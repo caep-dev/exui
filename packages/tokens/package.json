@@ -1,0 +1,43 @@
+{
+  "name": "@exre/exui-tokens",
+  "version": "0.0.0",
+  "description": "Framework-neutral visual tokens for Exre user interfaces.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css",
+    "./font.css": "./dist/font.css"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:js": "tsc -p tsconfig.json",
+    "build": "pnpm build:js && node scripts/generate-css.mjs && node scripts/copy-css.mjs && node scripts/validate-tokens.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "oxlint src scripts",
+    "tokens:check": "pnpm typecheck && pnpm build:js && node scripts/generate-css.mjs --check && node scripts/copy-css.mjs && node scripts/validate-tokens.mjs",
+    "pack:check": "pnpm build && pnpm pack"
+  },
+  "dependencies": {
+    "@fontsource-variable/outfit": "^5.2.8"
+  },
+  "devDependencies": {
+    "oxlint": "^1.71.0",
+    "typescript": "~6.0.2"
+  },
+  "sideEffects": [
+    "*.css"
+  ]
+}

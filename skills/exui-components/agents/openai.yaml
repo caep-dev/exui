@@ -1,0 +1,4 @@
+interface:
+  display_name: "Exre UI Components"
+  short_description: "Use components from the Exre React UI library."
+  default_prompt: "Use $exui-components to choose and use Exre UI components."
