@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "description": "Framework-neutral visual tokens for Exre user interfaces.",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/cjs/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.js"
     },
     "./style.css": "./dist/style.css",
     "./font.css": "./dist/font.css"
@@ -24,10 +25,11 @@
   ],
   "scripts": {
     "build:js": "tsc -p tsconfig.json",
-    "build": "pnpm build:js && node scripts/generate-css.mjs && node scripts/copy-css.mjs && node scripts/validate-tokens.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node scripts/write-cjs-package.mjs",
+    "build": "pnpm build:js && pnpm build:cjs && node scripts/generate-css.mjs && node scripts/copy-css.mjs && node scripts/validate-tokens.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.cjs.json --noEmit",
     "lint": "oxlint src scripts",
-    "tokens:check": "pnpm typecheck && pnpm build:js && node scripts/generate-css.mjs --check && node scripts/copy-css.mjs && node scripts/validate-tokens.mjs",
+    "tokens:check": "pnpm typecheck && pnpm build:js && pnpm build:cjs && node scripts/verify-cjs.mjs && node scripts/generate-css.mjs --check && node scripts/copy-css.mjs && node scripts/validate-tokens.mjs",
     "pack:check": "pnpm build && pnpm pack"
   },
   "dependencies": {

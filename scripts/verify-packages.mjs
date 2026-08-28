@@ -74,7 +74,7 @@ async function verifyConsumer(componentTarball, tokenTarball) {
         name: "exui-packed-consumer",
         private: true,
         type: "module",
-        scripts: { build: "vite build" },
+        scripts: { build: "vite build", "verify:cjs": "node cjs-check.cjs" },
         dependencies: {
           "@exre/exui": `file:${componentTarball}`,
           "@exre/exui-tokens": `file:${tokenTarball}`,
@@ -103,8 +103,33 @@ async function verifyConsumer(componentTarball, tokenTarball) {
     'import "@exre/exui-tokens/font.css"\nimport "@exre/exui-tokens/style.css"\nimport "@exre/exui/style.css"\nimport { exuiTokens } from "@exre/exui-tokens"\nimport { Button } from "@exre/exui"\nconsole.log(exuiTokens.themes.light.control.primary, Button)\n'
   )
 
+  // The packed tarball is what non-ESM consumers load, so `require` has to be
+  // exercised against the installed package rather than the local build.
+  await writeFile(
+    join(consumerRoot, "cjs-check.cjs"),
+    `const assert = require("node:assert")
+const { exuiTokens: cjsTokens } = require("@exre/exui-tokens")
+
+async function main() {
+  const { exuiTokens: esmTokens } = await import("@exre/exui-tokens")
+
+  assert.deepStrictEqual(cjsTokens, esmTokens, "packed CJS and ESM token trees differ")
+  assert.ok(Object.isFrozen(cjsTokens), "packed CJS token tree must be frozen")
+  assert.deepStrictEqual(
+    Object.keys(cjsTokens.themes).sort(),
+    ["dark", "light", "pitchBlack"],
+    "packed CJS token tree must expose every theme"
+  )
+  console.log("packed cjs+esm parity ok:", cjsTokens.typography.fontFamily.slice(0, 20))
+}
+
+void main()
+`
+  )
+
   run(pnpmCommand, ["install", "--ignore-scripts"], consumerRoot)
   run(pnpmCommand, ["build"], consumerRoot)
+  run(pnpmCommand, ["verify:cjs"], consumerRoot)
 }
 
 try {
@@ -116,6 +141,22 @@ try {
   const componentManifest = readPackedManifest(componentPackage.filename)
 
   requireCondition(tokenManifest.name === "@exre/exui-tokens", "token tarball has the wrong package name")
+  requireCondition(
+    tokenManifest.exports?.["."]?.import === "./dist/index.js",
+    "token tarball changed its ESM import entry"
+  )
+  requireCondition(
+    tokenManifest.exports?.["."]?.require === "./dist/cjs/index.js",
+    "token tarball lost its CommonJS require entry"
+  )
+  requireCondition(
+    tokenManifest.main === "./dist/cjs/index.js",
+    "token tarball main must point at the CommonJS entry for legacy resolvers"
+  )
+  requireCondition(
+    tokenManifest.module === "./dist/index.js",
+    "token tarball changed its ESM module entry"
+  )
   requireCondition(componentManifest.name === "@exre/exui", "component tarball has the wrong package name")
   requireCondition(componentManifest.main === "./dist/exui.js", "component tarball changed its main entry")
   requireCondition(componentManifest.types === "./types/index.d.ts", "component tarball changed its types entry")
@@ -141,6 +182,8 @@ try {
   requirePackedPaths(tokenPackage, [
     "dist/index.js",
     "dist/index.d.ts",
+    "dist/cjs/index.js",
+    "dist/cjs/package.json",
     "dist/style.css",
     "dist/font.css",
   ])
