@@ -6,6 +6,18 @@ import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { CheckIcon, ChevronRightIcon } from "lucide-react"
 
+const menuItemRecipeClasses =
+  "relative flex cursor-default items-center gap-[var(--exui-component-menu-item-gap)] rounded-[var(--exui-component-menu-item-radius)] border [border-color:var(--exui-component-menu-item-default-border)] [background:var(--exui-component-menu-item-default-background)] px-[var(--exui-component-menu-item-padding-inline)] py-[var(--exui-component-menu-item-padding-block)] text-[length:var(--exui-component-menu-item-font-size)] font-[number:var(--exui-component-menu-item-font-weight)] [color:var(--exui-component-menu-item-default-foreground)] [box-shadow:var(--exui-component-menu-item-default-shadow)] opacity-[var(--exui-component-menu-item-default-opacity)] outline-hidden select-none hover:[background:var(--exui-component-menu-item-hover-background)] hover:[color:var(--exui-component-menu-item-hover-foreground)] hover:[border-color:var(--exui-component-menu-item-hover-border)] hover:[box-shadow:var(--exui-component-menu-item-hover-shadow)] hover:opacity-[var(--exui-component-menu-item-hover-opacity)] active:[background:var(--exui-component-menu-item-active-background)] active:[color:var(--exui-component-menu-item-active-foreground)] active:[border-color:var(--exui-component-menu-item-active-border)] active:[box-shadow:var(--exui-component-menu-item-active-shadow)] active:opacity-[var(--exui-component-menu-item-active-opacity)] focus:[background:var(--exui-component-menu-item-focus-background)] focus:[color:var(--exui-component-menu-item-focus-foreground)] focus:[border-color:var(--exui-component-menu-item-focus-border)] focus:[box-shadow:var(--exui-component-menu-item-focus-shadow)] focus:opacity-[var(--exui-component-menu-item-focus-opacity)] data-highlighted:[background:var(--exui-component-menu-item-hover-background)] data-highlighted:[color:var(--exui-component-menu-item-hover-foreground)] data-highlighted:[border-color:var(--exui-component-menu-item-hover-border)] data-highlighted:[box-shadow:var(--exui-component-menu-item-hover-shadow)] data-highlighted:opacity-[var(--exui-component-menu-item-hover-opacity)] data-disabled:pointer-events-none data-disabled:[background:var(--exui-component-menu-item-disabled-background)] data-disabled:[color:var(--exui-component-menu-item-disabled-foreground)] data-disabled:[border-color:var(--exui-component-menu-item-disabled-border)] data-disabled:[box-shadow:var(--exui-component-menu-item-disabled-shadow)] data-disabled:opacity-[var(--exui-component-menu-item-disabled-opacity)] data-inset:pl-9.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+
+const menuKeyboardFocusRecipeClasses =
+  "focus:data-highlighted:[background:var(--exui-component-menu-item-focus-background)] focus:data-highlighted:[color:var(--exui-component-menu-item-focus-foreground)] focus:data-highlighted:[border-color:var(--exui-component-menu-item-focus-border)] focus:data-highlighted:[box-shadow:var(--exui-component-menu-item-focus-shadow)] focus:data-highlighted:opacity-[var(--exui-component-menu-item-focus-opacity)]"
+
+const submenuTriggerRecipeClasses =
+  "flex cursor-default items-center gap-[var(--exui-component-menu-submenu-trigger-gap)] rounded-[var(--exui-component-menu-submenu-trigger-radius)] border [border-color:var(--exui-component-menu-submenu-trigger-default-border)] [background:var(--exui-component-menu-submenu-trigger-default-background)] px-[var(--exui-component-menu-submenu-trigger-padding-inline)] py-[var(--exui-component-menu-submenu-trigger-padding-block)] text-[length:var(--exui-component-menu-submenu-trigger-font-size)] font-[number:var(--exui-component-menu-submenu-trigger-font-weight)] [color:var(--exui-component-menu-submenu-trigger-default-foreground)] [box-shadow:var(--exui-component-menu-submenu-trigger-default-shadow)] opacity-[var(--exui-component-menu-submenu-trigger-default-opacity)] outline-hidden select-none hover:[background:var(--exui-component-menu-submenu-trigger-hover-background)] hover:[color:var(--exui-component-menu-submenu-trigger-hover-foreground)] hover:[border-color:var(--exui-component-menu-submenu-trigger-hover-border)] hover:[box-shadow:var(--exui-component-menu-submenu-trigger-hover-shadow)] hover:opacity-[var(--exui-component-menu-submenu-trigger-hover-opacity)] active:[background:var(--exui-component-menu-submenu-trigger-active-background)] active:[color:var(--exui-component-menu-submenu-trigger-active-foreground)] active:[border-color:var(--exui-component-menu-submenu-trigger-active-border)] active:[box-shadow:var(--exui-component-menu-submenu-trigger-active-shadow)] active:opacity-[var(--exui-component-menu-submenu-trigger-active-opacity)] focus:[background:var(--exui-component-menu-submenu-trigger-focus-background)] focus:[color:var(--exui-component-menu-submenu-trigger-focus-foreground)] focus:[border-color:var(--exui-component-menu-submenu-trigger-focus-border)] focus:[box-shadow:var(--exui-component-menu-submenu-trigger-focus-shadow)] focus:opacity-[var(--exui-component-menu-submenu-trigger-focus-opacity)] data-open:[background:var(--exui-component-menu-submenu-trigger-active-background)] data-open:[color:var(--exui-component-menu-submenu-trigger-active-foreground)] data-open:[border-color:var(--exui-component-menu-submenu-trigger-active-border)] data-open:[box-shadow:var(--exui-component-menu-submenu-trigger-active-shadow)] data-open:opacity-[var(--exui-component-menu-submenu-trigger-active-opacity)] data-disabled:pointer-events-none data-disabled:[background:var(--exui-component-menu-submenu-trigger-disabled-background)] data-disabled:[color:var(--exui-component-menu-submenu-trigger-disabled-foreground)] data-disabled:[border-color:var(--exui-component-menu-submenu-trigger-disabled-border)] data-disabled:[box-shadow:var(--exui-component-menu-submenu-trigger-disabled-shadow)] data-disabled:opacity-[var(--exui-component-menu-submenu-trigger-disabled-opacity)] data-inset:pl-9.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+
+const submenuKeyboardFocusRecipeClasses =
+  "focus:data-highlighted:[background:var(--exui-component-menu-submenu-trigger-focus-background)] focus:data-highlighted:[color:var(--exui-component-menu-submenu-trigger-focus-foreground)] focus:data-highlighted:[border-color:var(--exui-component-menu-submenu-trigger-focus-border)] focus:data-highlighted:[box-shadow:var(--exui-component-menu-submenu-trigger-focus-shadow)] focus:data-highlighted:opacity-[var(--exui-component-menu-submenu-trigger-focus-opacity)]"
+
 function DropdownMenu({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
@@ -43,7 +55,7 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         align={align}
-        className={cn("z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-48 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-3xl p-1.5 text-popover-foreground shadow-lg ring-1 ring-foreground/5 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:overflow-hidden dark:ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 animate-none! relative bg-popover/70 before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl before:backdrop-saturate-150 **:data-[slot$=-item]:focus:bg-foreground/10 **:data-[slot$=-item]:data-highlighted:bg-foreground/10 **:data-[slot$=-separator]:bg-foreground/5 **:data-[slot$=-trigger]:focus:bg-foreground/10 **:data-[slot$=-trigger]:aria-expanded:bg-foreground/10! **:data-[variant=destructive]:focus:bg-foreground/10! **:data-[variant=destructive]:text-accent-foreground! **:data-[variant=destructive]:**:text-accent-foreground!", className )}
+        className={cn("relative z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-48 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-[var(--exui-component-menu-surface-radius)] border [border-color:var(--exui-component-menu-surface-border)] [background:var(--exui-component-menu-surface-background)] p-[var(--exui-component-menu-surface-padding)] [color:var(--exui-component-menu-surface-foreground)] [box-shadow:var(--exui-component-menu-surface-shadow)] duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:overflow-hidden data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 animate-none! before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl before:backdrop-saturate-150", className )}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -73,7 +85,9 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        "group/dropdown-menu-item relative flex cursor-default items-center gap-2.5 rounded-2xl px-3 py-2 text-sm font-medium outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-9.5 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:*:[svg]:text-destructive",
+        menuItemRecipeClasses,
+        menuKeyboardFocusRecipeClasses,
+        "group/dropdown-menu-item data-[variant=destructive]:[background:var(--exui-component-menu-item-destructive-background)] data-[variant=destructive]:[color:var(--exui-component-menu-item-destructive-foreground)] data-[variant=destructive]:[border-color:var(--exui-component-menu-item-destructive-border)] data-[variant=destructive]:[box-shadow:var(--exui-component-menu-item-destructive-shadow)] data-[variant=destructive]:opacity-[var(--exui-component-menu-item-destructive-opacity)]",
         className
       )}
       {...props}
@@ -95,14 +109,16 @@ function DropdownMenuCheckboxItem({
       data-slot="dropdown-menu-checkbox-item"
       data-inset={inset}
       className={cn(
-        "relative flex cursor-default items-center gap-2.5 rounded-2xl py-2 pr-8 pl-3 text-sm font-medium outline-hidden select-none focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground data-inset:pl-9.5 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        menuItemRecipeClasses,
+        menuKeyboardFocusRecipeClasses,
+        "pr-8 data-checked:[background:var(--exui-component-menu-checked-item-background)] data-checked:[color:var(--exui-component-menu-checked-item-foreground)]",
         className
       )}
       checked={checked}
       {...props}
     >
       <span
-        className="pointer-events-none absolute right-2 flex items-center justify-center"
+        className="pointer-events-none absolute right-2 flex items-center justify-center [color:var(--exui-component-menu-checked-item-indicator)]"
         data-slot="dropdown-menu-checkbox-item-indicator"
       >
         <DropdownMenuPrimitive.ItemIndicator>
@@ -139,13 +155,15 @@ function DropdownMenuRadioItem({
       data-slot="dropdown-menu-radio-item"
       data-inset={inset}
       className={cn(
-        "relative flex cursor-default items-center gap-2.5 rounded-2xl py-2 pr-8 pl-3 text-sm font-medium outline-hidden select-none focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground data-inset:pl-9.5 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        menuItemRecipeClasses,
+        menuKeyboardFocusRecipeClasses,
+        "pr-8 data-checked:[background:var(--exui-component-menu-checked-item-background)] data-checked:[color:var(--exui-component-menu-checked-item-foreground)]",
         className
       )}
       {...props}
     >
       <span
-        className="pointer-events-none absolute right-2 flex items-center justify-center"
+        className="pointer-events-none absolute right-2 flex items-center justify-center [color:var(--exui-component-menu-checked-item-indicator)]"
         data-slot="dropdown-menu-radio-item-indicator"
       >
         <DropdownMenuPrimitive.ItemIndicator>
@@ -185,7 +203,7 @@ function DropdownMenuSeparator({
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
-      className={cn("-mx-1.5 my-1.5 h-px bg-border/50", className)}
+      className={cn("-mx-1.5 my-[var(--exui-component-menu-separator-margin-block)] h-[var(--exui-component-menu-separator-thickness)] [background:var(--exui-component-menu-separator-color)]", className)}
       {...props}
     />
   )
@@ -199,7 +217,7 @@ function DropdownMenuShortcut({
     <span
       data-slot="dropdown-menu-shortcut"
       className={cn(
-        "ml-auto text-xs tracking-widest text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground",
+        "ms-[var(--exui-component-menu-shortcut-margin-inline-start)] text-[length:var(--exui-component-menu-shortcut-font-size)] tracking-[var(--exui-component-menu-shortcut-letter-spacing)] [color:var(--exui-component-menu-shortcut-foreground)] group-focus/dropdown-menu-item:text-accent-foreground",
         className
       )}
       {...props}
@@ -226,7 +244,8 @@ function DropdownMenuSubTrigger({
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-default items-center gap-2 rounded-2xl px-3 py-2 text-sm font-medium outline-hidden select-none focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground data-inset:pl-9.5 data-open:bg-accent data-open:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        submenuTriggerRecipeClasses,
+        submenuKeyboardFocusRecipeClasses,
         className
       )}
       {...props}
@@ -244,7 +263,7 @@ function DropdownMenuSubContent({
   return (
     <DropdownMenuPrimitive.SubContent
       data-slot="dropdown-menu-sub-content"
-      className={cn("z-50 min-w-36 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-3xl p-1.5 text-popover-foreground shadow-lg ring-1 ring-foreground/5 duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 animate-none! relative bg-popover/70 before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl before:backdrop-saturate-150 **:data-[slot$=-item]:focus:bg-foreground/10 **:data-[slot$=-item]:data-highlighted:bg-foreground/10 **:data-[slot$=-separator]:bg-foreground/5 **:data-[slot$=-trigger]:focus:bg-foreground/10 **:data-[slot$=-trigger]:aria-expanded:bg-foreground/10! **:data-[variant=destructive]:focus:bg-foreground/10! **:data-[variant=destructive]:text-accent-foreground! **:data-[variant=destructive]:**:text-accent-foreground!", className )}
+      className={cn("relative z-50 min-w-36 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-[var(--exui-component-menu-surface-radius)] border [border-color:var(--exui-component-menu-surface-border)] [background:var(--exui-component-menu-surface-background)] p-[var(--exui-component-menu-surface-padding)] [color:var(--exui-component-menu-surface-foreground)] [box-shadow:var(--exui-component-menu-surface-shadow)] duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 animate-none! before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl before:backdrop-saturate-150", className )}
       {...props}
     />
   )

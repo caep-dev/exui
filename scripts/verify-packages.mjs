@@ -33,11 +33,15 @@ function pack(packageDirectory) {
 }
 
 function readPackedManifest(tarballPath) {
-  const argumentsList = process.platform === "win32"
-    ? ["--force-local", "-xOf", tarballPath, "package/package.json"]
-    : ["-xOf", tarballPath, "package/package.json"]
+  return JSON.parse(readPackedText(tarballPath, "package/package.json"))
+}
 
-  return JSON.parse(run("tar", argumentsList, repositoryRoot))
+function readPackedText(tarballPath, packedPath) {
+  const argumentsList = process.platform === "win32"
+    ? ["--force-local", "-xOf", tarballPath, packedPath]
+    : ["-xOf", tarballPath, packedPath]
+
+  return run("tar", argumentsList, repositoryRoot)
 }
 
 function requireCondition(condition, message) {
@@ -100,7 +104,7 @@ async function verifyConsumer(componentTarball, tokenTarball) {
   )
   await writeFile(
     join(consumerRoot, "src.ts"),
-    'import "@exre/exui-tokens/font.css"\nimport "@exre/exui-tokens/style.css"\nimport "@exre/exui/style.css"\nimport { exuiTokens } from "@exre/exui-tokens"\nimport { Button } from "@exre/exui"\nconsole.log(exuiTokens.themes.light.control.primary, Button)\n'
+    'import "@exre/exui-tokens/font.css"\nimport "@exre/exui-tokens/style.css"\nimport "@exre/exui/style.css"\nimport { componentRecipes, exuiTokens } from "@exre/exui-tokens"\nimport { Button } from "@exre/exui"\nconsole.log(exuiTokens.themes.light.control.primary, componentRecipes.button.defaultSize, Button)\n'
   )
 
   // The packed tarball is what non-ESM consumers load, so `require` has to be
@@ -108,13 +112,15 @@ async function verifyConsumer(componentTarball, tokenTarball) {
   await writeFile(
     join(consumerRoot, "cjs-check.cjs"),
     `const assert = require("node:assert")
-const { exuiTokens: cjsTokens } = require("@exre/exui-tokens")
+const { componentRecipes: cjsRecipes, exuiTokens: cjsTokens } = require("@exre/exui-tokens")
 
 async function main() {
-  const { exuiTokens: esmTokens } = await import("@exre/exui-tokens")
+  const { componentRecipes: esmRecipes, exuiTokens: esmTokens } = await import("@exre/exui-tokens")
 
   assert.deepStrictEqual(cjsTokens, esmTokens, "packed CJS and ESM token trees differ")
   assert.ok(Object.isFrozen(cjsTokens), "packed CJS token tree must be frozen")
+  assert.deepStrictEqual(cjsRecipes, esmRecipes, "packed CJS and ESM recipe trees differ")
+  assert.ok(Object.isFrozen(cjsRecipes.button.default), "packed recipe tree must be deeply frozen")
   assert.deepStrictEqual(
     Object.keys(cjsTokens.themes).sort(),
     ["dark", "light", "pitchBlack"],
@@ -187,6 +193,9 @@ try {
     "dist/style.css",
     "dist/font.css",
   ])
+  const packedTokenCss = readPackedText(tokenPackage.filename, "package/dist/style.css")
+  const componentVariableCount = (packedTokenCss.match(/--exui-component-/g) ?? []).length
+  requireCondition(componentVariableCount > 0, "token tarball contains no component recipe CSS variables")
   requireCondition(
     tokenPackage.files.every((file) => /^(dist\/|LICENSE$|README\.md$|package\.json$)/.test(file.path)),
     "token tarball contains undeclared source or framework files"
@@ -202,6 +211,7 @@ try {
   ])
 
   await verifyConsumer(componentPackage.filename, tokenPackage.filename)
+  console.log(`Packed token CSS contains ${componentVariableCount} component recipe variables`)
   console.log("Package and packed-consumer validation passed")
 } finally {
   await rm(temporaryRoot, { recursive: true, force: true })

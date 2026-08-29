@@ -39,7 +39,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/30 duration-100 supports-backdrop-filter:backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+        "fixed inset-0 isolate z-50 [background:var(--exui-component-dialog-overlay-background)] duration-[var(--exui-component-dialog-overlay-duration)] supports-backdrop-filter:backdrop-blur-[var(--exui-component-dialog-overlay-backdrop-blur)] data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -61,7 +61,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-4xl bg-popover p-6 text-sm text-popover-foreground shadow-xl ring-1 ring-foreground/5 duration-100 outline-none sm:max-w-md dark:ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-[var(--exui-component-dialog-surface-gap)] rounded-[var(--exui-component-dialog-surface-radius)] border [border-color:var(--exui-component-dialog-surface-border)] [background:var(--exui-component-dialog-surface-background)] p-[var(--exui-component-dialog-surface-padding)] [color:var(--exui-component-dialog-surface-foreground)] text-sm [box-shadow:var(--exui-component-dialog-surface-shadow)] duration-[var(--exui-component-dialog-overlay-duration)] outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
         {...props}
@@ -71,7 +71,7 @@ function DialogContent({
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button
               variant="ghost"
-              className="absolute top-4 right-4 bg-secondary"
+              className="absolute top-[var(--exui-component-dialog-close-button-placement-top)] right-[var(--exui-component-dialog-close-button-placement-right)] bg-secondary"
               size="icon-sm"
             >
               <XIcon
@@ -89,7 +89,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-1.5", className)}
+      className={cn("flex flex-col gap-[var(--exui-component-dialog-body-gap)]", className)}
       {...props}
     />
   )
@@ -107,7 +107,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        "flex flex-col-reverse gap-[var(--exui-component-dialog-footer-gap)] sm:flex-row sm:justify-end",
         className
       )}
       {...props}
@@ -130,7 +130,7 @@ function DialogTitle({
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn(
-        "font-heading text-base leading-none font-medium",
+        "[font-family:var(--exui-component-dialog-title-font-family)] text-[length:var(--exui-component-dialog-title-font-size)] leading-[var(--exui-component-dialog-title-line-height)] font-[number:var(--exui-component-dialog-title-font-weight)] [color:var(--exui-component-dialog-title-foreground)]",
         className
       )}
       {...props}
@@ -146,7 +146,7 @@ function DialogDescription({
     <DialogPrimitive.Description
       data-slot="dialog-description"
       className={cn(
-        "text-sm text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+        "[font-family:var(--exui-component-dialog-description-font-family)] text-[length:var(--exui-component-dialog-description-font-size)] leading-[var(--exui-component-dialog-description-line-height)] font-[number:var(--exui-component-dialog-description-font-weight)] [color:var(--exui-component-dialog-description-foreground)] *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
         className
       )}
       {...props}

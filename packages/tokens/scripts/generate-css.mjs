@@ -66,6 +66,139 @@ function flattenVariables(variables, prefix, value) {
   }
 }
 
+const semanticVariableByReference = {
+  "surface.background": "--exui-surface-background",
+  "surface.secondary": "--exui-surface-secondary",
+  "surface.tertiary": "--exui-surface-tertiary",
+  "surface.accent": "--exui-surface-accent",
+  "surface.accentForeground": "--exui-surface-accent-foreground",
+  "surface.popover": "--exui-surface-popover",
+  "surface.popoverForeground": "--exui-surface-popover-foreground",
+  "surface.modal": "--exui-surface-modal",
+  "surface.menu": "--exui-surface-menu",
+  "surface.sidebar": "--exui-surface-sidebar",
+  "surface.input": "--exui-surface-input",
+  "surface.overlay": "--exui-surface-overlay",
+  "text.primary": "--exui-text-primary",
+  "text.secondary": "--exui-text-secondary",
+  "text.placeholder": "--exui-text-placeholder",
+  "text.link": "--exui-text-link",
+  "text.inverse": "--exui-text-inverse",
+  "control.primary": "--exui-control-primary",
+  "control.primaryForeground": "--exui-control-primary-foreground",
+  "control.hover": "--exui-control-hover",
+  "control.active": "--exui-control-active",
+  "control.disabled": "--exui-control-disabled",
+  "control.neutral": "--exui-control-neutral",
+  "control.neutralForeground": "--exui-control-neutral-foreground",
+  "control.danger": "--exui-control-danger",
+  "control.dangerForeground": "--exui-control-danger-foreground",
+  "control.invalid": "--exui-control-invalid",
+  "control.selected": "--exui-control-selected",
+  "control.focusRing": "--exui-control-focus-ring",
+  "border.default": "--exui-border-default",
+  "border.strong": "--exui-border-strong",
+  "border.input": "--exui-border-input",
+  "border.focused": "--exui-border-focused",
+  "border.divider": "--exui-border-divider",
+  "feedback.danger": "--exui-feedback-danger",
+  "feedback.dangerForeground": "--exui-feedback-danger-foreground",
+  "sidebar.background": "--exui-sidebar-background",
+  "sidebar.foreground": "--exui-sidebar-foreground",
+  "sidebar.primary": "--exui-sidebar-primary",
+  "sidebar.primaryForeground": "--exui-sidebar-primary-foreground",
+  "sidebar.accent": "--exui-sidebar-accent",
+  "sidebar.accentForeground": "--exui-sidebar-accent-foreground",
+  "sidebar.border": "--exui-sidebar-border",
+  "sidebar.ring": "--exui-sidebar-ring",
+  "shadow.card": "--exui-shadow-card",
+  "shadow.modal": "--exui-shadow-modal",
+  "shadow.menu": "--exui-shadow-menu",
+}
+
+function createFoundationValueByReference(contract) {
+  return {
+    "radii.none": contract.radii.none,
+    "radii.small": contract.radii.small,
+    "radii.medium": contract.radii.medium,
+    "radii.large": contract.radii.large,
+    "radii.extraLarge": contract.radii.extraLarge,
+    "radii.full": contract.radii.full,
+    "typography.fontFamily": contract.typography.fontFamily,
+    "typography.fontWeightRegular": contract.typography.fontWeightRegular,
+    "typography.fontWeightMedium": contract.typography.fontWeightMedium,
+    "typography.fontWeightBold": contract.typography.fontWeightBold,
+    "typography.bodyFontSize": contract.typography.bodyFontSize,
+    "typography.bodyLineHeight": contract.typography.bodyLineHeight,
+    "typography.smallFontSize": contract.typography.smallFontSize,
+    "typography.smallLineHeight": contract.typography.smallLineHeight,
+    "shadows.small": contract.shadows.small,
+    "shadows.medium": contract.shadows.medium,
+    "shadows.large": contract.shadows.large,
+    "shadows.focus": contract.shadows.focus,
+  }
+}
+
+function resolveRecipeValue(value, foundationValueByReference) {
+  if (value !== null && typeof value === "object") {
+    if (value.kind === "foundation") {
+      const resolved = foundationValueByReference[value.path]
+      if (resolved === undefined) {
+        throw new Error(`Unsupported foundation recipe reference: ${value.path}`)
+      }
+      return String(resolved)
+    }
+
+    if (value.kind === "semantic") {
+      const variableName = semanticVariableByReference[value.path]
+      if (variableName === undefined) {
+        throw new Error(`Unsupported semantic recipe reference: ${value.path}`)
+      }
+      return `var(${variableName})`
+    }
+  }
+
+  return String(value)
+}
+
+function flattenRecipeVariables(
+  variables,
+  prefix,
+  value,
+  foundationValueByReference
+) {
+  for (const [name, child] of Object.entries(value)) {
+    if (name === "defaultVariant" || name === "defaultSize") {
+      continue
+    }
+
+    const variableName = `${prefix}-${toKebabCase(name)}`
+    const isReference = child !== null &&
+      typeof child === "object" &&
+      (child.kind === "foundation" || child.kind === "semantic")
+
+    if (child !== null && typeof child === "object" && !isReference) {
+      flattenRecipeVariables(
+        variables,
+        variableName,
+        child,
+        foundationValueByReference
+      )
+    } else {
+      variables[variableName] = resolveRecipeValue(child, foundationValueByReference)
+    }
+  }
+}
+
+function addComponentVariables(variables, contract, recipes) {
+  flattenRecipeVariables(
+    variables,
+    "--exui-component",
+    recipes,
+    createFoundationValueByReference(contract)
+  )
+}
+
 function toKebabCase(value) {
   return value.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)
 }
@@ -85,7 +218,7 @@ function changedVariables(current, baseline) {
   )
 }
 
-export function createCssVariables(contract) {
+export function createCssVariables(contract, recipes) {
   const light = {}
   const dark = {}
   const pitchBlack = {}
@@ -107,6 +240,7 @@ export function createCssVariables(contract) {
     "--exui-font-weight-regular": contract.typography.fontWeightRegular,
     "--radius": contract.radii.large,
   })
+  addComponentVariables(light, contract, recipes)
 
   const compact = {
     "--density-control-gap": contract.density.compact.controlGap,
@@ -119,13 +253,13 @@ export function createCssVariables(contract) {
   return {
     light,
     dark: changedVariables(dark, light),
-    pitchBlack: changedVariables(pitchBlack, dark),
+    pitchBlack: changedVariables(pitchBlack, light),
     compact,
   }
 }
 
-export function renderCss(contract) {
-  const variables = createCssVariables(contract)
+export function renderCss(contract, recipes) {
+  const variables = createCssVariables(contract, recipes)
 
   return [
     "/* Generated by scripts/generate-css.mjs. Do not edit by hand. */",
@@ -137,8 +271,8 @@ export function renderCss(contract) {
 }
 
 async function run() {
-  const { exuiTokens } = await import("../dist/tokens.js")
-  const generated = renderCss(exuiTokens)
+  const { componentRecipes, exuiTokens } = await import("../dist/index.js")
+  const generated = renderCss(exuiTokens, componentRecipes)
 
   if (process.argv.includes("--check")) {
     const current = await readFile(outputPath, "utf8").catch(() => "")

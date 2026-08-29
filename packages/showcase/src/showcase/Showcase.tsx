@@ -31,6 +31,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -66,6 +71,12 @@ import {
   PopoverTrigger,
   Progress,
   Select,
+  SelectContent,
+  SelectField,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Separator,
   Sheet,
   SheetContent,
@@ -74,6 +85,15 @@ import {
   SheetTitle,
   SheetTrigger,
   Skeleton,
+  Sidebar,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
   Slider,
   Switch,
   Table,
@@ -110,6 +130,7 @@ import {
 } from "lucide-react"
 
 const sections = [
+  "Recipes",
   "Foundation",
   "Actions",
   "Forms",
@@ -189,6 +210,7 @@ function Showcase() {
 
           <main className="flex min-w-0 flex-col gap-6">
             <IntroPanel />
+            <ComponentRecipeContract />
             <FoundationSection />
             <ActionsSection />
             <FormsSection />
@@ -200,6 +222,197 @@ function Showcase() {
         </div>
       </div>
     </TooltipProvider>
+  )
+}
+
+export function ComponentRecipeContract() {
+  const [menuOpen, setMenuOpen] = React.useState(false)
+
+  return (
+    <ShowcaseSection
+      id="recipes"
+      title="Component recipe contract"
+      description="Deterministic reference states generated from the public component recipes."
+    >
+      <div data-testid="recipe-contract" className="grid gap-4">
+        <PreviewPanel title="Button sizes and variants">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button data-testid="recipe-button-small" size="sm"><LayersIcon />Small</Button>
+              <Button data-testid="recipe-button-default"><LayersIcon />Default</Button>
+              <Button data-testid="recipe-button-large" size="lg"><LayersIcon />Large</Button>
+              <Button data-testid="recipe-button-icon" size="icon" aria-label="Icon recipe"><SettingsIcon /></Button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button data-testid="recipe-primary">Primary</Button>
+              <Button data-testid="recipe-button-secondary" variant="secondary">Secondary</Button>
+              <Button data-testid="recipe-button-ghost" variant="ghost">Ghost</Button>
+              <Button data-testid="recipe-button-danger" variant="danger">Danger</Button>
+              <Button data-testid="recipe-button-disabled" disabled>Disabled</Button>
+            </div>
+          </div>
+        </PreviewPanel>
+
+        <PreviewPanel title="Form Control states">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input data-testid="recipe-input-default" aria-label="Default name" placeholder="Default" />
+            <Input data-testid="recipe-input-focus" aria-label="Focused name" defaultValue="Focused" />
+            <Input data-testid="recipe-input-invalid" aria-label="Invalid name" aria-invalid="true" defaultValue="Invalid" />
+            <Input data-testid="recipe-input-disabled" aria-label="Disabled name" disabled defaultValue="Disabled" />
+            <SelectField>
+              <SelectTrigger data-testid="recipe-select-trigger" aria-label="Recipe select">
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent data-testid="recipe-select-content">
+                <SelectGroup>
+                  <SelectItem data-testid="recipe-select-first" value="first">First option</SelectItem>
+                  <SelectItem data-testid="recipe-select-second" value="second">Second option</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </SelectField>
+          </div>
+        </PreviewPanel>
+
+        <PreviewPanel title="Sidebar Item states">
+          <SidebarProvider className="min-h-0">
+            <Sidebar collapsible="none" className="h-auto w-full">
+              <SidebarContent className="p-2">
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton data-testid="recipe-sidebar-default">
+                      <LayersIcon />
+                      <span>Default destination</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton data-testid="recipe-sidebar-active" isActive>
+                      <CheckIcon />
+                      <span>Active destination</span>
+                    </SidebarMenuButton>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton data-testid="recipe-sidebar-nested" href="#recipes">
+                          Nested destination
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton data-testid="recipe-sidebar-disabled" disabled>
+                      <SettingsIcon />
+                      <span>Disabled destination</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem className="group" data-collapsible="icon">
+                    <SidebarMenuButton data-testid="recipe-sidebar-icon-only" aria-label="Icon-only destination">
+                      <SettingsIcon />
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarContent>
+            </Sidebar>
+          </SidebarProvider>
+        </PreviewPanel>
+
+        <PreviewPanel title="Menu surface and items">
+          <div
+            data-testid="recipe-menu-surface"
+            className="grid max-w-sm"
+            style={{
+              padding: "var(--exui-component-menu-surface-padding)",
+              borderRadius: "var(--exui-component-menu-surface-radius)",
+              background: "var(--exui-component-menu-surface-background)",
+              color: "var(--exui-component-menu-surface-foreground)",
+              border: "1px solid var(--exui-component-menu-surface-border)",
+              boxShadow: "var(--exui-component-menu-surface-shadow)",
+            }}
+          >
+            <div className="rounded-[var(--exui-component-menu-item-radius)] px-[var(--exui-component-menu-item-padding-inline)] py-[var(--exui-component-menu-item-padding-block)]">
+              Standard item
+            </div>
+            <div className="flex items-center gap-[var(--exui-component-menu-item-gap)] rounded-[var(--exui-component-menu-item-radius)] px-[var(--exui-component-menu-item-padding-inline)] py-[var(--exui-component-menu-item-padding-block)]">
+              <CheckIcon className="size-4" /> Checked item
+            </div>
+            <div className="rounded-[var(--exui-component-menu-item-radius)] px-[var(--exui-component-menu-item-padding-inline)] py-[var(--exui-component-menu-item-padding-block)] [color:var(--exui-component-menu-item-destructive-foreground)]">
+              Destructive item
+            </div>
+          </div>
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button className="mt-3" variant="outline">Test real menu</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent data-testid="recipe-menu-content" align="start">
+              <DropdownMenuItem data-testid="recipe-menu-item">Standard item</DropdownMenuItem>
+              <DropdownMenuCheckboxItem data-testid="recipe-menu-checked" checked>Checked item</DropdownMenuCheckboxItem>
+              <DropdownMenuItem data-testid="recipe-menu-destructive" variant="destructive">Destructive item</DropdownMenuItem>
+              <DropdownMenuItem data-testid="recipe-menu-disabled" disabled>Disabled item</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </PreviewPanel>
+
+        <PreviewPanel title="Dialog surface">
+          <Dialog>
+          <div
+            data-testid="recipe-dialog-surface"
+            className="grid max-w-md"
+            style={{
+              gap: "var(--exui-component-dialog-surface-gap)",
+              padding: "var(--exui-component-dialog-surface-padding)",
+              borderRadius: "var(--exui-component-dialog-surface-radius)",
+              background: "var(--exui-component-dialog-surface-background)",
+              color: "var(--exui-component-dialog-surface-foreground)",
+              border: "1px solid var(--exui-component-dialog-surface-border)",
+              boxShadow: "var(--exui-component-dialog-surface-shadow)",
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>Recipe preview</DialogTitle>
+              <DialogDescription>
+                A deterministic dialog surface using the public contract.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline">Cancel</Button>
+              <Button>Confirm</Button>
+            </DialogFooter>
+          </div>
+            <DialogTrigger asChild>
+              <Button data-testid="recipe-dialog-trigger" className="mt-3" variant="outline">
+                Test real dialog
+              </Button>
+            </DialogTrigger>
+            <DialogContent data-testid="recipe-dialog-content">
+              <DialogHeader>
+                <DialogTitle data-testid="recipe-dialog-title">Recipe contract dialog</DialogTitle>
+                <DialogDescription data-testid="recipe-dialog-description">
+                  This dialog verifies the real portal and focus behavior.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button>Confirm</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </PreviewPanel>
+
+        <PreviewPanel title="Tabs variants">
+          <div data-testid="recipe-tabs" className="grid gap-4">
+            <Tabs defaultValue="overview">
+              <TabsList data-testid="recipe-tabs-default-list">
+                <TabsTrigger data-testid="recipe-tab-default-overview" value="overview">Overview</TabsTrigger>
+                <TabsTrigger data-testid="recipe-tab-default-details" value="details">Details</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Tabs defaultValue="overview">
+              <TabsList data-testid="recipe-tabs-line-list" variant="line">
+                <TabsTrigger data-testid="recipe-tab-line-overview" value="overview">Overview</TabsTrigger>
+                <TabsTrigger data-testid="recipe-tab-line-details" value="details">Details</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </PreviewPanel>
+      </div>
+    </ShowcaseSection>
   )
 }
 

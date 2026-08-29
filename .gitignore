@@ -11,6 +11,7 @@ node_modules
 dist
 types
 dist-ssr
+.vitest-attachments/
 *.local
 
 # Editor directories and files

@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify:
+    # Visual baselines are intentionally captured on Windows. Keep the runner
+    # platform aligned because Chromium text rasterization is platform-specific.
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright Chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/AppData/Local/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @exre/exui-showcase exec playwright install chromium
+
+      - name: Validate tokens
+        run: pnpm tokens:check
+
+      - name: Type-check workspaces
+        run: pnpm typecheck
+
+      - name: Lint workspaces
+        run: pnpm lint
+
+      - name: Run visual tests
+        run: pnpm test:visual
+
+      - name: Build workspaces
+        run: pnpm build
+
+      - name: Verify packed consumers
+        run: pnpm verify:pack

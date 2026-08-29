@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url"
 import path from "node:path"
 
 import { createCssVariables, renderCss } from "./generate-css.mjs"
-import { exuiTokens } from "../dist/tokens.js"
+import { componentRecipes, exuiTokens } from "../dist/index.js"
 
 const packageRoot = fileURLToPath(new URL("..", import.meta.url))
 const failures = []
@@ -59,6 +59,182 @@ function validateFrozen(value, prefix = "exuiTokens") {
       validateFrozen(child, `${prefix}.${name}`)
     }
   }
+}
+
+function requireKeys(label, value, requiredKeys) {
+  const missing = requiredKeys.filter((name) => !(name in value))
+  if (missing.length > 0) {
+    failures.push(`${label} is missing required keys: ${missing.join(", ")}`)
+  }
+}
+
+function visitRecipeValues(value, prefix, visitor) {
+  for (const [name, child] of Object.entries(value)) {
+    const childPath = `${prefix}.${name}`
+    const isReference = child !== null &&
+      typeof child === "object" &&
+      (child.kind === "foundation" || child.kind === "semantic")
+
+    if (child !== null && typeof child === "object" && !isReference) {
+      visitRecipeValues(child, childPath, visitor)
+    } else {
+      visitor(child, childPath)
+    }
+  }
+}
+
+function validateRecipeContract() {
+  requireKeys("componentRecipes", componentRecipes, [
+    "button",
+    "formControl",
+    "sidebarItem",
+    "menu",
+    "dialog",
+    "tabs",
+  ])
+  requireKeys("componentRecipes.button", componentRecipes.button, [
+    "primary", "secondary", "outline", "ghost", "danger", "link",
+    "default", "small", "large", "icon", "defaultVariant", "defaultSize",
+  ])
+  for (const variantName of ["primary", "secondary", "outline", "ghost", "danger", "link"]) {
+    requireKeys(`componentRecipes.button.${variantName}`, componentRecipes.button[variantName], [
+      "default", "hover", "active", "focus", "disabled",
+    ])
+  }
+  requireKeys("componentRecipes.formControl", componentRecipes.formControl, [
+    "base", "hover", "focus", "disabled", "invalid",
+  ])
+  requireKeys("componentRecipes.sidebarItem", componentRecipes.sidebarItem, [
+    "default", "hover", "active", "focus", "disabled", "nested", "iconOnly",
+  ])
+  requireKeys("componentRecipes.menu", componentRecipes.menu, [
+    "surface", "item", "checkedItem", "submenuTrigger", "separator", "shortcut",
+  ])
+  requireKeys("componentRecipes.dialog", componentRecipes.dialog, [
+    "overlay", "surface", "title", "description", "body", "footer", "closeButtonPlacement",
+  ])
+  requireKeys("componentRecipes.tabs", componentRecipes.tabs, [
+    "list", "trigger", "indicator", "default", "line", "defaultVariant",
+  ])
+  requireKeys("componentRecipes.tabs.trigger", componentRecipes.tabs.trigger, [
+    "default", "hover", "selected", "focus", "disabled",
+  ])
+
+  if (!(componentRecipes.button.defaultVariant in componentRecipes.button)) {
+    failures.push(`button default variant does not resolve: ${componentRecipes.button.defaultVariant}`)
+  }
+  if (!(componentRecipes.button.defaultSize in componentRecipes.button)) {
+    failures.push(`button default size does not resolve: ${componentRecipes.button.defaultSize}`)
+  }
+  if (!(componentRecipes.tabs.defaultVariant in componentRecipes.tabs)) {
+    failures.push(`tabs default variant does not resolve: ${componentRecipes.tabs.defaultVariant}`)
+  }
+
+  const foundationReferences = new Set([
+    "radii.none", "radii.small", "radii.medium", "radii.large", "radii.extraLarge", "radii.full",
+    "typography.fontFamily", "typography.fontWeightRegular", "typography.fontWeightMedium",
+    "typography.fontWeightBold", "typography.bodyFontSize", "typography.bodyLineHeight",
+    "typography.smallFontSize", "typography.smallLineHeight", "shadows.small", "shadows.medium",
+    "shadows.large", "shadows.focus",
+  ])
+  const semanticReferences = new Set([
+    "surface.background", "surface.secondary", "surface.tertiary", "surface.accent",
+    "surface.accentForeground", "surface.popover", "surface.popoverForeground", "surface.modal",
+    "surface.menu", "surface.sidebar", "surface.input", "surface.overlay", "text.primary",
+    "text.secondary", "text.placeholder", "text.link", "text.inverse", "control.primary",
+    "control.primaryForeground", "control.hover", "control.active", "control.disabled",
+    "control.neutral", "control.neutralForeground", "control.danger", "control.dangerForeground",
+    "control.invalid", "control.selected", "control.focusRing", "border.default", "border.strong",
+    "border.input", "border.focused", "border.divider", "feedback.danger",
+    "feedback.dangerForeground", "sidebar.background", "sidebar.foreground", "sidebar.primary",
+    "sidebar.primaryForeground", "sidebar.accent", "sidebar.accentForeground", "sidebar.border",
+    "sidebar.ring", "shadow.card", "shadow.modal", "shadow.menu",
+  ])
+
+  visitRecipeValues(componentRecipes, "componentRecipes", (value, valuePath) => {
+    const fieldName = valuePath.slice(valuePath.lastIndexOf(".") + 1)
+    const colorFields = new Set([
+      "background", "foreground", "border", "placeholder", "indicator",
+      "color", "listBackground", "triggerSelectedBackground",
+    ])
+    const lengthFields = new Set([
+      "height", "minHeight", "padding", "paddingInline", "paddingBlock", "gap",
+      "iconSize", "thickness", "marginBlock", "marginInlineStart", "backdropBlur",
+      "top", "right", "offset", "radius", "fontSize", "lineHeight",
+    ])
+    const fontSizeReferences = new Set(["typography.bodyFontSize", "typography.smallFontSize"])
+    const lineHeightReferences = new Set(["typography.bodyLineHeight", "typography.smallLineHeight"])
+    const fontWeightReferences = new Set([
+      "typography.fontWeightRegular", "typography.fontWeightMedium", "typography.fontWeightBold",
+    ])
+
+    if (value !== null && typeof value === "object") {
+      if (value.kind === "foundation" && !foundationReferences.has(value.path)) {
+        failures.push(`${valuePath} has an unsupported foundation reference: ${value.path}`)
+      }
+      if (value.kind === "semantic" && !semanticReferences.has(value.path)) {
+        failures.push(`${valuePath} has an unsupported semantic reference: ${value.path}`)
+      }
+      if (colorFields.has(fieldName) &&
+        (value.kind !== "semantic" || value.path.startsWith("shadow."))) {
+        failures.push(`${valuePath} must use a semantic color reference`)
+      }
+      if (fieldName === "shadow" && !(
+        (value.kind === "semantic" && value.path.startsWith("shadow.")) ||
+        (value.kind === "foundation" && value.path.startsWith("shadows."))
+      )) {
+        failures.push(`${valuePath} must use a shadow reference`)
+      }
+      if (fieldName === "radius" &&
+        (value.kind !== "foundation" || !value.path.startsWith("radii."))) {
+        failures.push(`${valuePath} must use a radius foundation reference or px length`)
+      }
+      if (fieldName === "fontFamily" &&
+        (value.kind !== "foundation" || value.path !== "typography.fontFamily")) {
+        failures.push(`${valuePath} must use the foundation font-family reference`)
+      }
+      if (fieldName === "fontSize" &&
+        (value.kind !== "foundation" || !fontSizeReferences.has(value.path))) {
+        failures.push(`${valuePath} must use a font-size foundation reference or px length`)
+      }
+      if (fieldName === "lineHeight" &&
+        (value.kind !== "foundation" || !lineHeightReferences.has(value.path))) {
+        failures.push(`${valuePath} must use a line-height foundation reference or px length`)
+      }
+      if (fieldName === "fontWeight" &&
+        (value.kind !== "foundation" || !fontWeightReferences.has(value.path))) {
+        failures.push(`${valuePath} must use a font-weight foundation reference or supported number`)
+      }
+    } else if (colorFields.has(fieldName) && value !== "transparent") {
+      failures.push(`${valuePath} must use a semantic reference or transparent`)
+    } else if (fieldName === "shadow" && value !== "none") {
+      failures.push(`${valuePath} must use a shadow reference or none`)
+    } else if ((fieldName === "opacity" || fieldName === "indicatorOpacity") &&
+      (typeof value !== "number" || value < 0 || value > 1)) {
+      failures.push(`${valuePath} must be a number between 0 and 1`)
+    } else if (fieldName === "marginInlineStart" && value === "auto") {
+      // `auto` is the sole non-length layout keyword in the public recipe contract.
+    } else if (lengthFields.has(fieldName) &&
+      (typeof value !== "string" || !/^-?(?:\d+\.?\d*|\.\d+)px$|^0$/.test(value))) {
+      failures.push(`${valuePath} must be a px length`)
+    } else if (fieldName === "duration" &&
+      (typeof value !== "string" || !/^(?:\d+\.?\d*|\.\d+)ms$/.test(value))) {
+      failures.push(`${valuePath} must be a millisecond duration`)
+    } else if (fieldName === "letterSpacing" &&
+      (typeof value !== "string" || !/^-?(?:\d+\.?\d*|\.\d+)em$/.test(value))) {
+      failures.push(`${valuePath} must be an em tracking value`)
+    } else if (fieldName === "fontFamily") {
+      failures.push(`${valuePath} must use the foundation font-family reference`)
+    } else if (fieldName === "fontWeight" && ![400, 500, 600].includes(value)) {
+      failures.push(`${valuePath} must be a supported numeric font weight`)
+    }
+
+    const isFullRadius = value === exuiTokens.radii.full ||
+      (value !== null && typeof value === "object" && value.kind === "foundation" && value.path === "radii.full")
+    if (valuePath.endsWith(".radius") && isFullRadius && !valuePath.startsWith("componentRecipes.button.")) {
+      failures.push(`${valuePath} uses the Button-only full radius`)
+    }
+  })
 }
 
 function parseColor(value) {
@@ -154,12 +330,12 @@ function validateContrast() {
 async function validateGeneratedCss() {
   const sourcePath = path.join(packageRoot, "src", "style.css")
   const current = await readFile(sourcePath, "utf8").catch(() => "")
-  const expected = renderCss(exuiTokens)
+  const expected = renderCss(exuiTokens, componentRecipes)
   if (current !== expected) {
     failures.push("src/style.css differs from the canonical token source")
   }
 
-  const allVariables = createCssVariables(exuiTokens)
+  const allVariables = createCssVariables(exuiTokens, componentRecipes)
   for (const [selector, variables] of Object.entries(allVariables)) {
     const names = Object.keys(variables)
     if (new Set(names).size !== names.length) {
@@ -196,6 +372,8 @@ requireEqualShape("themes", Object.entries(exuiTokens.themes))
 requireEqualShape("density", Object.entries(exuiTokens.density))
 validateDensity()
 validateFrozen(exuiTokens)
+validateFrozen(componentRecipes, "componentRecipes")
+validateRecipeContract()
 validateColors(exuiTokens.themes)
 validateContrast()
 await validateGeneratedCss()
