@@ -3,6 +3,11 @@ import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
 import { fileURLToPath } from "node:url"
+import {
+  assertPublishableManifest,
+  COMPONENT_PACKAGE_NAME,
+  TOKEN_PACKAGE_NAME,
+} from "./package-contract.mjs"
 
 const repositoryRoot = fileURLToPath(new URL("..", import.meta.url))
 const temporaryRoot = await mkdtemp(join(tmpdir(), "exui-pack-check-"))
@@ -145,6 +150,16 @@ try {
   const componentPackage = pack(resolve(repositoryRoot, "packages", "components"))
   const tokenManifest = readPackedManifest(tokenPackage.filename)
   const componentManifest = readPackedManifest(componentPackage.filename)
+
+  assertPublishableManifest(tokenManifest, {
+    expectedName: TOKEN_PACKAGE_NAME,
+    expectedVersion: tokenPackage.version,
+  })
+  assertPublishableManifest(componentManifest, {
+    expectedName: COMPONENT_PACKAGE_NAME,
+    expectedVersion: componentPackage.version,
+    tokenVersion: tokenManifest.version,
+  })
 
   requireCondition(tokenManifest.name === "@exre/exui-tokens", "token tarball has the wrong package name")
   requireCondition(

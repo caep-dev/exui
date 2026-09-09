@@ -1,0 +1,55 @@
+name: Release Hook - npm
+
+on:
+  push:
+    tags:
+      - '@exre/exui@*'
+      - '@exre/exui-tokens@*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.repository }}:${{ github.ref_name }}:npm
+  cancel-in-progress: false
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: npm-release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate release context before installing dependencies
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          node scripts/release-bootstrap/hook-context.mjs --root . --tag "$RELEASE_TAG" --commit "$(git rev-parse HEAD)" --provider github --repository "$GITHUB_REPOSITORY" --hook-id npm --main-ref origin/main > "$RUNNER_TEMP/npm-context.json"
+      - name: Install pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 11.9.0
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Require npm with trusted publishing support
+        run: npm install --global npm@11.9.0 --ignore-scripts
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Verify and build release packages
+        run: |
+          pnpm release:verify
+          pnpm build
+          pnpm verify:pack
+      - name: Publish only the tagged package using npm OIDC
+        run: node scripts/release-bootstrap/npm.mjs --root . --context "$RUNNER_TEMP/npm-context.json"

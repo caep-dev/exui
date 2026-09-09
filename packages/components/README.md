@@ -48,11 +48,9 @@ Apply pending changesets to `package.json` and changelogs:
 pnpm version-packages
 ```
 
-Publish a built release:
+After release automation is enabled, successful CI on `main` versions pending Changesets and creates annotated package tags. The `tag-npm.yml` workflow publishes each tagged package using npm OIDC.
 
-```bash
-pnpm release
-```
+There is no local `pnpm release` command. Maintainers must configure the Release App, protected refs, and npm Trusted Publishers before enabling automation.
 
 ## shadcn/ui
 

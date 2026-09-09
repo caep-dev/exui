@@ -1,0 +1,116 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      vars.RELEASE_AUTOMATION_ENABLED == 'true' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      EXPECTED_MAIN: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Check out the verified main revision
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.EXPECTED_MAIN }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 11.9.0
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Verify release configuration
+        run: pnpm release:verify
+      - name: Check trusted main and prepare release plan
+        id: plan
+        run: |
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN" || { echo 'MAIN_ADVANCED' >&2; exit 1; }
+          status_file="$RUNNER_TEMP/changesets-status.json"
+          plan_file="$RUNNER_TEMP/release-plan.json"
+          pnpm exec changeset status --output "$status_file"
+          node scripts/release-bootstrap/plan.mjs --root . --status-file "$status_file" > "$plan_file"
+          echo "file=$plan_file" >> "$GITHUB_OUTPUT"
+          mode=$(node -e 'process.stdout.write(require(process.argv[1]).mode)' "$plan_file")
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "Release mode: $mode" >> "$GITHUB_STEP_SUMMARY"
+      - name: Apply version plan
+        if: steps.plan.outputs.mode == 'version'
+        env:
+          PLAN_FILE: ${{ steps.plan.outputs.file }}
+        run: |
+          node scripts/release-bootstrap/version.mjs --root . --plan "$PLAN_FILE" > "$RUNNER_TEMP/version-result.json"
+          pnpm install --lockfile-only --ignore-scripts --no-frozen-lockfile
+          pnpm tokens:check
+          pnpm typecheck
+          pnpm lint
+          pnpm build
+          pnpm verify:pack
+          pnpm test:release
+          node scripts/release-bootstrap/version.mjs --root . --plan "$PLAN_FILE" --verify true > "$RUNNER_TEMP/version-result.json"
+      - name: Create a repository-scoped Release App token
+        if: steps.plan.outputs.mode != 'no-op'
+        id: app
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+        with:
+          app-id: ${{ vars.EXUI_RELEASE_APP_ID }}
+          private-key: ${{ secrets.EXUI_RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+      - name: Configure Release Bot identity and credentials
+        if: steps.plan.outputs.mode != 'no-op'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+        run: |
+          bot_login="${APP_SLUG}[bot]"
+          bot_id=$(gh api "/users/$bot_login" --jq .id)
+          git config user.name "$bot_login"
+          git config user.email "${bot_id}+${bot_login}@users.noreply.github.com"
+          gh auth setup-git
+      - name: Commit and push only the validated version diff
+        if: steps.plan.outputs.mode == 'version'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+        run: |
+          node -e 'const fs=require("node:fs"),cp=require("node:child_process");for(const p of JSON.parse(fs.readFileSync(process.argv[1],"utf8")).changed)cp.execFileSync("git",["add","--",p]);' "$RUNNER_TEMP/version-result.json"
+          git diff --cached --quiet && { echo 'RELEASE_DIFF_INVALID: empty commit' >&2; exit 1; }
+          git commit --signoff -m 'chore(release): version packages'
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN" || { echo 'MAIN_ADVANCED' >&2; exit 1; }
+          git push origin HEAD:refs/heads/main
+      - name: Create or recover annotated tags one at a time
+        if: steps.plan.outputs.mode != 'no-op'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PLAN_FILE: ${{ steps.plan.outputs.file }}
+        run: |
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          node scripts/release-bootstrap/tags.mjs --root . --plan "$PLAN_FILE" --commit "$(git rev-parse HEAD)"
+      - name: Report no release
+        if: steps.plan.outputs.mode == 'no-op'
+        run: echo 'No version changes; successful no-op.' >> "$GITHUB_STEP_SUMMARY"

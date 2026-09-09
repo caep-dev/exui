@@ -13,7 +13,8 @@
     "verify:pack": "node scripts/verify-packages.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "pnpm build && pnpm verify:pack && changeset publish"
+    "test:release": "node --test scripts/release-bootstrap/*.test.mjs",
+    "release:verify": "node scripts/release-bootstrap/verify.mjs --root ."
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",

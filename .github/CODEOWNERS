@@ -1,0 +1,13 @@
+/.github/workflows/ci.yml @wojzj57 @Xiamolc007
+/.github/workflows/release.yml @wojzj57 @Xiamolc007
+/.github/CODEOWNERS @wojzj57 @Xiamolc007
+/.changeset/config.json @wojzj57 @Xiamolc007
+/package.json @wojzj57 @Xiamolc007
+/scripts/package-contract.mjs @wojzj57 @Xiamolc007
+/scripts/verify-packages.mjs @wojzj57 @Xiamolc007
+/scripts/release-bootstrap/ @wojzj57 @Xiamolc007
+/packages/tokens/package.json @wojzj57 @Xiamolc007
+/packages/components/package.json @wojzj57 @Xiamolc007
+/.github/workflows/tag-npm.yml @wojzj57 @Xiamolc007
+/.release-bootstrap.yaml @wojzj57 @Xiamolc007
+/.release-bootstrap/ @wojzj57 @Xiamolc007

@@ -2,6 +2,10 @@
   "name": "@exre/exui",
   "version": "0.0.0",
   "description": "Exre brand React component library built on shadcn/ui and Radix UI.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caep-dev/exui.git"
+  },
   "type": "module",
   "main": "./dist/exui.js",
   "module": "./dist/exui.js",
@@ -17,7 +21,8 @@
     }
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "files": [
     "dist",

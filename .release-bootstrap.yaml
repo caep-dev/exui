@@ -1,0 +1,24 @@
+schemaVersion: 1
+provider: github
+defaultBranch: main
+packageManager: pnpm
+tagStrategy: adaptive
+changesets:
+  required: false
+ci:
+  aggregateCheck: ci-gate
+  scripts:
+    - lint
+    - typecheck
+    - build
+hooks:
+  - id: npm
+    type: npm
+    packages: ["@exre/exui", "@exre/exui-tokens"]
+    registry: https://registry.npmjs.org/
+    access: public
+    auth: oidc
+    provenance: true
+    command: node scripts/release-bootstrap/npm.mjs
+    workflow: .github/workflows/tag-npm.yml
+    environment: npm-release
