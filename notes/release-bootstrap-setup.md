@@ -47,7 +47,7 @@ The App integration ID is still an external input. Before application, re-read c
 - If a version commit reached main but tag pushes failed, rerun CI for that release commit while it remains current main. Release recognizes that commit, validates its diff, and creates only missing tags. Existing tags must be annotated and resolve to the same SHA.
 - If main has already advanced past that release commit, recovery requires a separately reviewed operation at the original release SHA; the automated workflow intentionally rejects stale main runs.
 - If npm failed after tag creation, rerun the failed `Release Hook - npm` run. Do not move tags, revert a published version, or generate another version just to retry.
-- `.release-bootstrap/managed.json` hashes fully owned release workflows, declaration, runtime and tests. Shared CI, package manifest, CODEOWNERS, and testing policy are not whole-file managed. `.gitattributes` keeps hashed content LF across platforms. After intentional reviewed managed-file edits, update only their SHA-256 entries, then run `pnpm release:verify` and release tests. Hash mismatches are `CI_CONFLICT`, not permission to overwrite files.
+- Release files are maintained directly in Git; the managed SHA-256 manifest and hash checks have been removed. Run `pnpm release:verify` to validate the declaration, Changesets configuration, quality scripts, and required provider workflows, then run the release tests. The historical initialization results below describe the original bootstrap acceptance.
 
 ## Validation
 

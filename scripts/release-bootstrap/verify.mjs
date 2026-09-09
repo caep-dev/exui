@@ -1,11 +1,6 @@
-import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
-import { isAbsolute, join, normalize, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { args, fail } from "./_lib.mjs";
-
-function digest(content) {
-  return `sha256:${createHash("sha256").update(content).digest("hex")}`;
-}
 
 const options = args(process.argv.slice(2));
 if (!options.root) fail("INVALID_ARGUMENT", "--root is required");
@@ -49,27 +44,4 @@ const providerFiles = provider === "github"
   : [".gitlab/ci/release-bootstrap-ci.yml", ".gitlab/ci/release-bootstrap-release.yml"];
 for (const path of providerFiles) if (!existsSync(join(root, path))) fail("CI_CONFLICT", `missing provider file ${path}`);
 
-const managedPath = join(root, ".release-bootstrap", "managed.json");
-if (!existsSync(managedPath)) fail("PROJECT_UNSUPPORTED", ".release-bootstrap/managed.json is required");
-
-let managed;
-try {
-  managed = JSON.parse(readFileSync(managedPath, "utf8"));
-} catch (error) {
-  fail("PROJECT_UNSUPPORTED", `Invalid managed manifest: ${error.message}`);
-}
-if (managed.schemaVersion !== 1 || !managed.files || Array.isArray(managed.files) || typeof managed.files !== "object") {
-  fail("PROJECT_UNSUPPORTED", "Unsupported managed manifest schema");
-}
-
-for (const [path, expected] of Object.entries(managed.files)) {
-  const normalized = normalize(path);
-  if (isAbsolute(path) || normalized === ".." || normalized.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`)) {
-    fail("PROJECT_UNSUPPORTED", `Unsafe managed path ${path}`);
-  }
-  const target = resolve(root, path);
-  if (!existsSync(target)) fail("CI_CONFLICT", `missing managed file ${path}`);
-  if (digest(readFileSync(target)) !== expected) fail("CI_CONFLICT", `user-modified managed file ${path}`);
-}
-
-process.stdout.write(`${JSON.stringify({ schemaVersion: 1, valid: true, files: Object.keys(managed.files).length })}\n`);
+process.stdout.write(`${JSON.stringify({ schemaVersion: 1, valid: true })}\n`);

@@ -12,7 +12,7 @@ pnpm test:release
 
 The suite covers no-op planning, scoped tags, release diff validation, annotated tag recovery and conflicts, npm Registry failures and idempotency, and packed-manifest contracts. It never exercises a real npm publication.
 
-Run `pnpm release:verify` to check managed release files. Release setup and external activation are recorded in `notes/release-bootstrap-setup.md`.
+Run `pnpm release:verify` to check the release declaration, Changesets configuration, quality scripts, and required provider workflows. Release setup and external activation are recorded in `notes/release-bootstrap-setup.md`.
 
 ## Visual tests
 
