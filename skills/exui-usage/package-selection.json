@@ -8,7 +8,8 @@
     {
       "role": "components",
       "workspace": "packages/components",
-      "name": "@exre/exui"
+      "name": "@exre/exui",
+      "tokensEntry": "./tokens"
     }
   ]
 }

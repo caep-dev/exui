@@ -34,6 +34,7 @@ const approvedPackages = {
   components: {
     workspace: "packages/components",
     name: "@exre/exui",
+    tokensEntry: "./tokens",
   },
 }
 
@@ -71,6 +72,15 @@ function getExportTarget(manifest, exportName, condition) {
   }
   if (exported && typeof exported === "object" && typeof exported[condition] === "string") {
     return exported[condition]
+  }
+  if (
+    exported &&
+    typeof exported === "object" &&
+    exported[condition] &&
+    typeof exported[condition] === "object" &&
+    typeof exported[condition].default === "string"
+  ) {
+    return exported[condition].default
   }
   fail(`${manifest.name}: export ${exportName} does not expose ${condition}`)
 }
@@ -124,15 +134,24 @@ async function validatePackageSelection(root, selection) {
     const manifestPath = path.join(packageDirectory, "package.json")
     const manifest = await readJson(manifestPath)
     requireCondition(manifest.name === entry.name, `${role}: package manifest name does not match selection`)
-    requireCondition(manifest.private !== true, `${role}: private packages cannot be selected`)
-    requireCondition(manifest.exports && manifest.exports["."], `${role}: package root export is missing`)
 
     if (role === "tokens") {
-      validateExportTarget(packageDirectory, getExportTarget(manifest, ".", "import"), `${role} root export`)
-      validateExportTarget(packageDirectory, getExportTarget(manifest, "./style.css", "default"), `${role} style export`)
-      validateExportTarget(packageDirectory, getExportTarget(manifest, "./font.css", "default"), `${role} font export`)
+      // The tokens workspace is the internal build location; its artifacts
+      // ship through the public components package subpath.
+      requireCondition(manifest.private === true, "tokens: the internal tokens workspace must stay private")
     } else {
-      validateExportTarget(packageDirectory, getExportTarget(manifest, ".", "types"), `${role} type export`)
+      requireCondition(manifest.private !== true, "components: private packages cannot be selected")
+      requireCondition(manifest.exports && manifest.exports["."], "components: package root export is missing")
+      validateExportTarget(packageDirectory, getExportTarget(manifest, ".", "types"), "components root export")
+      const tokensEntry = approved.tokensEntry
+      requireCondition(
+        entry.tokensEntry === tokensEntry,
+        `components: tokens entry must be ${tokensEntry}`
+      )
+      validateExportTarget(packageDirectory, getExportTarget(manifest, tokensEntry, "import"), "components tokens import export")
+      validateExportTarget(packageDirectory, getExportTarget(manifest, tokensEntry, "require"), "components tokens require export")
+      validateExportTarget(packageDirectory, getExportTarget(manifest, `${tokensEntry}/style.css`, "default"), "components tokens style export")
+      validateExportTarget(packageDirectory, getExportTarget(manifest, `${tokensEntry}/font.css`, "default"), "components tokens font export")
     }
 
     result[role] = { directory: packageDirectory, manifest }
@@ -170,6 +189,17 @@ function runPnpm(args, stage) {
 
 function buildPublicEntries() {
   runPnpm(["--filter", "@exre/exui-tokens", "build"], "tokens build")
+  // The public tokens artifacts live inside the components package; the
+  // copy step only needs the tokens build output and keeps the inventory
+  // reading exactly what consumers install.
+  const copyResult = spawnSync(process.execPath, [path.join(repositoryRoot, "packages", "components", "scripts", "copy-tokens-dist.mjs")], {
+    cwd: repositoryRoot,
+    shell: false,
+    stdio: "inherit",
+  })
+  if (copyResult.error || copyResult.status !== 0) {
+    fail(`tokens artifact copy: ${copyResult.error?.message ?? `exited with status ${String(copyResult.status)}`}`)
+  }
   runPnpm(["--filter", "@exre/exui", "build:types"], "component types build")
 }
 
@@ -262,13 +292,17 @@ function renderTokenInventory({ tokenPaths, recipePaths, cssProperties }) {
   ].join("\n")
 }
 
-async function loadTokenInventory(tokensPackage) {
-  const javascriptTarget = getExportTarget(tokensPackage.manifest, ".", "import")
-  const stylesheetTarget = getExportTarget(tokensPackage.manifest, "./style.css", "default")
-  const javascriptEntry = path.resolve(tokensPackage.directory, javascriptTarget)
-  const stylesheetEntry = path.resolve(tokensPackage.directory, stylesheetTarget)
-  requireWithin(tokensPackage.directory, javascriptEntry, "tokens JavaScript export")
-  requireWithin(tokensPackage.directory, stylesheetEntry, "tokens stylesheet export")
+async function loadTokenInventory(packages) {
+  // Token inventories load from the public package artifacts: the
+  // components package carries the tokens subpath that consumers import.
+  const { components } = packages
+  const tokensEntry = approvedPackages.components.tokensEntry
+  const javascriptTarget = getExportTarget(components.manifest, tokensEntry, "import")
+  const stylesheetTarget = getExportTarget(components.manifest, `${tokensEntry}/style.css`, "default")
+  const javascriptEntry = path.resolve(components.directory, javascriptTarget)
+  const stylesheetEntry = path.resolve(components.directory, stylesheetTarget)
+  requireWithin(components.directory, javascriptEntry, "tokens JavaScript export")
+  requireWithin(components.directory, stylesheetEntry, "tokens stylesheet export")
 
   const cacheKey = (await stat(javascriptEntry)).mtimeMs
   const publicModule = await import(`${pathToFileURL(javascriptEntry).href}?updated=${cacheKey}`)
@@ -293,6 +327,11 @@ function pascalCaseFileName(value) {
 function classifyDeclaration(componentDirectory, declarationFile, referenceNames) {
   requireWithin(componentDirectory, declarationFile, "component declaration")
   const relative = path.relative(componentDirectory, declarationFile).split(path.sep).join("/")
+  if (relative.startsWith("types/vendor/")) {
+    // Vendored third-party declarations back re-exported symbols; the
+    // re-exporting package declaration provides the approved group.
+    return { category: "vendored", family: null, reference: null }
+  }
   let match = /^types\/components\/ui\/(.+)\.d\.ts$/.exec(relative)
   if (match) {
     const referenceName = referenceNames.get(normalizedReferenceKey(match[1]))
@@ -371,7 +410,13 @@ async function loadComponentInventory(componentsPackage) {
     const repositoryDeclarations = sortUnique(declarations)
     requireCondition(repositoryDeclarations.length > 0, `component export ${exportedSymbol.name} has no repository declaration`)
 
-    const classifications = repositoryDeclarations.map((fileName) => classifyDeclaration(componentsPackage.directory, fileName, componentReferences))
+    const classifications = repositoryDeclarations
+      .map((fileName) => classifyDeclaration(componentsPackage.directory, fileName, componentReferences))
+      .filter((classification) => classification.category !== "vendored")
+    requireCondition(
+      classifications.length > 0,
+      `component export ${exportedSymbol.name} has no declaration in an approved group`
+    )
     const groupingKeys = new Set(classifications.map(({ category, family }) => `${category}\u0000${family ?? ""}`))
     requireCondition(groupingKeys.size === 1, `component export ${exportedSymbol.name} has conflicting declaration groups`)
     inventory.push({
@@ -509,8 +554,8 @@ async function validateHumanDocuments(root, virtualGenerated = new Set(generated
 
   for (const required of [
     "@exre/exui/style.css",
-    "@exre/exui-tokens/style.css",
-    "@exre/exui-tokens/font.css",
+    "@exre/exui/tokens/style.css",
+    "@exre/exui/tokens/font.css",
     "componentRecipes",
     "surface",
     "text",
@@ -659,7 +704,7 @@ async function createHumanDocumentFixture(root) {
   await mkdir(path.join(root, "references", "components"), { recursive: true })
   await writeFile(path.join(root, "SKILL.md"), `---\nname: exui-usage\ndescription: Guide Token, component, and icon consumers.\n---\n\n[Tokens](references/token-usage.md)\n[Icons](references/icon-usage.md)\n[Generated](references/generated/token-paths.md)\n`, "utf8")
   await writeFile(path.join(root, "agents", "openai.yaml"), `interface:\n  default_prompt: "Use $exui-usage now."\n`, "utf8")
-  await writeFile(path.join(root, "references", "token-usage.md"), `@exre/exui/style.css @exre/exui-tokens/style.css @exre/exui-tokens/font.css componentRecipes surface text control border feedback editor chart sidebar density typography radii shadows\n`, "utf8")
+  await writeFile(path.join(root, "references", "token-usage.md"), `@exre/exui/style.css @exre/exui/tokens/style.css @exre/exui/tokens/font.css componentRecipes surface text control border feedback editor chart sidebar density typography radii shadows\n`, "utf8")
   await writeFile(path.join(root, "references", "icon-usage.md"), `lucide-react direct dependency brand logo product-specific aria-label aria-hidden\n`, "utf8")
   await writeFile(path.join(root, "references", "components", "Button.md"), `import { Button } from "@exre/exui"\n`, "utf8")
 }
@@ -686,11 +731,19 @@ async function runSelfTest() {
     const packageRoot = path.join(root, "repo")
     await writeFixtureManifest(path.join(packageRoot, "packages", "tokens"), {
       name: "@exre/exui-tokens",
-      exports: { ".": { import: "./dist/index.js" }, "./style.css": "./dist/style.css", "./font.css": "./dist/font.css" },
+      private: true,
     })
     await writeFixtureManifest(path.join(packageRoot, "packages", "components"), {
       name: "@exre/exui",
-      exports: { ".": { types: "./types/index.d.ts" } },
+      exports: {
+        ".": { types: "./types/index.d.ts" },
+        "./tokens": {
+          import: { types: "./dist/tokens/index.d.ts", default: "./dist/tokens/index.js" },
+          require: { types: "./dist/tokens/cjs/index.d.ts", default: "./dist/tokens/cjs/index.js" },
+        },
+        "./tokens/style.css": "./dist/tokens/style.css",
+        "./tokens/font.css": "./dist/tokens/font.css",
+      },
     })
     await writeFixtureManifest(path.join(packageRoot, "packages", "showcase"), {
       name: "@exre/exui-showcase",
@@ -699,24 +752,30 @@ async function runSelfTest() {
     })
     const selection = { packages: [
       { role: "tokens", workspace: "packages/tokens", name: "@exre/exui-tokens" },
-      { role: "components", workspace: "packages/components", name: "@exre/exui" },
+      { role: "components", workspace: "packages/components", name: "@exre/exui", tokensEntry: "./tokens" },
     ] }
     await validatePackageSelection(packageRoot, selection)
     await expectRejection(() => validatePackageSelection(packageRoot, { packages: [selection.packages[0], { ...selection.packages[0] }] }), "roles must be unique")
     await expectRejection(() => validatePackageSelection(packageRoot, { packages: [selection.packages[0], { ...selection.packages[1], name: "wrong" }] }), "package name")
     await expectRejection(() => validatePackageSelection(packageRoot, { packages: [selection.packages[0], { ...selection.packages[1], workspace: "packages/showcase" }] }), "unapproved workspace")
     await expectRejection(() => validatePackageSelection(packageRoot, { packages: [selection.packages[0], { ...selection.packages[1], workspace: "../outside" }] }), "unapproved workspace")
+    await expectRejection(() => validatePackageSelection(packageRoot, { packages: [selection.packages[0], { ...selection.packages[1], tokensEntry: "./legacy-tokens" }] }), "tokens entry must be")
+    const componentsManifestPath = path.join(packageRoot, "packages", "components", "package.json")
+    const componentsManifest = await readJson(componentsManifestPath)
+    await writeFile(componentsManifestPath, `${JSON.stringify({ ...componentsManifest, private: true }, null, 2)}\n`, "utf8")
+    await expectRejection(() => validatePackageSelection(packageRoot, selection), "private packages")
+    await writeFile(componentsManifestPath, `${JSON.stringify(componentsManifest, null, 2)}\n`, "utf8")
+    const escapingManifest = {
+      ...componentsManifest,
+      exports: { ...componentsManifest.exports, "./tokens/font.css": "../../outside.css" },
+    }
+    await writeFile(componentsManifestPath, `${JSON.stringify(escapingManifest, null, 2)}\n`, "utf8")
+    await expectRejection(() => validatePackageSelection(packageRoot, selection), "resolves outside")
+    await writeFile(componentsManifestPath, `${JSON.stringify(componentsManifest, null, 2)}\n`, "utf8")
     const tokensManifestPath = path.join(packageRoot, "packages", "tokens", "package.json")
     const tokensManifest = await readJson(tokensManifestPath)
-    await writeFile(tokensManifestPath, `${JSON.stringify({ ...tokensManifest, private: true }, null, 2)}\n`, "utf8")
-    await expectRejection(() => validatePackageSelection(packageRoot, selection), "private packages")
-    await writeFile(tokensManifestPath, `${JSON.stringify(tokensManifest, null, 2)}\n`, "utf8")
-    const escapingManifest = {
-      ...tokensManifest,
-      exports: { ...tokensManifest.exports, "./font.css": "../../outside.css" },
-    }
-    await writeFile(tokensManifestPath, `${JSON.stringify(escapingManifest, null, 2)}\n`, "utf8")
-    await expectRejection(() => validatePackageSelection(packageRoot, selection), "resolves outside")
+    await writeFile(tokensManifestPath, `${JSON.stringify({ ...tokensManifest, private: false }, null, 2)}\n`, "utf8")
+    await expectRejection(() => validatePackageSelection(packageRoot, selection), "must stay private")
     await writeFile(tokensManifestPath, `${JSON.stringify(tokensManifest, null, 2)}\n`, "utf8")
 
     const humanRoot = path.join(root, "human")
@@ -803,7 +862,7 @@ function parseMode(argumentsList) {
 }
 
 async function generateOutputs(packages) {
-  const tokens = await loadTokenInventory(packages.tokens)
+  const tokens = await loadTokenInventory(packages)
   const components = await loadComponentInventory(packages.components)
   const outputs = {
     "component-exports.md": renderComponentInventory(components),

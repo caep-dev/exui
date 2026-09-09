@@ -1,21 +1,21 @@
 # ExUI Token Usage
 
-Use `@exre/exui-tokens` when a consuming project needs ExUI's visual contract without the React component package. Use `@exre/exui` for React components instead of recreating those components from Tokens.
+Use `@exre/exui/tokens` when a consuming project needs ExUI's visual contract without React. Use `@exre/exui` for React components instead of recreating those components from Tokens. Both entries ship from the same package, so one install covers either need.
 
 ## Install and import
 
-For framework-neutral Token use:
+Tokens are framework-neutral and require no React, React DOM, or React type packages:
 
 ```bash
-pnpm add @exre/exui-tokens
+pnpm add @exre/exui
 ```
 
 ```ts
-import { componentRecipes, exuiTokens } from "@exre/exui-tokens"
-import "@exre/exui-tokens/style.css"
+import { componentRecipes, exuiTokens } from "@exre/exui/tokens"
+import "@exre/exui/tokens/style.css"
 ```
 
-Import `@exre/exui-tokens/font.css` separately only when the consumer wants the ExUI font assets. The JavaScript root also supports CommonJS through the package's declared root export.
+Import `@exre/exui/tokens/font.css` separately only when the consumer wants the ExUI font assets. The JavaScript tokens entry also supports CommonJS through the package's declared require export.
 
 For React components:
 
@@ -23,6 +23,8 @@ For React components:
 import "@exre/exui/style.css"
 import { Button } from "@exre/exui"
 ```
+
+React consumers additionally install `react`, `react-dom`, and their TypeScript type packages; those are optional peers of the package, not transitive installs.
 
 `@exre/exui/style.css` already includes the Token stylesheet and font stylesheet. Do not import either Token CSS file again in the same React application path.
 
@@ -40,7 +42,7 @@ Do not copy resolved colors, lengths, shadows, or typography values into applica
 
 - Use `exuiTokens` when code needs typed, framework-neutral Token paths or must adapt ExUI into another theme system.
 - Use `componentRecipes` for non-React component geometry, typography, states, motion, and variants. Recipe references point back to public semantic or foundation Tokens; do not treat them as a second React component API.
-- Use `@exre/exui-tokens/style.css` when styling can consume CSS custom properties directly. The stylesheet exposes Light under `:root`, Dark under `.dark`, and Pitch Black under `.pitch-black`.
+- Use `@exre/exui/tokens/style.css` when styling can consume CSS custom properties directly. The stylesheet exposes Light under `:root`, Dark under `.dark`, and Pitch Black under `.pitch-black`.
 
 Consult the [generated Token path inventory](generated/token-paths.md) for exact `exuiTokens` paths, `componentRecipes` paths, and CSS custom-property names. That inventory intentionally lists no concrete values.
 
@@ -48,10 +50,10 @@ Consult the [generated Token path inventory](generated/token-paths.md) for exact
 
 Supported consumer entries are:
 
-- `@exre/exui-tokens`
-- `@exre/exui-tokens/style.css`
-- `@exre/exui-tokens/font.css`
 - `@exre/exui`
 - `@exre/exui/style.css`
+- `@exre/exui/tokens`
+- `@exre/exui/tokens/style.css`
+- `@exre/exui/tokens/font.css`
 
-Do not import from package `src/`, `dist/`, or `types/` paths.
+Do not import from package `src/`, `dist/`, or `types/` paths, and do not reference the internal `@exre/exui-tokens` workspace, which is not published.
