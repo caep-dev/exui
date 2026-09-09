@@ -294,9 +294,15 @@ const size: string = recipes.button.defaultSize
 console.log(themes, size)
 `
   const tokensCommonJs = `
-const { exuiTokens, componentRecipes } = require("@exre/exui/tokens")
+import tokens = require("@exre/exui/tokens")
+const { exuiTokens, componentRecipes } = tokens
+const recipes: tokens.ComponentRecipes = componentRecipes
 const themes: string[] = Object.keys(exuiTokens.themes)
-const size: string = componentRecipes.button.defaultSize
+const size: string = recipes.button.defaultSize
+// @ts-expect-error Unknown recipes must be rejected, not silently typed as any.
+componentRecipes.nonexistent
+// @ts-expect-error A recipe size is a string, not a number.
+const invalidSize: number = componentRecipes.button.defaultSize
 console.log(themes, size)
 `
   const sharedOptions = {
@@ -342,7 +348,13 @@ console.log(themes, size)
   )
 
   run("node", [join(consumerRoot, "node_modules", "typescript", "bin", "tsc"), "-p", "tsconfig.bundler.json"], consumerRoot)
-  run("node", [join(consumerRoot, "node_modules", "typescript", "bin", "tsc"), "-p", "tsconfig.nodenext.json"], consumerRoot)
+  const nodeNextFiles = run("node", [join(consumerRoot, "node_modules", "typescript", "bin", "tsc"), "-p", "tsconfig.nodenext.json", "--listFiles"], consumerRoot)
+  requireCondition(
+    nodeNextFiles.replaceAll("\\", "/").split(/\r?\n/).some(
+      (file) => file.endsWith("/node_modules/@exre/exui/dist/tokens/cjs/index.d.ts")
+    ),
+    "NodeNext CommonJS consumer must resolve the tokens require declaration entry"
+  )
 }
 
 async function verifyTokensStylesheet(tarballPath, consumerRoot) {
