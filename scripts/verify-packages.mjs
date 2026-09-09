@@ -1,6 +1,6 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
-import { join, resolve } from "node:path"
+import { basename, dirname, join, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
 import { fileURLToPath } from "node:url"
 import {
@@ -42,11 +42,8 @@ function readPackedManifest(tarballPath) {
 }
 
 function readPackedText(tarballPath, packedPath) {
-  const argumentsList = process.platform === "win32"
-    ? ["--force-local", "-xOf", tarballPath, packedPath]
-    : ["-xOf", tarballPath, packedPath]
-
-  return run("tar", argumentsList, repositoryRoot)
+  // Relative archive names work with BSD tar and avoid GNU tar's drive-letter parsing.
+  return run("tar", ["-xOf", basename(tarballPath), packedPath], dirname(tarballPath))
 }
 
 function requireCondition(condition, message) {
