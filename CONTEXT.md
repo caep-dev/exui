@@ -37,5 +37,5 @@ The shared visual token set applied through the library stylesheet and shadcn/ui
 _Avoid_: skin, preset only
 
 **Package Entry**:
-The public import surface exposed by the package root, such as `@exre/exui` and `@exre/exui/style.css`.
+The public import surface exposed by the package root and its declared subpaths, such as `@exre/exui`, `@exre/exui/style.css`, and `@exre/exui/tokens`.
 _Avoid_: barrel file, index file

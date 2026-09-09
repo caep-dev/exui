@@ -19,7 +19,7 @@ pnpm build
 pnpm verify:pack
 ```
 
-Run shadcn commands from `packages/components`. The repository root and `packages/showcase` are private; only `@exre/exui-tokens` and `@exre/exui` participate in Changesets and publication.
+Run shadcn commands from `packages/components`. The repository root, `packages/showcase`, and the internal `packages/tokens` workspace are private; only `@exre/exui` participates in Changesets and publication.
 
 ## Commit Messages
 

@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository is a private pnpm workspace for the ExUI visual foundation. `packages/tokens` publishes the framework-neutral `@exre/exui-tokens` package. `packages/components` publishes the React 19 `@exre/exui` component library, with public exports in `packages/components/src/index.ts`, shared styling in `packages/components/src/index.css`, and shadcn/ui primitives under `packages/components/src/components/ui`. `packages/showcase` is a private Vite application and may consume components only through the public `@exre/exui` package entries. Build output under package `dist/` and `types/` directories is generated and must not be edited by hand.
+This repository is a private pnpm workspace for the ExUI visual foundation. `packages/tokens` is the private workspace where framework-neutral token sources are generated and validated; its artifacts ship through the public package's `@exre/exui/tokens` subpath and the workspace itself is never published. `packages/components` publishes the React 19 `@exre/exui` component library as the single public package, with public exports in `packages/components/src/index.ts`, shared styling in `packages/components/src/index.css`, and shadcn/ui primitives under `packages/components/src/components/ui`. `packages/showcase` is a private Vite application and may consume components only through the public `@exre/exui` package entries. Build output under package `dist/` and `types/` directories is generated and must not be edited by hand.
 
 ## Documentation Locations
 
@@ -18,7 +18,7 @@ Use pnpm 11.9.0, as declared in `package.json`.
 - `pnpm typecheck`: run TypeScript checks across all three workspaces.
 - `pnpm lint`: run Oxlint with React and TypeScript rules.
 - `pnpm build`: build Tokens, components, declarations, and the private Showcase in dependency order.
-- `pnpm verify:pack`: verify both public tarballs and build a minimal packed consumer.
+- `pnpm verify:pack`: pack the public tarball and run the isolated packed-consumer gates (npm and pnpm tokens-only installs, token type and stylesheet checks, and a React consumer with strict type-checking, a production build, and a server-render smoke test).
 - `pnpm changeset`: create a release note for user-facing package changes.
 - `pnpm version-packages`: apply pending Changesets to versions and changelogs.
 

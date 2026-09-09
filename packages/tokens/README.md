@@ -1,6 +1,8 @@
-# @exre/exui-tokens
+# @exre/exui-tokens (internal workspace)
 
-Framework-neutral visual tokens shared by Exre user interfaces.
+Framework-neutral visual tokens for Exre user interfaces. This workspace is private: it is the build location for token sources and validation, and its generated artifacts ship through the public `@exre/exui/tokens` subpath. It is not published to npm.
+
+Inside this repository, the generated entries resolve through the workspace exports:
 
 ```ts
 import { exuiTokens } from "@exre/exui-tokens"
@@ -8,23 +10,17 @@ import "@exre/exui-tokens/font.css"
 import "@exre/exui-tokens/style.css"
 ```
 
+Consuming projects must use the public entries instead: `@exre/exui/tokens`, `@exre/exui/tokens/style.css`, and `@exre/exui/tokens/font.css`.
+
 The JavaScript entry has no React, DOM, storage, network, or global CSS side effects. CSS and font assets are available only through their explicit subpath exports.
 
 ## Module formats
 
-Both an ESM and a CommonJS build are published from the same source. `import` and bundlers resolve the ESM entry; `require()` resolves the CommonJS entry under `dist/cjs`. Either way the exported token tree is identical and deeply frozen.
-
-```js
-const { exuiTokens } = require("@exre/exui-tokens")
-```
+Both an ESM and a CommonJS build are generated from the same source. `import` and bundlers resolve the ESM entry; `require()` resolves the CommonJS entry under `dist/cjs`. Either way the exported token tree is identical and deeply frozen.
 
 The CommonJS entry exists for runtimes that cannot load ESM, such as server builds compiled to CommonJS. It is a compatibility entry: it carries the same contract as the ESM entry and is covered by the package release gates, but it is re-evaluated for removal at the next major version once no supported consumer needs it.
 
-Consumers that cannot rely on a bundler should gate their release on the CommonJS entry actually loading:
-
-```bash
-node -e "const { exuiTokens } = require('@exre/exui-tokens'); if (!exuiTokens) process.exit(1)"
-```
+The public copy of these artifacts is verified in the packed-consumer gates with a NodeNext CommonJS consumer.
 
 ## Accessibility baseline
 
