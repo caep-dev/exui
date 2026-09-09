@@ -49,6 +49,8 @@ jobs:
         run: |
           git fetch --no-tags origin main:refs/remotes/origin/main
           test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN" || { echo 'MAIN_ADVANCED' >&2; exit 1; }
+          # Changesets resolves its baseBranch as a local ref, but the checkout above is detached.
+          git branch --force main "$EXPECTED_MAIN"
           status_file="$RUNNER_TEMP/changesets-status.json"
           plan_file="$RUNNER_TEMP/release-plan.json"
           pnpm exec changeset status --output "$status_file"
