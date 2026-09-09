@@ -6,7 +6,6 @@ import {
   EXUI_REPOSITORY_URL,
   findWorkspaceDependencies,
   OFFICIAL_NPM_REGISTRY,
-  TOKEN_PACKAGE_NAME,
 } from "../package-contract.mjs"
 
 function manifest(name, version = "0.1.0") {
@@ -15,43 +14,89 @@ function manifest(name, version = "0.1.0") {
     version,
     repository: { type: "git", url: EXUI_REPOSITORY_URL },
     publishConfig: { access: "public", registry: OFFICIAL_NPM_REGISTRY },
-    dependencies: name === COMPONENT_PACKAGE_NAME ? { [TOKEN_PACKAGE_NAME]: "0.1.0" } : {},
+    dependencies: name === COMPONENT_PACKAGE_NAME ? { "@fontsource-variable/outfit": "^5.2.8" } : {},
   }
 }
 
-test("valid public tarball manifests satisfy the shared contract", () => {
+function publicManifest() {
+  return {
+    ...manifest(COMPONENT_PACKAGE_NAME),
+    exports: {
+      ".": { types: "./types/index.d.ts", import: "./dist/exui.js" },
+      "./style.css": { types: "./types/index.css.d.ts", default: "./dist/index.css" },
+      "./tokens": {
+        import: { types: "./dist/tokens/index.d.ts", default: "./dist/tokens/index.js" },
+        require: { types: "./dist/tokens/cjs/index.d.ts", default: "./dist/tokens/cjs/index.js" },
+      },
+      "./tokens/style.css": { types: "./dist/tokens/style.css.d.ts", default: "./dist/tokens/style.css" },
+      "./tokens/font.css": { types: "./dist/tokens/font.css.d.ts", default: "./dist/tokens/font.css" },
+    },
+    peerDependencies: { react: ">=19.0.0 <20", "react-dom": ">=19.0.0 <20" },
+    peerDependenciesMeta: { react: { optional: true }, "react-dom": { optional: true } },
+  }
+}
+
+test("a valid single-package tarball manifest satisfies the shared contract", () => {
   assert.doesNotThrow(() =>
-    assertPublishableManifest(manifest(TOKEN_PACKAGE_NAME), {
-      expectedName: TOKEN_PACKAGE_NAME,
-      expectedVersion: "0.1.0",
-    })
-  )
-  assert.doesNotThrow(() =>
-    assertPublishableManifest(manifest(COMPONENT_PACKAGE_NAME), {
+    assertPublishableManifest(publicManifest(), {
       expectedName: COMPONENT_PACKAGE_NAME,
       expectedVersion: "0.1.0",
-      tokenVersion: "0.1.0",
     })
   )
 })
 
-test("private, mirrored, mismatched, and workspace manifests fail closed", () => {
-  assert.throws(() => assertPublishableManifest({ ...manifest(TOKEN_PACKAGE_NAME), private: true }), /private/u)
+test("private, mirrored, and mismatched manifests fail closed", () => {
+  assert.throws(() => assertPublishableManifest({ ...publicManifest(), private: true }), /private/u)
   assert.throws(
-    () => assertPublishableManifest({ ...manifest(TOKEN_PACKAGE_NAME), publishConfig: { access: "public", registry: "https://example.test/" } }),
+    () =>
+      assertPublishableManifest({
+        ...publicManifest(),
+        publishConfig: { access: "public", registry: "https://example.test/" },
+      }),
     /registry/u
   )
   assert.throws(
-    () => assertPublishableManifest({ ...manifest(TOKEN_PACKAGE_NAME), repository: { type: "git", url: "https://example.test/repo.git" } }),
+    () =>
+      assertPublishableManifest({
+        ...publicManifest(),
+        repository: { type: "git", url: "https://example.test/repo.git" },
+      }),
     /identify/u
   )
   assert.throws(
-    () => assertPublishableManifest({ ...manifest(COMPONENT_PACKAGE_NAME), dependencies: { [TOKEN_PACKAGE_NAME]: "workspace:*" } }, { tokenVersion: "0.1.0" }),
-    /workspace/u
+    () => assertPublishableManifest({ ...publicManifest(), version: "0.2.0" }, { expectedVersion: "0.1.0" }),
+    /expected version/u
+  )
+})
+
+test("tokens exports, peer, and dependency boundaries are enforced", () => {
+  const complete = publicManifest()
+  const withoutTokens = { ...complete, exports: { ...complete.exports } }
+  delete withoutTokens.exports["./tokens"]
+  assert.throws(() => assertPublishableManifest(withoutTokens), /must expose \.\/tokens/u)
+  assert.throws(
+    () =>
+      assertPublishableManifest({
+        ...complete,
+        exports: { ...complete.exports, "./tokens": "./dist/tokens/index.js" },
+      }),
+    /must expose \.\/tokens/u
   )
   assert.throws(
-    () => assertPublishableManifest(manifest(COMPONENT_PACKAGE_NAME), { tokenVersion: "0.2.0" }),
-    /must depend/u
+    () => assertPublishableManifest({ ...complete, dependencies: { "@exre/exui-tokens": "0.1.0" } }),
+    /private tokens workspace/u
+  )
+  assert.throws(
+    () => assertPublishableManifest({ ...complete, peerDependencies: { ...complete.peerDependencies, "@exre/exui-tokens": "*" } }),
+    /private tokens workspace/u
+  )
+  assert.throws(
+    () => assertPublishableManifest({ ...complete, peerDependenciesMeta: {} }),
+    /optional/u
+  )
+  assert.throws(
+    () => assertPublishableManifest({ ...complete, peerDependencies: { react: "^19", "react-dom": ">=19.0.0 <20" } }),
+    /peer contract/u
   )
 })
 

@@ -412,7 +412,7 @@ export interface TabsRecipe {
   readonly line: TabsLineVariantRecipe
 }
 
-/** Public component-recipe collection released by `@exre/exui-tokens`. */
+/** Public component-recipe collection released through `@exre/exui/tokens`. */
 export interface ComponentRecipes {
   readonly button: ButtonRecipe
   readonly formControl: FormControlRecipe

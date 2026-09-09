@@ -1,6 +1,7 @@
 {
   "name": "@exre/exui-tokens",
   "version": "0.0.0",
+  "private": true,
   "description": "Framework-neutral visual tokens for Exre user interfaces.",
   "repository": {
     "type": "git",
@@ -19,10 +20,6 @@
     "./style.css": "./dist/style.css",
     "./font.css": "./dist/font.css"
   },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
   "files": [
     "dist",
     "README.md",
@@ -34,8 +31,7 @@
     "build": "pnpm build:js && pnpm build:cjs && node scripts/generate-css.mjs && node scripts/copy-css.mjs && node scripts/validate-tokens.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.cjs.json --noEmit",
     "lint": "oxlint src scripts",
-    "tokens:check": "pnpm typecheck && pnpm build:js && pnpm build:cjs && node scripts/verify-cjs.mjs && node scripts/generate-css.mjs --check && node scripts/copy-css.mjs && node scripts/validate-tokens.mjs",
-    "pack:check": "pnpm build && pnpm pack"
+    "tokens:check": "pnpm typecheck && pnpm build:js && pnpm build:cjs && node scripts/verify-cjs.mjs && node scripts/generate-css.mjs --check && node scripts/copy-css.mjs && node scripts/validate-tokens.mjs"
   },
   "dependencies": {
     "@fontsource-variable/outfit": "^5.2.8"
