@@ -3,3 +3,4 @@
 /.github/workflows/tag-npm.yml text eol=lf
 /.release-bootstrap.yaml text eol=lf
 /.release-bootstrap/managed.json text eol=lf
+/packages/tokens/src/style.css text eol=lf
