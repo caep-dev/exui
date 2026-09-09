@@ -18,7 +18,10 @@ Run `pnpm release:verify` to check managed release files. Release setup and exte
 
 The Showcase visual suite uses Vitest Browser Mode with Playwright Chromium. Baselines are platform-specific and CI runs them on Windows.
 
+Build the workspaces before running visual tests: Showcase consumes the public component package's generated JavaScript and CSS entries.
+
 ```bash
+pnpm build
 pnpm test:visual
 ```
 
@@ -30,8 +33,8 @@ pnpm test:release
 pnpm tokens:check
 pnpm typecheck
 pnpm lint
-pnpm test:visual
 pnpm build
+pnpm test:visual
 pnpm verify:pack
 git diff --check
 ```

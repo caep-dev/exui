@@ -52,11 +52,11 @@ jobs:
       - name: Lint workspaces
         run: pnpm lint
 
-      - name: Run visual tests
-        run: pnpm test:visual
-
       - name: Build workspaces
         run: pnpm build
+
+      - name: Run visual tests
+        run: pnpm test:visual
 
       - name: Verify packed consumers
         run: pnpm verify:pack
