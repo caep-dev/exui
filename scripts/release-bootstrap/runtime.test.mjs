@@ -130,7 +130,7 @@ test("a manifest script change disguised as a version commit is rejected", (t) =
 
 test("real Changesets versioning returns JSON and limits the staged paths", (t) => {
   const f = fixture(t)
-  f.write(".gitignore", "node_modules/\n")
+  f.write(".gitignore", "node_modules\n")
   f.write(".changeset/config.json", { changelog: "@changesets/cli/changelog", commit: false, baseBranch: "main", access: "public", updateInternalDependencies: "patch" })
   f.write(".changeset/feature.md", '---\n"@exre/exui": minor\n---\nFeature\n')
   f.git("add", "."); f.git("commit", "-m", "feature")
