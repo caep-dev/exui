@@ -1,6 +1,6 @@
 {
   "name": "@exre/exui",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Exre brand React component library built on shadcn/ui and Radix UI.",
   "repository": {
     "type": "git",
