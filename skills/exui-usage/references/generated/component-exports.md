@@ -129,6 +129,7 @@ This inventory covers exports reachable from the public `@exre/exui` package roo
 - `ChartStyle` — value
 - `ChartTooltip` — value
 - `ChartTooltipContent` — value
+- `Recharts` — value
 
 ### [Checkbox](../components/Checkbox.md)
 

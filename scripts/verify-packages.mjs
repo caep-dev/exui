@@ -423,13 +423,21 @@ async function verifyReactConsumer(tarballPath) {
 
   const application = `
 import "@exre/exui/style.css"
-import { Button, ThemeProvider, Dialog, DialogTrigger, DialogContent, Field, Input, Label, ChartContainer, ChartTooltip, ChartConfig, useIsMobile } from "@exre/exui"
+import { useState } from "react"
+import { Button, ThemeProvider, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, Field, Input, Label, Recharts, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartConfig, useIsMobile } from "@exre/exui"
+
+const { BarChart, Bar, XAxis } = Recharts
+const chartData = [
+  { month: "January", visitors: 10 },
+  { month: "February", visitors: 20 },
+]
 
 const chartConfig = {
   visitors: { label: "Visitors", color: "var(--chart-1)" },
 } satisfies ChartConfig
 
 export function App() {
+  const [submittedEmail, setSubmittedEmail] = useState("")
   return (
     <ThemeProvider>
       <Dialog>
@@ -437,19 +445,30 @@ export function App() {
           <Button variant="default">Open</Button>
         </DialogTrigger>
         <DialogContent>
-          <form>
+          <DialogTitle>Subscribe</DialogTitle>
+          <DialogDescription>Enter your email to subscribe.</DialogDescription>
+          <form onSubmit={(event) => {
+            event.preventDefault()
+            setSubmittedEmail(String(new FormData(event.currentTarget).get("email")))
+          }}>
             <Field>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" />
+              <Input id="email" name="email" type="email" required />
             </Field>
+            <Button type="submit">Subscribe</Button>
+            <output role="status">{submittedEmail}</output>
           </form>
         </DialogContent>
       </Dialog>
-      <ChartContainer config={chartConfig}>
-        <span>chart</span>
+      <ChartContainer config={chartConfig} style={{ width: 480, height: 320 }}>
+        <BarChart data={chartData}>
+          <XAxis dataKey="month" />
+          <Bar dataKey="visitors" fill="var(--color-visitors)" isAnimationActive={false} />
+          <ChartTooltip content={<ChartTooltipContent />} isAnimationActive={false} />
+          <ChartLegend content={<ChartLegendContent />} />
+        </BarChart>
       </ChartContainer>
       <span>{useIsMobile() ? "mobile" : "desktop"}</span>
-      <ChartTooltip />
     </ThemeProvider>
   )
 }
@@ -549,6 +568,9 @@ console.log("react consumer SSR smoke ok:", html.length, "chars, single React in
   run(npmCommand, ["install", "--no-fund", "--no-audit", "--save-dev", "@vitejs/plugin-react@^6"], consumerRoot)
   run("node", [join(consumerRoot, "node_modules", "vite", "bin", "vite.js"), "build"], consumerRoot)
   run("node", ["smoke.mjs"], consumerRoot)
+  // Run Vite's preview in a child process so Windows releases its native
+  // bindings before the parent removes the isolated consumer directory.
+  console.log(run(process.execPath, [join(repositoryRoot, "scripts", "verify-react-browser.mjs"), consumerRoot], consumerRoot))
 }
 
 function logStage(message) {

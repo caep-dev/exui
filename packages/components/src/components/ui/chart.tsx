@@ -364,6 +364,8 @@ function getPayloadConfigFromPayload(
 }
 
 export {
+  // Chart primitives must share the context used by Tooltip and Legend.
+  RechartsPrimitive as Recharts,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
