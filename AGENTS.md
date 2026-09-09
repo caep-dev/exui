@@ -18,7 +18,7 @@ Use pnpm 11.9.0, as declared in `package.json`.
 - `pnpm typecheck`: run TypeScript checks across all three workspaces.
 - `pnpm lint`: run Oxlint with React and TypeScript rules.
 - `pnpm build`: build Tokens, components, declarations, and the private Showcase in dependency order.
-- `pnpm verify:pack`: pack the public tarball and run the isolated packed-consumer gates (npm and pnpm tokens-only installs, token type and stylesheet checks, and a React consumer with strict type-checking, a production build, and a server-render smoke test).
+- `pnpm verify:pack`: pack the public tarball and run the isolated packed-consumer gates (npm and pnpm tokens-only installs, token type and stylesheet checks, and a React consumer with strict type-checking, a production build, server-render smoke, and Chromium chart/dialog/form interactions).
 - `pnpm changeset`: create a release note for user-facing package changes.
 - `pnpm version-packages`: apply pending Changesets to versions and changelogs.
 

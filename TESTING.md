@@ -20,9 +20,19 @@ Run `pnpm release:verify` to check the release declaration, Changesets configura
 
 - tokens-only installs contain no React, React DOM, their type packages, or component implementation libraries anywhere in the dependency tree, and the font dependency installs;
 - the tokens ESM and CommonJS entries agree, stay deeply frozen, and the component root fails with a missing-React error when React is absent;
-- token-only TypeScript consumers compile under Bundler and NodeNext resolution with `skipLibCheck` disabled and no React types, covering both `.mts` and `.cts` consumers;
+- token-only TypeScript consumers compile under Bundler and NodeNext resolution with `skipLibCheck` disabled and no React types, covering both `.mts` and `.cts` consumers; the `.cts` fixture uses a typed `import = require`, asserts invalid properties and assignments are rejected, and checks that the CommonJS declaration entry was loaded;
 - the tokens stylesheets build standalone with resolvable font assets and no component Tailwind styles;
-- a React consumer type-checks public component imports with `skipLibCheck` disabled, produces a production build, renders Button, form, and Chart components on the server, and shares exactly one React instance with the package.
+- a React consumer type-checks public component imports with `skipLibCheck` disabled, produces a production build, renders Button, form, and Chart components on the server, and shares exactly one React instance with the package;
+- the production build runs in Chromium: chart primitives imported through the root `Recharts` namespace render both data points, ExUI legend content, and tooltip values that change on hover; Dialog opens through its portal, the form submits, and Escape restores focus to the trigger.
+
+The browser assertions live in `scripts/verify-react-browser.mjs` and run as part
+of `pnpm verify:pack`. The controller reuses the Showcase's pinned Playwright
+dependency, while the browser serves only the isolated consumer's built files.
+Install Chromium before running the packed-consumer or visual gates:
+
+```bash
+pnpm --filter @exre/exui-showcase exec playwright install chromium
+```
 
 CI runs these gates on Node.js 24; local runs on older Node versions are informative but do not replace the CI gate.
 

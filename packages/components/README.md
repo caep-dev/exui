@@ -49,6 +49,49 @@ The compiled component bundle includes its implementation libraries (Radix UI, B
 
 Shipped declarations include the third-party type definitions they need, so TypeScript consumers require no component implementation packages.
 
+### Charts and migration
+
+Use the root `Recharts` namespace for chart primitives so they share the bundled
+state and contexts used by `ChartTooltip` and `ChartLegend`:
+
+```tsx
+import {
+  Recharts,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@exre/exui"
+
+const { BarChart, Bar, XAxis } = Recharts
+
+export function VisitorsChart() {
+  return (
+    <ChartContainer config={{ visitors: { label: "Visitors", color: "#6366f1" } }}>
+      <BarChart data={[{ month: "January", visitors: 10 }]}>
+        <XAxis dataKey="month" />
+        <Bar dataKey="visitors" fill="var(--color-visitors)" />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartLegend content={<ChartLegendContent />} />
+      </BarChart>
+    </ChartContainer>
+  )
+}
+```
+
+When migrating existing charts, replace imports such as
+`import { BarChart, Bar } from "recharts"` with the `Recharts` import and
+destructuring shown above. An independently installed Recharts copy does not
+share the chart context: mixing its charts with ExUI's tooltip or legend can
+silently omit their content. Chart primitive props and types are available
+through `Recharts`; no separate `recharts` installation is needed.
+
+The namespace exposes the bundled Recharts public API and increases the shipped
+component bundle size. Tokens remain isolated behind `@exre/exui/tokens`.
+
+### Source distribution
+
 The tarball also ships the package source under `src/` for reference and for existing tooling that copies source files. Source-copy consumers resolve the third-party source dependencies themselves; only the `exports` entries above are the supported consumption contract.
 
 ## Development
