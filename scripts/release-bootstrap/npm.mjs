@@ -3,9 +3,8 @@ import { mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { basename, join, resolve } from "node:path"
 import { pathToFileURL } from "node:url"
-import { setTimeout } from "node:timers/promises"
 import { args, json, packages, resolveRoot } from "./_lib.mjs"
-import { assertPublishableManifest, COMPONENT_PACKAGE_NAME, OFFICIAL_NPM_REGISTRY, PUBLIC_PACKAGE_NAMES, TOKEN_PACKAGE_NAME } from "../package-contract.mjs"
+import { assertPublishableManifest, OFFICIAL_NPM_REGISTRY, PUBLIC_PACKAGE_NAMES } from "../package-contract.mjs"
 
 export async function registryStatus(name, version, fetcher = fetch) {
   let response
@@ -37,16 +36,6 @@ async function main() {
   const available = packages(root), target = available.find((p) => p.name === name)
   if (!target || target.version !== version) throw new Error("TAG_VERSION_MISMATCH")
   const result = await publishIfMissing(name, version, { publish: async () => {
-    const tokenVersion = available.find((p) => p.name === TOKEN_PACKAGE_NAME)?.version
-    if (name === COMPONENT_PACKAGE_NAME) {
-      // Independent tag jobs may start in either order. Wait only for confirmed absence.
-      let ready = false
-      for (let attempt = 0; attempt < 24; attempt++) {
-        if (await registryStatus(TOKEN_PACKAGE_NAME, tokenVersion) === "present") { ready = true; break }
-        if (attempt < 23) await setTimeout(5000)
-      }
-      if (!ready) throw new Error("DEPENDENCY_NOT_PUBLISHED: retry after the tokens tag workflow succeeds")
-    }
     const temp = mkdtempSync(join(tmpdir(), "exui-npm-"))
     try {
       const output = execFileSync("pnpm", ["--filter", name, "pack", "--json", "--pack-destination", temp], { cwd: root, encoding: "utf8" })
@@ -54,7 +43,7 @@ async function main() {
       const tarball = resolve(packed.filename)
       if (tarball !== join(temp, basename(tarball))) throw new Error("PACK_PATH_INVALID")
       const manifest = JSON.parse(execFileSync("tar", ["-xOf", tarball, "package/package.json"], { encoding: "utf8" }))
-      assertPublishableManifest(manifest, { expectedName: name, expectedVersion: version, tokenVersion })
+      assertPublishableManifest(manifest, { expectedName: name, expectedVersion: version })
       execFileSync("npm", ["publish", tarball, "--access", "public", "--registry", OFFICIAL_NPM_REGISTRY, "--provenance", "--ignore-scripts", "--tag", version.includes("-") ? "next" : "latest"], { cwd: root, stdio: "inherit" })
     } finally { rmSync(temp, { recursive: true, force: true }) }
   } })

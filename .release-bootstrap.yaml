@@ -14,7 +14,7 @@ ci:
 hooks:
   - id: npm
     type: npm
-    packages: ["@exre/exui", "@exre/exui-tokens"]
+    packages: ["@exre/exui"]
     registry: https://registry.npmjs.org/
     access: public
     auth: oidc
