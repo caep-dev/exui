@@ -31,6 +31,8 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           git fetch --no-tags origin main:refs/remotes/origin/main
+          # actions/checkout leaves refs/tags/<tag> pointing at the peeled commit; fetch the real annotated tag object.
+          git fetch --no-tags --force origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
           node scripts/release-bootstrap/hook-context.mjs --root . --tag "$RELEASE_TAG" --commit "$(git rev-parse HEAD)" --provider github --repository "$GITHUB_REPOSITORY" --hook-id npm --main-ref origin/main > "$RUNNER_TEMP/npm-context.json"
       - name: Install pnpm
         uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
