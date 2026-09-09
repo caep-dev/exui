@@ -45,6 +45,13 @@ jobs:
         run: npm install --global npm@11.9.0 --ignore-scripts
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Cache Playwright Chromium
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Install Playwright Chromium
+        run: pnpm --filter @exre/exui-showcase exec playwright install --with-deps chromium
       - name: Verify and build release packages
         run: |
           pnpm release:verify
