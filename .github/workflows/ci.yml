@@ -55,6 +55,15 @@ jobs:
       - name: Build workspaces
         run: pnpm build
 
+      - name: Self-test Skill updater
+        run: node skills/exui-usage/scripts/update.mjs --self-test
+
+      - name: Check Skill generated references
+        run: node skills/exui-usage/scripts/update.mjs --check
+
+      - name: Verify Skill examples
+        run: node skills/exui-usage/scripts/verify-examples.mjs
+
       - name: Run visual tests
         run: pnpm test:visual
 

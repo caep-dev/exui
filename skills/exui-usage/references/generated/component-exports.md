@@ -480,6 +480,7 @@ This inventory covers exports reachable from the public `@exre/exui` package roo
 
 ### [Sonner](../components/Sonner.md)
 
+- `toast` — value
 - `Toaster` — value
 
 ### [Spinner](../components/Spinner.md)

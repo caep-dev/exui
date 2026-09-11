@@ -344,6 +344,18 @@ function classifyDeclaration(componentDirectory, declarationFile, referenceNames
   if (relative === "types/components/theme-provider.d.ts") {
     return { category: "Theme provider", family: null, reference: null }
   }
+  if (relative === "types/index.d.ts") {
+    // Named re-exports in src/index.ts (for example the narrowed
+    // theme-provider export) make the compiler emit export-specifier alias
+    // declarations into the public declaration entry. Those specifiers are
+    // entry re-export plumbing, not the symbol's real declaration, so
+    // resolveDeclarationGroup filters them out exactly like vendored
+    // declarations — the re-exporting package declaration provides the
+    // approved group. The guard stays intact: a symbol whose only
+    // declarations are entry specifiers and vendored files still fails with
+    // "no declaration in an approved group".
+    return { category: "entry-re-export", family: null, reference: null }
+  }
   match = /^types\/hooks\/(.+)\.d\.ts$/.exec(relative)
   if (match) {
     return { category: "Hooks", family: null, reference: null }
@@ -363,6 +375,25 @@ function symbolKind(ts, symbol) {
     return "value + type"
   }
   return isValue ? "value" : "type"
+}
+
+// Resolves the single approved declaration group for one public export from
+// its repository declaration files. Vendored declarations and entry
+// re-export specifiers (types/index.d.ts) are filtered because they are
+// plumbing, not the symbol's real declaration; every export must still keep
+// at least one approved declaration group, and all approved declarations
+// must agree on one group.
+function resolveDeclarationGroup(componentDirectory, declarationFiles, referenceNames, exportName) {
+  const classifications = declarationFiles
+    .map((fileName) => classifyDeclaration(componentDirectory, fileName, referenceNames))
+    .filter((classification) => classification.category !== "vendored" && classification.category !== "entry-re-export")
+  requireCondition(
+    classifications.length > 0,
+    `component export ${exportName} has no declaration in an approved group`
+  )
+  const groupingKeys = new Set(classifications.map(({ category, family }) => `${category}\u0000${family ?? ""}`))
+  requireCondition(groupingKeys.size === 1, `component export ${exportName} has conflicting declaration groups`)
+  return classifications[0]
 }
 
 async function loadComponentInventory(componentsPackage) {
@@ -410,19 +441,10 @@ async function loadComponentInventory(componentsPackage) {
     const repositoryDeclarations = sortUnique(declarations)
     requireCondition(repositoryDeclarations.length > 0, `component export ${exportedSymbol.name} has no repository declaration`)
 
-    const classifications = repositoryDeclarations
-      .map((fileName) => classifyDeclaration(componentsPackage.directory, fileName, componentReferences))
-      .filter((classification) => classification.category !== "vendored")
-    requireCondition(
-      classifications.length > 0,
-      `component export ${exportedSymbol.name} has no declaration in an approved group`
-    )
-    const groupingKeys = new Set(classifications.map(({ category, family }) => `${category}\u0000${family ?? ""}`))
-    requireCondition(groupingKeys.size === 1, `component export ${exportedSymbol.name} has conflicting declaration groups`)
     inventory.push({
       name: exportedSymbol.name,
       kind: symbolKind(ts, targetSymbol),
-      ...classifications[0],
+      ...resolveDeclarationGroup(componentsPackage.directory, repositoryDeclarations, componentReferences, exportedSymbol.name),
     })
   }
 
@@ -513,12 +535,49 @@ async function validateRelativeLinks(root, filePath, markdown, virtualGenerated)
   }
 }
 
+async function validateResourceDirectory(root, skill, virtualGenerated) {
+  const linkedPaths = new Set(extractRelativeLinks(skill).map((link) => path.resolve(root, link.split("#", 1)[0])))
+  const resources = []
+  async function collect(directory, extension) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const entryPath = path.join(directory, entry.name)
+      // Generated inventories are validated against prospective outputs during --write.
+      if (entryPath === path.join(root, "references", "generated")) {
+        continue
+      }
+      if (entry.isDirectory()) {
+        await collect(entryPath, extension)
+      } else if (entry.isFile() && entry.name.endsWith(extension)) {
+        resources.push(entryPath)
+      }
+    }
+  }
+  await collect(path.join(root, "references"), ".md")
+  await collect(path.join(root, "examples"), ".tsx")
+  for (const name of virtualGenerated) {
+    resources.push(path.join(root, "references", "generated", name))
+  }
+  for (const resource of resources) {
+    const relative = path.relative(root, resource).split(path.sep).join("/")
+    requireCondition(linkedPaths.has(resource), `SKILL.md directory is missing a link to ${relative}`)
+    if (resource.endsWith(".md") && path.dirname(resource) !== path.join(root, "references", "generated")) {
+      await validateRelativeLinks(root, resource, await readFile(resource, "utf8"), virtualGenerated)
+    }
+  }
+}
+
 async function validateHumanDocuments(root, virtualGenerated = new Set(generatedFileNames)) {
   const skillFilePath = path.join(root, "SKILL.md")
   const skill = normalizeLineEndings(await readFile(skillFilePath, "utf8"))
   const metadata = normalizeLineEndings(await readFile(path.join(root, "agents", "openai.yaml"), "utf8"))
   const tokenGuide = normalizeLineEndings(await readFile(path.join(root, "references", "token-usage.md"), "utf8"))
   const iconGuide = normalizeLineEndings(await readFile(path.join(root, "references", "icon-usage.md"), "utf8"))
+  const reactSetupPath = path.join(root, "references", "react-setup.md")
+  const themeUsagePath = path.join(root, "references", "theme-usage.md")
+  requireCondition(await pathExists(reactSetupPath), "react-setup.md is missing from references/ (the React install guidance is a required human document)")
+  requireCondition(await pathExists(themeUsagePath), "theme-usage.md is missing from references/ (the theme guidance is a required human document)")
+  const reactSetup = normalizeLineEndings(await readFile(reactSetupPath, "utf8"))
+  const themeUsage = normalizeLineEndings(await readFile(themeUsagePath, "utf8"))
 
   requireCondition(/^---\n[\s\S]*?^name: exui-usage$/m.test(skill), "SKILL.md name must be exui-usage")
   requireCondition(/^description: .*Token.*component.*icon/im.test(skill), "SKILL.md description must distinguish Token, component, and icon requests")
@@ -527,6 +586,9 @@ async function validateHumanDocuments(root, virtualGenerated = new Set(generated
   await validateRelativeLinks(root, skillFilePath, skill, virtualGenerated)
   await validateRelativeLinks(root, path.join(root, "references", "token-usage.md"), tokenGuide, virtualGenerated)
   await validateRelativeLinks(root, path.join(root, "references", "icon-usage.md"), iconGuide, virtualGenerated)
+  await validateRelativeLinks(root, reactSetupPath, reactSetup, virtualGenerated)
+  await validateRelativeLinks(root, themeUsagePath, themeUsage, virtualGenerated)
+  await validateResourceDirectory(root, skill, virtualGenerated)
   validateLucideExamples(iconGuide, "icon-usage.md")
 
   const componentDirectory = path.join(root, "references", "components")
@@ -546,7 +608,7 @@ async function validateHumanDocuments(root, virtualGenerated = new Set(generated
     requireCondition(!/from\s+["']@exre\/exui(?:-tokens)?\/(?:src|dist|types)(?:\/|["'])/.test(content), `${entry.name}: private package import detected`)
   }
 
-  const combined = [skill, metadata, tokenGuide, iconGuide, ...componentContents].join("\n")
+  const combined = [skill, metadata, tokenGuide, iconGuide, reactSetup, themeUsage, ...componentContents].join("\n")
   const replacedInvocation = ["$exui", "components"].join("-")
   const replacedDisplayName = ["Exre", "UI", "Components"].join(" ")
   requireCondition(!combined.includes(replacedInvocation) && !combined.includes(replacedDisplayName), "new skill contains the replaced skill name")
@@ -702,10 +764,22 @@ async function writeFixtureManifest(directory, manifest) {
 async function createHumanDocumentFixture(root) {
   await mkdir(path.join(root, "agents"), { recursive: true })
   await mkdir(path.join(root, "references", "components"), { recursive: true })
+  await mkdir(path.join(root, "examples"), { recursive: true })
   await writeFile(path.join(root, "SKILL.md"), `---\nname: exui-usage\ndescription: Guide Token, component, and icon consumers.\n---\n\n[Tokens](references/token-usage.md)\n[Icons](references/icon-usage.md)\n[Generated](references/generated/token-paths.md)\n`, "utf8")
+  const fixtureLinks = [
+    "references/react-setup.md",
+    "references/theme-usage.md",
+    "references/generated/component-exports.md",
+    "references/components/Button.md",
+    "examples/button.tsx",
+  ].map((file) => `[${file}](${file})`).join("\n")
+  await writeFile(path.join(root, "SKILL.md"), `${await readFile(path.join(root, "SKILL.md"), "utf8")}${fixtureLinks}\n`, "utf8")
+  await writeFile(path.join(root, "examples", "button.tsx"), `export const label = "Button"\n`, "utf8")
   await writeFile(path.join(root, "agents", "openai.yaml"), `interface:\n  default_prompt: "Use $exui-usage now."\n`, "utf8")
   await writeFile(path.join(root, "references", "token-usage.md"), `@exre/exui/style.css @exre/exui/tokens/style.css @exre/exui/tokens/font.css componentRecipes surface text control border feedback editor chart sidebar density typography radii shadows\n`, "utf8")
   await writeFile(path.join(root, "references", "icon-usage.md"), `lucide-react direct dependency brand logo product-specific aria-label aria-hidden\n`, "utf8")
+  await writeFile(path.join(root, "references", "react-setup.md"), `React 19 install guidance with @types/react and @types/react-dom.\n`, "utf8")
+  await writeFile(path.join(root, "references", "theme-usage.md"), `ThemeProvider, useTheme, and Toaster theme priority guidance.\n`, "utf8")
   await writeFile(path.join(root, "references", "components", "Button.md"), `import { Button } from "@exre/exui"\n`, "utf8")
 }
 
@@ -727,6 +801,89 @@ async function runSelfTest() {
       cssProperties: [...tokenRenderInput.cssProperties].reverse(),
     }))
     assert.throws(() => renderTokenInventory({ ...tokenRenderInput, tokenPaths: [{ value: "#fff" }] }), /names only/)
+
+    // classifyDeclaration + resolveDeclarationGroup pins.
+    const fakePackageRoot = path.join(root, "fake-components")
+    assert.deepEqual(
+      classifyDeclaration(fakePackageRoot, path.join(fakePackageRoot, "types", "index.d.ts"), new Map()),
+      { category: "entry-re-export", family: null, reference: null },
+      "index.d.ts export specifiers must classify as filterable entry re-export plumbing"
+    )
+    assert.deepEqual(
+      classifyDeclaration(fakePackageRoot, path.join(fakePackageRoot, "types", "vendor", "sonner", "dist", "index.mts"), new Map()),
+      { category: "vendored", family: null, reference: null },
+      "vendored declarations must stay filterable"
+    )
+    assert.deepEqual(
+      classifyDeclaration(fakePackageRoot, path.join(fakePackageRoot, "types", "components", "theme-provider.d.ts"), new Map()),
+      { category: "Theme provider", family: null, reference: null },
+      "theme-provider declarations must keep their category"
+    )
+    assert.deepEqual(
+      classifyDeclaration(fakePackageRoot, path.join(fakePackageRoot, "types", "components", "ui", "sonner.d.ts"), new Map()),
+      { category: "Components", family: "Sonner", reference: null },
+      "ui declarations must map to their component family"
+    )
+    // Positive: an index entry re-export whose target has an approved
+    // declaration groups through the target (the current theme-provider
+    // reality after the narrowed src/index.ts re-export).
+    assert.deepEqual(
+      resolveDeclarationGroup(
+        fakePackageRoot,
+        [
+          path.join(fakePackageRoot, "types", "components", "theme-provider.d.ts"),
+          path.join(fakePackageRoot, "types", "index.d.ts"),
+        ],
+        new Map(),
+        "ThemeProvider"
+      ),
+      { category: "Theme provider", family: null, reference: null },
+      "entry re-export specifiers must not block grouping via the target declaration"
+    )
+    // Positive: an in-family re-export (ui file + vendored target + entry
+    // specifier) groups through the re-exporting package declaration.
+    assert.deepEqual(
+      resolveDeclarationGroup(
+        fakePackageRoot,
+        [
+          path.join(fakePackageRoot, "types", "components", "ui", "sonner.d.ts"),
+          path.join(fakePackageRoot, "types", "vendor", "sonner", "dist", "index.mts"),
+        ],
+        new Map(),
+        "toast"
+      ),
+      { category: "Components", family: "Sonner", reference: null },
+      "vendored targets must group through the re-exporting package declaration"
+    )
+    // Negative guard: an entry re-export whose only other declaration is
+    // vendored (a root-level vendor re-export) must still fail.
+    await expectRejection(
+      () =>
+        resolveDeclarationGroup(
+          fakePackageRoot,
+          [
+            path.join(fakePackageRoot, "types", "index.d.ts"),
+            path.join(fakePackageRoot, "types", "vendor", "sonner", "dist", "index.mts"),
+          ],
+          new Map(),
+          "toast"
+        ),
+      "no declaration in an approved group"
+    )
+    // Negative guard: conflicting approved groups must still fail.
+    await expectRejection(
+      () =>
+        resolveDeclarationGroup(
+          fakePackageRoot,
+          [
+            path.join(fakePackageRoot, "types", "components", "ui", "sonner.d.ts"),
+            path.join(fakePackageRoot, "types", "components", "theme-provider.d.ts"),
+          ],
+          new Map(),
+          "Conflicting"
+        ),
+      "conflicting declaration groups"
+    )
 
     const packageRoot = path.join(root, "repo")
     await writeFixtureManifest(path.join(packageRoot, "packages", "tokens"), {
@@ -781,6 +938,38 @@ async function runSelfTest() {
     const humanRoot = path.join(root, "human")
     await createHumanDocumentFixture(humanRoot)
     await validateHumanDocuments(humanRoot)
+    const catalogPath = path.join(humanRoot, "SKILL.md")
+    const completeCatalog = await readFile(catalogPath, "utf8")
+    for (const resource of ["references/components/Button.md", "references/react-setup.md", "references/generated/component-exports.md", "examples/button.tsx"]) {
+      await writeFile(catalogPath, completeCatalog.replace(`[${resource}](${resource})`, ""), "utf8")
+      await expectRejection(() => validateHumanDocuments(humanRoot), `directory is missing a link to ${resource}`)
+    }
+    await writeFile(catalogPath, completeCatalog, "utf8")
+    const nestedExamples = path.join(humanRoot, "examples", "nested")
+    await mkdir(nestedExamples)
+    const nestedExample = path.join(nestedExamples, "new.tsx")
+    await writeFile(nestedExample, `export const label = "New"\n`, "utf8")
+    await expectRejection(() => validateHumanDocuments(humanRoot), "directory is missing a link to examples/nested/new.tsx")
+    await writeFile(catalogPath, `${completeCatalog}\n[Nested example](examples/nested/new.tsx)\n`, "utf8")
+    await validateHumanDocuments(humanRoot)
+    await rm(nestedExample)
+    await expectRejection(() => validateHumanDocuments(humanRoot), "link does not exist")
+    await writeFile(catalogPath, completeCatalog, "utf8")
+    const extraGuide = path.join(humanRoot, "references", "new-guide.md")
+    await writeFile(extraGuide, "A new usage guide.\n", "utf8")
+    await expectRejection(() => validateHumanDocuments(humanRoot), "directory is missing a link to references/new-guide.md")
+    await writeFile(catalogPath, `${completeCatalog}\n[Guide](references/new-guide.md)\n`, "utf8")
+    await validateHumanDocuments(humanRoot)
+    await writeFile(extraGuide, "[Missing](missing.md)\n", "utf8")
+    await expectRejection(() => validateHumanDocuments(humanRoot), "link does not exist")
+    await rm(extraGuide)
+    await writeFile(catalogPath, completeCatalog, "utf8")
+    await rm(path.join(humanRoot, "references", "react-setup.md"))
+    await expectRejection(() => validateHumanDocuments(humanRoot), "react-setup.md is missing")
+    await createHumanDocumentFixture(humanRoot)
+    await rm(path.join(humanRoot, "references", "theme-usage.md"))
+    await expectRejection(() => validateHumanDocuments(humanRoot), "theme-usage.md is missing")
+    await createHumanDocumentFixture(humanRoot)
     await writeFile(path.join(humanRoot, "SKILL.md"), `${await readFile(path.join(humanRoot, "SKILL.md"), "utf8")}\n[Missing](references/missing.md)\n`, "utf8")
     await expectRejection(() => validateHumanDocuments(humanRoot), "link does not exist")
     await createHumanDocumentFixture(humanRoot)

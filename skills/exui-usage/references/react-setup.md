@@ -1,0 +1,66 @@
+# ExUI React setup
+
+Set up `@exre/exui` in a React 19 project: install the right dependencies, load the stylesheet once, and keep implementation libraries out of your dependency tree. For Tokens without React, read [Token usage](token-usage.md) instead.
+
+## Install
+
+```bash
+pnpm add @exre/exui react@19 react-dom@19
+```
+
+React and React DOM are the only host dependencies. They are declared as optional peers of `@exre/exui`, so a component consumer installs them explicitly. The supported range is React 19 (`>=19.0.0 <20`).
+
+TypeScript projects also install the matching type packages:
+
+```bash
+pnpm add -D @types/react@19 @types/react-dom@19
+```
+
+The type packages are not optional peers and are not installed transitively. Without them, TypeScript has no React types for ExUI's component declarations.
+
+The package root ships an ESM entry. CommonJS consumers can use the `@exre/exui/tokens` subpath, which also declares a `require` export, but not the React component root.
+
+## Load the stylesheet once
+
+```tsx
+import "@exre/exui/style.css"
+```
+
+Import the component stylesheet once per application. `@exre/exui/style.css` already includes the Token stylesheet and the font stylesheet; do not import `@exre/exui/tokens/style.css` or `@exre/exui/tokens/font.css` again in the same React application, because that duplicates the CSS.
+
+The stylesheet contains the component styles and the Token custom properties. It does not include general-purpose layout utilities (Tailwind or otherwise): a class such as `h-96` or `max-w-md` from the examples does nothing in a consumer that has no utility-class setup of its own. Use inline styles or your own CSS for layout outside the components.
+
+## Implementation dependencies are bundled
+
+Only React and React DOM stay external to the package build. Every implementation library that ExUI components are built on — Sonner, Radix UI, Base UI, cmdk, vaul, react-day-picker, Recharts, and the rest — is bundled into the package output.
+
+Do not install these libraries to use ExUI:
+
+- They add nothing: the components already run on the bundled copies.
+- A separately installed copy is a different instance. For notifications this breaks silently: a `sonner` copy you install yourself has its own toast state, so its `toast` calls never reach the ExUI `Toaster`.
+
+Use notifications through the package root so you share the bundled instance:
+
+```tsx
+import { Toaster, toast } from "@exre/exui"
+
+export function App() {
+  return (
+    <>
+      <Toaster />
+      <button onClick={() => toast.success("Saved")}>Save</button>
+    </>
+  )
+}
+```
+
+`toast` re-exports the same Sonner instance the `Toaster` renders, so `toast.success`, `toast.error`, `toast.dismiss`, and the other Sonner call signatures work as documented by Sonner. Theme behavior of the `Toaster` is covered in [Theme usage](theme-usage.md), and the runnable demo is [完整示例：通知调用链](../examples/sonner-notifications.tsx).
+
+## Icons
+
+ExUI does not re-export `lucide-react`. When your own code renders icons, install it directly, as described in [Icon usage](icon-usage.md).
+
+## Where to go next
+
+- Import components from the package root; the full inventory is in the [generated component export inventory](generated/component-exports.md).
+- Read [Theme usage](theme-usage.md) before wiring `ThemeProvider`, `useTheme`, or `Toaster` theming.

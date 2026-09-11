@@ -56,3 +56,5 @@ Use `asChild` when the action should render as another element, such as a router
 ## Guidance
 
 Always provide accessible text. For icon-only buttons, use `aria-label` or an `sr-only` label. Keep destructive actions visually distinct with `danger` or `destructive`.
+
+The package also exports `buttonVariants`, the style function behind these variants, for applying button styling to custom elements.
