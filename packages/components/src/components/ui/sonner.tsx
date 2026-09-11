@@ -1,13 +1,19 @@
-import { useTheme } from "next-themes"
-import { Toaster as Sonner, type ToasterProps } from "sonner"
+import { Toaster as Sonner, toast, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { useOptionalTheme } from "../theme-provider"
 
-const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+// Theme resolution: an explicit `theme` prop wins, then the surrounding
+// ExUI ThemeProvider (read via the optional helper so this component
+// stays mountable without a provider), then a `system` fallback. The
+// public `useTheme` hook still throws outside <ThemeProvider /> — this
+// component deliberately does not.
+const Toaster = ({ theme: explicitTheme, ...props }: ToasterProps) => {
+  const providerTheme = useOptionalTheme()
+  const resolvedTheme = explicitTheme ?? providerTheme ?? "system"
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={resolvedTheme}
       className="toaster group"
       icons={{
         success: (
@@ -44,4 +50,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
   )
 }
 
-export { Toaster }
+// Re-export `toast` next to the Toaster so the package root exposes the
+// exact Sonner instance bundled into this file: Vite collapses both uses of
+// the "sonner" specifier into a single bundled module, so the Toaster and
+// the re-exported `toast` see one queue. Keep this re-export inside the
+// component file: the declaration then lands in
+// types/components/ui/sonner.d.ts, which the exui-usage updater classifies
+// into the Sonner family (same pattern as chart.tsx re-exporting Recharts).
+export { Toaster, toast }

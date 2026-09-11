@@ -1,6 +1,10 @@
 import "./index.css"
 
-export * from "./components/theme-provider"
+// Re-export the theme provider explicitly so that the internal
+// `useOptionalTheme` helper stays package-private. `export *` would leak it
+// alongside `ThemeProvider` and `useTheme`, which is not part of the public
+// surface.
+export { ThemeProvider, useTheme } from "./components/theme-provider"
 export * from "./components/ui/accordion"
 export * from "./components/ui/alert"
 export * from "./components/ui/alert-dialog"
