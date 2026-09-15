@@ -39,6 +39,22 @@ import "@exre/exui/tokens/style.css"
 
 `@exre/exui/tokens` publishes ESM and CommonJS entries. `@exre/exui/tokens/style.css` carries only token variables for the three themes, and `@exre/exui/tokens/font.css` loads the optional font assets.
 
+### Sizing and root font size
+
+ExUI publishes its scalable sizes in `rem`, calibrated so that a 16px root font size reproduces the original pixel design exactly. Type, control heights, padding, gaps, icons, and ordinary radii therefore resize together when the application sets its own root font size:
+
+```css
+html {
+  font-size: 20px; /* every scalable ExUI size grows by 20 / 16 */
+}
+```
+
+ExUI never sets a root font size itself and declares no scale variable, so this stays an application decision. Keep the root at `16px` for the previous rendering; applications that already set a different root font size will see differently sized components after upgrading.
+
+The following stay fixed pixels on purpose and do **not** scale: hairline borders and dividers, focus rings, shadows, and the capsule (`9999px`) radius. Third-party geometry is outside this contract too — the internals of Sonner and Recharts keep their own fixed sizes, so do not expect toasts or chart axes to scale in lockstep. ExUI's own legend, tooltip, and icon content does scale.
+
+Numeric positioning props such as `sideOffset` and `alignOffset` keep their upstream pixel contract and are never multiplied by the root font size.
+
 ### Bundled implementation dependencies
 
 The compiled component bundle includes its implementation libraries (Radix UI, Base UI, Recharts, and others); they are not dependencies of the installed package. Consequences:

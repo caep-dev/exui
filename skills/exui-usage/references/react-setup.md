@@ -30,6 +30,18 @@ Import the component stylesheet once per application. `@exre/exui/style.css` alr
 
 The stylesheet contains the component styles and the Token custom properties. It does not include general-purpose layout utilities (Tailwind or otherwise): a class such as `h-96` or `max-w-md` from the examples does nothing in a consumer that has no utility-class setup of its own. Use inline styles or your own CSS for layout outside the components.
 
+## Sizing
+
+ExUI publishes its scalable sizes in `rem` against a 16px base, so a 16px root font size reproduces the original pixel design exactly and any other root font size rescales type, controls, spacing, icons, and ordinary radii together. ExUI never sets a root font size itself:
+
+```css
+html {
+  font-size: 20px; /* every scalable ExUI size grows by 20 / 16 */
+}
+```
+
+Hairline borders and dividers, focus rings, shadows, the capsule radius, and third-party internals (Sonner toasts, Recharts axes and series) keep their own fixed sizes and do not scale. See [Token usage](token-usage.md) for the full list of fixed exceptions and for the `parseFloat(token)` caveat.
+
 ## Implementation dependencies are bundled
 
 Only React and React DOM stay external to the package build. Every implementation library that ExUI components are built on — Sonner, Radix UI, Base UI, cmdk, vaul, react-day-picker, Recharts, and the rest — is bundled into the package output.
