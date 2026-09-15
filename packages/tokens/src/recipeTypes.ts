@@ -98,7 +98,7 @@ export interface SemanticReference<
 }
 
 /** Direct CSS lengths accepted by recipe geometry fields. */
-export type RecipeLength = `${number}px` | "0"
+export type RecipeLength = `${number}rem` | `${number}px` | "0"
 
 /** Direct CSS durations accepted by recipe motion fields. */
 export type RecipeDuration = `${number}ms`
