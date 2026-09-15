@@ -12,6 +12,7 @@ type ElementLocator = { element(): Element }
 const themes: ThemeName[] = ["light", "dark", "pitch-black"]
 let container: HTMLDivElement
 let root: Root
+let environment: EnvironmentSnapshot
 
 function pixels(value: string): number {
   return Number.parseFloat(value)
@@ -62,7 +63,39 @@ function setTheme(theme: ThemeName): void {
   document.documentElement.classList.add(theme)
 }
 
+/** The environment this file changes, captured so it can be put back exactly. */
+interface EnvironmentSnapshot {
+  fontValue: string
+  fontPriority: string
+  rootClassName: string
+  bodyMargin: string
+}
+
+function snapshotEnvironment(): EnvironmentSnapshot {
+  const rootStyle = document.documentElement.style
+  return {
+    fontValue: rootStyle.getPropertyValue("font-size"),
+    fontPriority: rootStyle.getPropertyPriority("font-size"),
+    rootClassName: document.documentElement.className,
+    bodyMargin: document.body.style.margin,
+  }
+}
+
+/** Restore the captured values instead of clearing them, including CSS priority. */
+function restoreEnvironment(snapshot: EnvironmentSnapshot): void {
+  const rootStyle = document.documentElement.style
+  if (snapshot.fontValue === "") {
+    rootStyle.removeProperty("font-size")
+  } else {
+    rootStyle.setProperty("font-size", snapshot.fontValue, snapshot.fontPriority)
+  }
+  document.documentElement.className = snapshot.rootClassName
+  document.body.style.margin = snapshot.bodyMargin
+}
+
 beforeEach(async () => {
+  environment = snapshotEnvironment()
+
   container = document.createElement("div")
   container.id = "visual-root"
   document.body.replaceChildren(container)
@@ -83,8 +116,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   root.unmount()
-  document.documentElement.classList.remove("light", "dark", "pitch-black")
-  document.documentElement.style.fontSize = ""
+  restoreEnvironment(environment)
 })
 
 describe.each(themes)("%s recipe contract", (theme) => {
