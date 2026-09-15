@@ -14,6 +14,7 @@ Check the consuming project's installed ExUI version, React version, stylesheet 
 | Task                                                          | Read first                                                                                               | Continue with                                                                                            |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | Install or integrate React UI                                 | [React setup](references/react-setup.md)                                                                 | The component directory below                                                                            |
+| Build components or content that follow the root-font scale | [Standalone ExUI scaling rules](EXUI_SCALING_RULES.md) | [React sizing guidance](references/react-setup.md#sizing) |
 | Build a form or selection flow                                | [Field](references/components/Field.md)                                                                  | Input and selection components; the matching example below                                               |
 | Build navigation or an application shell                      | [Sidebar](references/components/Sidebar.md) or [NavigationMenu](references/components/NavigationMenu.md) | Navigation and layout components                                                                         |
 | Add notifications                                             | [Sonner / Toaster / toast](references/components/Sonner.md)                                              | [Notification example](examples/sonner-notifications.tsx)                                                |
@@ -27,6 +28,7 @@ Check the consuming project's installed ExUI version, React version, stylesheet 
 ```text
 exui-usage/
 ├── SKILL.md                  Task routing and complete resource directory
+├── EXUI_SCALING_RULES.md     Standalone rules to copy into a consuming project's AI instructions
 ├── references/
 │   ├── react-setup.md        React installation, CSS, dependency boundaries
 │   ├── theme-usage.md        Provider, hook, notifications, SSR limitations
@@ -39,6 +41,10 @@ exui-usage/
 ├── package-selection.json   Maintainer source selection for generation
 └── agents/openai.yaml       Skill UI metadata
 ```
+
+## Copyable rules for third-party AI
+
+For third-party AI handoff, copy [EXUI_SCALING_RULES.md](EXUI_SCALING_RULES.md) on its own. It explains how to build React components and content that follow ExUI's root-font scale, including deliberate pixel exceptions, without requiring this skill directory.
 
 ## Component directory
 

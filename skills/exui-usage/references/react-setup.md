@@ -42,6 +42,12 @@ html {
 
 Hairline borders and dividers, focus rings, shadows, the capsule radius, and third-party internals (Sonner toasts, Recharts axes and series) keep their own fixed sizes and do not scale. See [Token usage](token-usage.md) for the full list of fixed exceptions and for the `parseFloat(token)` caveat.
 
+### Scale custom React content with the library
+
+Use rem strings for new scalable lengths in React styles: `padding: "1.5rem"` follows the root font size, whereas `padding: 24` stays in pixels. Preserve unitless properties such as `lineHeight: 1.5` and fixed effects such as `border: "1px solid var(--exui-border-default)"`. Prefer the existing component and Token values before inventing new geometry.
+
+Keep root-font control at application level and let content wrap or grow when text gets larger. Use [EXUI_SCALING_RULES.md](../EXUI_SCALING_RULES.md) for the complete authoring rules, a React example that needs no utility framework, and verification at 16px, 20px, and 32px root sizes. Third-party developers can copy that file alone into their AI instructions.
+
 ## Implementation dependencies are bundled
 
 Only React and React DOM stay external to the package build. Every implementation library that ExUI components are built on — Sonner, Radix UI, Base UI, cmdk, vaul, react-day-picker, Recharts, and the rest — is bundled into the package output.

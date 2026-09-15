@@ -48,6 +48,8 @@ Consult the [generated Token path inventory](generated/token-paths.md) for exact
 
 ## Sizing and root font size
 
+For custom React components and content, follow the standalone [ExUI scaling rules](../EXUI_SCALING_RULES.md). That file can be copied directly into another project's AI instructions; the Token-specific conversion details follow here.
+
 Scalable length Tokens are published in `rem` against a 16px base, so a 16px root font size reproduces the original pixel design exactly. Setting a different root font size scales ExUI's type, control heights, padding, gaps, icons, and ordinary radii together:
 
 ```css

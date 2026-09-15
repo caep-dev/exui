@@ -43,3 +43,11 @@ Changesets version the single public package. The private Showcase and the priva
 - [ExUI usage skill](skills/exui-usage/SKILL.md): component references, theme guidance, and consumer examples.
 
 `.docset.json` records the committed source snapshot reviewed for these documents and the additional contribution/testing guides. It advances only after the complete tracked scope has been reviewed and its documentation checks pass.
+
+## Building content that scales with ExUI
+
+ExUI's scalable dimensions use `rem` against a 16px root font size. When the application changes that root size, custom React content should scale alongside the library: prefer Tokens and rem-based typography, spacing, icons, and ordinary radii. Keep intentional fixed effects such as `1px` borders in pixels. Reusable components should preserve the application's root-font setting.
+
+For example, React `style={{ padding: "1.5rem", borderWidth: "1px" }}` scales the padding while keeping the border width fixed; `padding: 24` would remain 24px.
+
+Copy [EXUI_SCALING_RULES.md](skills/exui-usage/EXUI_SCALING_RULES.md) into a third-party project's AI instructions or attach it to an AI request. It is a standalone English rule document with React examples, allowed pixel exceptions, and browser verification steps for root-font scaling.
