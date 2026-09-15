@@ -24,7 +24,7 @@ import "@exre/exui/style.css"
 import { Button } from "@exre/exui"
 ```
 
-React consumers additionally install `react`, `react-dom`, and their TypeScript type packages; those are optional peers of the package, not transitive installs.
+React consumers additionally install `react@19` and `react-dom@19`, which are optional peers. TypeScript consumers also install `@types/react@19` and `@types/react-dom@19`; the type packages are not declared peers or transitive dependencies.
 
 `@exre/exui/style.css` already includes the Token stylesheet and font stylesheet. Do not import either Token CSS file again in the same React application path.
 

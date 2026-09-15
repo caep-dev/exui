@@ -15,6 +15,15 @@ import "@exre/exui/style.css"
 
 ## Usage
 
-Use the root component with its Trigger and Content parts. Keep interactive state controlled only when the consuming app needs to coordinate it.
+Place `CollapsibleTrigger` and `CollapsibleContent` inside the root. Use `open`/`onOpenChange` for controlled state, or `defaultOpen` for uncontrolled state.
+
+```tsx
+<Collapsible defaultOpen>
+  <CollapsibleTrigger>Build details</CollapsibleTrigger>
+  <CollapsibleContent>All checks passed.</CollapsibleContent>
+</Collapsible>
+```
+
+The trigger is a button by default. Use `asChild` with a single custom control; the primitive supplies expanded-state and content relationships.
 
 For advanced props, use the TypeScript types exposed by the package-root import.

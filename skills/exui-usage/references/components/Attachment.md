@@ -21,7 +21,7 @@ import "@exre/exui/style.css"
 
 ## Usage
 
-`Attachment` presents a file or link card with an upload state. `state` drives the visual treatment: `"idle"` (dashed placeholder), `"uploading"`, `"processing"`, `"error"`, or `"done"` (default). `size` (`"default"`, `"sm"`, `"xs"`) and `orientation` (`"horizontal`, `"vertical"`) shape the card.
+`Attachment` presents a file or link card with an upload state. `state` drives the visual treatment: `"idle"` (dashed placeholder), `"uploading"`, `"processing"`, `"error"`, or `"done"` (default). `size` (`"default"`, `"sm"`, `"xs"`) and `orientation` (`"horizontal"`, `"vertical"`) shape the card.
 
 ```tsx
 import { FileIcon } from "lucide-react"

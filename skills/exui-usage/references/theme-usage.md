@@ -53,7 +53,7 @@ Mount one `Toaster` per surface; each mounted `Toaster` renders every toast from
 
 ## Server-side rendering limitation
 
-`ThemeProvider` reads `localStorage` while initializing its state and reads `window.matchMedia` when resolving `"system"`. Rendering it on a server throws. Adding `"use client"` does not make it SSR-safe; in frameworks that prerender client components, the initial HTML render still runs on the server. The provider must only mount in the browser, for example behind a client-only mount after hydration. This is a documented limitation of the current package; it does not ship an SSR-safe provider or hydration strategy.
+`ThemeProvider` reads `localStorage` while initializing its state. Rendering it on a server throws. In the browser, it reads `window.matchMedia` when applying `"system"` in an effect. Adding `"use client"` does not make it SSR-safe; in frameworks that prerender client components, the initial HTML render still runs on the server. The provider must only mount in the browser, for example behind a client-only mount after hydration. This is a documented limitation of the current package; it does not ship an SSR-safe provider or hydration strategy.
 
 ## Pitch Black is a Token CSS layer, not a provider theme
 

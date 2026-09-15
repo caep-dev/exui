@@ -17,7 +17,7 @@ import "@exre/exui/style.css"
 `Calendar` wraps react-day-picker. The `mode` prop selects the selection model and decides the controlled prop types:
 
 - `mode="single"`: `selected` is `Date | undefined` and `onSelect` receives `Date | undefined`.
-- `mode="range"`: `selected` is a `DateRange` (`{ from, to }`) and `onSelect` receives the same shape; `to` is `undefined` until the user picks the second date.
+- `mode="range"`: `selected` is a `DateRange` (`{ from, to }`) and `onSelect` receives the same shape; the range may be `undefined` when cleared, and an open range can have an undefined `to`. Depending on `min`, a single-day range can also have the same start and end date.
 
 ### Single selection
 
@@ -43,7 +43,7 @@ const [range, setRange] = React.useState<DateRange | undefined>(undefined)
 
 [完整示例：范围选择](../../examples/calendar-range.tsx) shows the controlled range with a two-month layout in one runnable file.
 
-For uncontrolled use, pass `defaultSelected` instead of `selected`/`onSelect`.
+There is no `defaultSelected` prop. Initialize your React state with the desired date or range and pass `selected`/`onSelect` as shown above. `defaultMonth` controls the initially displayed month, not the selection. The examples above use optional selection; `required` changes the selection callback type.
 
 ## Styling and localization
 

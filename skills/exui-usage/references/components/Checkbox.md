@@ -13,6 +13,15 @@ import "@exre/exui/style.css"
 
 ## Usage
 
-Use as a form control. Prefer controlled props when integrating with form state, and pass aria-invalid or field messaging through the Field components when validation is visible.
+Use `checked` and `onCheckedChange` for controlled state, or `defaultChecked` for an initial uncontrolled value. The checked state can be `true`, `false`, or `"indeterminate"`; a boolean form field can normalize changes with `next === true`.
+
+```tsx
+<label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+  <Checkbox name="terms" defaultChecked />
+  Accept the terms
+</label>
+```
+
+Pass `disabled`, `required`, and `name` as needed. For validation, pair `aria-invalid` on the control with the [Field](Field.md) label and error parts.
 
 For advanced props, use the TypeScript types exposed by the package-root import.

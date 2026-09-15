@@ -53,6 +53,6 @@ export function TablePagination({ page }: { page: number }) {
 }
 ```
 
-`PaginationLink` marks the current page with `isActive` and accepts `size`; `PaginationPrevious`/`PaginationNext` render labeled chevron links (their visible text is `text`-able). The links render anchors — adapt them to your router with `asChild`, or drive them with `onClick` handlers and controlled page state instead of `href`.
+`PaginationLink` marks the current page with `isActive` and accepts `size`. `PaginationPrevious`/`PaginationNext` render chevron links; customize their visible labels with the `text` prop and their accessible labels with `aria-label`. These components render anchors and do not expose `asChild`. Use `href` with your router's anchor handling, or intercept `onClick` for application navigation. The application must hide or disable unavailable previous/next destinations and avoid generating page zero.
 
 For advanced props, use the TypeScript types exposed by the package-root import.

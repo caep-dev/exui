@@ -23,7 +23,7 @@ import { NativeSelect, NativeSelectOption, NativeSelectOptGroup } from "@exre/ex
 import "@exre/exui/style.css"
 
 export function TimezonePicker() {
-  const [value, setValue] = React.useState("")
+  const [value, setValue] = React.useState("utc")
 
   return (
     <NativeSelect

@@ -7,26 +7,32 @@ Exre brand React component library built with Vite, Tailwind CSS v4, shadcn/ui, 
 Install the package together with the React host runtime it expects:
 
 ```bash
-npm add @exre/exui react react-dom
-npm add -D @types/react @types/react-dom
+npm add @exre/exui react@19 react-dom@19
+npm add -D @types/react@19 @types/react-dom@19
 ```
 
 React and React DOM are optional peers: the component entry needs them at runtime and their type packages for TypeScript, but the package never installs them for you. Then import the built stylesheet once:
 
 ```tsx
 import "@exre/exui/style.css"
-import { Button, ThemeProvider } from "@exre/exui"
+import { Button } from "@exre/exui"
 
 export function App() {
   return (
-    <ThemeProvider>
-      <Button>Continue</Button>
-    </ThemeProvider>
+    <Button>Continue</Button>
   )
 }
 ```
 
 `@exre/exui/style.css` is the complete component stylesheet, including token variables and fonts.
+
+The React root is ESM-only and supports React 19 (`>=19.0.0 <20`). General-purpose layout utilities are not part of the stylesheet contract; use your own CSS or utility setup for application layout.
+
+### Themes
+
+In a browser application, wrap the app with the root `ThemeProvider` and use `useTheme()` to switch between `"light"`, `"dark"`, and `"system"`. The default is `"system"`, and choices are stored under the `"theme"` localStorage key. Mount `Toaster` and call `toast` from the same `@exre/exui` root for notifications that follow the provider.
+
+`ThemeProvider` reads localStorage during rendering and cannot render on a server. Mount it only in the browser after hydration when using an SSR framework; `"use client"` alone does not prevent prerendering. The `.pitch-black` token class is managed separately and is not a provider theme value.
 
 ### Framework-neutral tokens
 
@@ -120,6 +126,7 @@ pnpm dev
 pnpm typecheck
 pnpm lint
 pnpm build
+pnpm --filter @exre/exui-showcase exec playwright install chromium
 pnpm verify:pack
 ```
 

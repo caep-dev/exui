@@ -25,6 +25,8 @@ Run `pnpm release:verify` to check the release declaration, Changesets configura
 - a React consumer type-checks public component imports with `skipLibCheck` disabled, produces a production build, renders Button, form, and Chart components on the server, and shares exactly one React instance with the package;
 - the production build runs in Chromium: chart primitives imported through the root `Recharts` namespace render both data points, ExUI legend content, and tooltip values that change on hover; Dialog opens through its portal, the form submits, and Escape restores focus to the trigger.
 
+The packed browser gate also compares Button geometry at 16px and 32px root font sizes, checks its fixed border and capsule radius, and checks portal Dialog padding at the larger root size.
+
 The browser assertions live in `scripts/verify-react-browser.mjs` and run as part
 of `pnpm verify:pack`. The controller reuses the Showcase's pinned Playwright
 dependency, while the browser serves only the isolated consumer's built files.
@@ -53,7 +55,7 @@ node skills/exui-usage/scripts/verify-examples.mjs
 - documentation links: every example is linked from at least one skill document, and no document links to a missing example file;
 - compilation: all examples compile in a single strict TypeScript pass (`skipLibCheck` disabled, Bundler resolution, `react-jsx`) against the packed tarball.
 
-`verify-examples.mjs --self-test` proves the gate rejects bad input on temporary copies: a forbidden import, an orphan example that no document links, a type-broken example (rejected by the real compiler with the diagnostic pointing at the broken file), and a dangling document link. The gate never writes inside the workspace. The updater `--check` verifies the generated inventories and every human document — including `references/react-setup.md` and `references/theme-usage.md` — without rewriting them; `--write` is the only mode that updates generated files.
+`verify-examples.mjs --self-test` proves the gate rejects bad input on temporary copies: a forbidden import, an orphan example that no document links, a type-broken example (rejected by the real compiler with the diagnostic pointing at the broken file), and a dangling document link. The gate never writes inside the workspace. The updater `--check` validates directory coverage, relative links, and generated inventories across the skill documents without rewriting them; `--write` updates generated inventories only. These checks do not establish the factual accuracy of prose or compile Markdown code blocks. Review those against the public source and declarations separately.
 
 CI runs all three commands after the workspace build. The toast API surface in examples is the nine-method list (`success`, `error`, `warning`, `info`, `message`, `loading`, `promise`, `custom`, `dismiss`); `toast.custom` accepts an `(id) => ReactElement` render function.
 
@@ -86,6 +88,8 @@ The Showcase scaling suite `packages/showcase/src/showcase/RemSizing.vrt.test.ts
 
 ```bash
 pnpm install --frozen-lockfile
+pnpm --filter @exre/exui-showcase exec playwright install chromium
+pnpm release:verify
 pnpm test:release
 pnpm tokens:check
 pnpm typecheck

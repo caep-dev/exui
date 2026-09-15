@@ -57,8 +57,8 @@ export default function SidebarLayout() {
             <span className="text-sm font-medium">Page content</span>
           </header>
           <main className="p-4 text-sm">
-            Main area. Toggle the sidebar with the trigger, Ctrl/Cmd+B, or the
-            rail; with collapsible="icon" the menu collapses to an icon rail
+            Main area. Toggle the sidebar with the trigger or Ctrl/Cmd+B;
+            with collapsible="icon" the menu collapses to an icon rail
             and the buttons reveal their tooltip.
           </main>
         </SidebarInset>

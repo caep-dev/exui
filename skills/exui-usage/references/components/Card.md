@@ -19,6 +19,19 @@ import "@exre/exui/style.css"
 
 ## Usage
 
-Use the provided subcomponents to keep spacing, hierarchy, and semantics consistent instead of rebuilding the layout with generic divs.
+Compose the header, body, and footer within `Card`. Use `size="sm"` for tighter spacing; the default size is `"default"`.
+
+```tsx
+<Card size="sm">
+  <CardHeader>
+    <CardTitle><h2>Workspace</h2></CardTitle>
+    <CardDescription>Manage this project's settings.</CardDescription>
+  </CardHeader>
+  <CardContent>Three members have access.</CardContent>
+  <CardFooter>Last updated today</CardFooter>
+</Card>
+```
+
+`CardAction` places an action in the header's trailing column. `CardTitle` is a styled `div`, so supply a heading element when the card introduces a section.
 
 For advanced props, use the TypeScript types exposed by the package-root import.

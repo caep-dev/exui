@@ -79,7 +79,7 @@ import "@exre/exui/style.css"
 
 - Desktop state (`open`) can stay uncontrolled or be controlled with `open` and `onOpenChange` on `SidebarProvider`.
 - On desktop, `Ctrl`/`Cmd`+`B` toggles the sidebar.
-- The open state is persisted in the `sidebar_state` cookie for seven days.
+- Desktop open-state changes write the `sidebar_state` cookie with a seven-day lifetime. The provider does not read this cookie on mount: the application must read it and supply `defaultOpen` or controlled `open` to restore a saved state. `defaultOpen` defaults to `true`; mobile open state is separate.
 - Below the 768px breakpoint the sidebar renders in a mobile `Sheet` controlled by `openMobile`/`setOpenMobile` from `useSidebar()`; `SidebarTrigger` and the keyboard shortcut toggle the mobile sheet automatically in that mode.
 
 ## Menu structure and submenus

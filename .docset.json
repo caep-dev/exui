@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "reviewedCommit": "0ec18ee607e1ee780026c7047007266e5a79f77e",
+  "updatedAt": "2026-09-15",
+  "surfaces": [
+    "**/README*.md",
+    "CONTRIBUTING.md",
+    "TESTING.md",
+    "skills"
+  ],
+  "additionalPaths": [
+    "CONTRIBUTING.md",
+    "TESTING.md"
+  ],
+  "exclusions": []
+}

@@ -25,16 +25,17 @@ export default function FieldUsage() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             aria-invalid={invalid || undefined}
+            aria-describedby={invalid ? "email-help email-error" : "email-help"}
           />
-          <FieldDescription>We only use this to sign you in.</FieldDescription>
-          {invalid && <FieldError>Enter a valid email address.</FieldError>}
+          <FieldDescription id="email-help">We only use this to sign you in.</FieldDescription>
+          {invalid && <FieldError id="email-error">Enter a valid email address.</FieldError>}
         </FieldContent>
       </Field>
       <Field>
         <FieldContent>
           <FieldLabel htmlFor="newsletter">Newsletter</FieldLabel>
-          <Input id="newsletter" />
-          <FieldError errors={formErrors} />
+          <Input id="newsletter" aria-invalid aria-describedby="newsletter-error" />
+          <FieldError id="newsletter-error" errors={formErrors} />
         </FieldContent>
       </Field>
     </div>

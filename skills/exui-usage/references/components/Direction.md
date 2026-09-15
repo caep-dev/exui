@@ -14,7 +14,7 @@ import "@exre/exui/style.css"
 
 ## Usage
 
-`DirectionProvider` sets the text direction that direction-aware components use for positioning, keyboard navigation, and mirroring — for example [Sidebar](Sidebar.md) and [Tooltip](Tooltip.md) read it.
+`DirectionProvider` supplies direction to the bundled Radix components that read its context, such as [NavigationMenu](NavigationMenu.md). It does not set a DOM `dir` attribute or configure the separate Base UI context used by Combobox. Sidebar placement remains controlled by its `side` prop.
 
 ```tsx
 import { DirectionProvider } from "@exre/exui"
@@ -22,13 +22,15 @@ import "@exre/exui/style.css"
 
 export function App() {
   return (
-    <DirectionProvider dir="rtl">
-      {/* direction-aware components mirror themselves in this subtree */}
-    </DirectionProvider>
+    <div dir="rtl">
+      <DirectionProvider dir="rtl">
+        {/* Radix direction context and DOM text direction now agree */}
+      </DirectionProvider>
+    </div>
   )
 }
 ```
 
-`dir` accepts `"ltr"` or `"rtl"`. `useDirection()` returns the current direction for components that need to adapt manually. If your app already sets `dir` on `<html>` and you do not need a direction change per subtree, you can skip the provider — the components fall back to the ambient document direction.
+`dir` accepts `"ltr"` or `"rtl"`. The optional `direction` alias takes precedence over `dir`. `useDirection(localDirection?)` resolves its argument first, then the provider, then `"ltr"`; it does not inspect `<html dir>`. Set the DOM direction and provider consistently when using RTL.
 
 For advanced props, use the TypeScript types exposed by the package-root import.

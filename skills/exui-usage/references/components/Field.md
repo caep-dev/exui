@@ -37,9 +37,10 @@ const invalid = email.length > 0 && !email.includes("@")
       value={email}
       onChange={(event) => setEmail(event.target.value)}
       aria-invalid={invalid || undefined}
+      aria-describedby={invalid ? "email-help email-error" : "email-help"}
     />
-    <FieldDescription>We only use this to sign you in.</FieldDescription>
-    {invalid && <FieldError>Enter a valid email address.</FieldError>}
+    <FieldDescription id="email-help">We only use this to sign you in.</FieldDescription>
+    {invalid && <FieldError id="email-error">Enter a valid email address.</FieldError>}
   </FieldContent>
 </Field>
 ```
@@ -47,6 +48,8 @@ const invalid = email.length > 0 && !email.includes("@")
 [完整示例：表单字段](../../examples/field-usage.tsx) shows the live validation and the `errors` array rendering in one runnable file.
 
 Set `data-invalid` on `Field` to switch the group into its invalid styling, and pass `aria-invalid` on the control itself for assistive technology.
+
+The parts do not automatically connect labels, descriptions, or errors to a control. Supply matching `htmlFor`/`id` and `aria-describedby` values, using unique IDs for each field instance.
 
 `FieldError` can also render an array of form-library errors directly; duplicates are collapsed:
 
