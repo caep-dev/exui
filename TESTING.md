@@ -68,6 +68,20 @@ pnpm build
 pnpm test:visual
 ```
 
+## Token checks
+
+`pnpm tokens:check` builds the token entries, verifies ESM/CommonJS parity, regenerates and compares the stylesheet, and runs the token validation script. It finishes with the token behaviour tests:
+
+```bash
+pnpm tokens:check
+```
+
+- Token behaviour tests use Node's built-in test runner and live under `packages/tokens/scripts/` with the `*.test.mjs` suffix. `node --test "scripts/**/*.test.mjs"` runs them as the last step of `tokens:check`, so no separate command is needed.
+- `packages/tokens/scripts/token-length-policy.mjs` holds the pure length policy: the public `RecipeLength` contract accepts rem, px, and `0`, while every built-in scalable length must be `rem` or `0`. Fixed-pixel exceptions (`radii.none`, `radii.full`, the menu separator thickness) are listed explicitly and must keep their exact values.
+- Policy tests mutate in-memory clones of the built token tree; they never rewrite the real source files.
+
+The Showcase scaling suite `packages/showcase/src/showcase/RemSizing.vrt.test.tsx` reuses the same Vitest Browser / Chromium setup as `ComponentRecipeContract.vrt.test.tsx`. It drives the root font size through 16px, 21.328px, and 32px, asserts computed geometry within 0.1 CSS px of the 16px baseline times the scale, and restores the root font size, theme, and injected styles after every case. It records no screenshots, so it adds no platform baselines.
+
 ## Full validation
 
 ```bash

@@ -67,6 +67,9 @@ beforeEach(async () => {
   container.id = "visual-root"
   document.body.replaceChildren(container)
   document.body.style.margin = "0"
+  // The recipe contract is calibrated against a 16px root font size, so pin it
+  // instead of relying on the browser default.
+  document.documentElement.style.fontSize = "16px"
 
   const style = document.createElement("style")
   style.textContent = "*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}"
@@ -81,6 +84,7 @@ beforeEach(async () => {
 afterEach(() => {
   root.unmount()
   document.documentElement.classList.remove("light", "dark", "pitch-black")
+  document.documentElement.style.fontSize = ""
 })
 
 describe.each(themes)("%s recipe contract", (theme) => {

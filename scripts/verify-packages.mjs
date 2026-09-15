@@ -228,6 +228,49 @@ async function main() {
     "token tree must expose every density"
   )
 
+  // Scalable sizes are published in rem against the 16px base so applications
+  // can drive them from their own root font size.
+  assert.strictEqual(
+    cjs.exuiTokens.density.standard.controlHeight,
+    "2.25rem",
+    "scalable density geometry must ship as rem"
+  )
+  assert.strictEqual(
+    cjs.exuiTokens.density.compact.controlRadius,
+    "0.5rem",
+    "compact density geometry must ship as rem"
+  )
+  assert.strictEqual(
+    cjs.exuiTokens.typography.bodyFontSize,
+    "0.875rem",
+    "scalable typography must ship as rem"
+  )
+  assert.strictEqual(cjs.exuiTokens.radii.large, "0.625rem", "ordinary radii must ship as rem")
+  assert.strictEqual(
+    cjs.componentRecipes.button.default.height,
+    "2.25rem",
+    "scalable recipe geometry must ship as rem"
+  )
+  assert.strictEqual(
+    cjs.componentRecipes.tabs.indicator.thickness,
+    "0.125rem",
+    "scalable indicator thickness must ship as rem"
+  )
+
+  // Fixed-pixel exceptions must survive the migration untouched.
+  assert.strictEqual(cjs.exuiTokens.radii.full, "9999px", "capsule radii must stay fixed")
+  assert.strictEqual(cjs.exuiTokens.radii.none, "0", "the zero radius must stay unitless")
+  assert.strictEqual(
+    cjs.componentRecipes.menu.separator.thickness,
+    "1px",
+    "hairline separators must stay fixed"
+  )
+  assert.strictEqual(
+    cjs.exuiTokens.shadows.focus,
+    "0 0 0 2px currentColor",
+    "focus rings must stay fixed"
+  )
+
   let componentImportError
   try {
     await import("@exre/exui")
@@ -286,12 +329,35 @@ async function verifyTokensOnlyConsumer(tarballPath, { packageManager }) {
 async function verifyTokensTypecheck(tarballPath, consumerRoot) {
   const tokensConsumer = `
 import { exuiTokens, componentRecipes } from "@exre/exui/tokens"
-import type { ComponentRecipes } from "@exre/exui/tokens"
+import type { ComponentRecipes, RecipeLength } from "@exre/exui/tokens"
 
 const recipes: ComponentRecipes = componentRecipes
 const themes: string[] = Object.keys(exuiTokens.themes)
 const size: string = recipes.button.defaultSize
-console.log(themes, size)
+
+// \`RecipeLength\` keeps accepting rem, px, and 0 so existing consumer recipes
+// stay valid while built-in values move to rem.
+const remLength: RecipeLength = "2.25rem"
+const pxLength: RecipeLength = "36px"
+const zeroLength: RecipeLength = "0"
+// @ts-expect-error A bare number is not a recipe length.
+const unitlessLength: RecipeLength = 36
+// @ts-expect-error Em values are not recipe lengths.
+const emLength: RecipeLength = "1.5em"
+// @ts-expect-error Viewport units are not recipe lengths.
+const viewportLength: RecipeLength = "2vw"
+
+// A consumer override may mix the new rem values with the retained px values.
+const customButtonSize: ComponentRecipes["button"]["default"] = {
+  ...componentRecipes.button.default,
+  height: "2.5rem",
+  paddingInline: "1rem",
+  iconSize: "16px",
+  radius: "0",
+}
+
+console.log(themes, size, remLength, pxLength, zeroLength, customButtonSize.height)
+console.log(unitlessLength, emLength, viewportLength)
 `
   const tokensCommonJs = `
 import tokens = require("@exre/exui/tokens")
@@ -299,11 +365,16 @@ const { exuiTokens, componentRecipes } = tokens
 const recipes: tokens.ComponentRecipes = componentRecipes
 const themes: string[] = Object.keys(exuiTokens.themes)
 const size: string = recipes.button.defaultSize
+const remLength: tokens.RecipeLength = "2.25rem"
+const pxLength: tokens.RecipeLength = "36px"
+const zeroLength: tokens.RecipeLength = "0"
+// @ts-expect-error Unrelated units must be rejected by the CommonJS declaration.
+const emLength: tokens.RecipeLength = "1.5em"
 // @ts-expect-error Unknown recipes must be rejected, not silently typed as any.
 componentRecipes.nonexistent
 // @ts-expect-error A recipe size is a string, not a number.
 const invalidSize: number = componentRecipes.button.defaultSize
-console.log(themes, size)
+console.log(themes, size, remLength, pxLength, zeroLength, emLength)
 `
   const sharedOptions = {
     strict: true,
