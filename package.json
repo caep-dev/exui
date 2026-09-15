@@ -5,11 +5,11 @@
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "pnpm --filter @exre/exui-tokens build && pnpm --filter @exre/exui build && pnpm --filter @exre/exui-showcase dev",
+    "build": "pnpm --filter @exre/exui-tokens build && pnpm --filter @exre/exui build && pnpm --filter @exre/exui-showcase build",
     "typecheck": "pnpm --filter @exre/exui-tokens typecheck && pnpm --filter @exre/exui typecheck && pnpm --filter @exre/exui build:types && pnpm --filter @exre/exui-showcase typecheck",
     "lint": "oxlint scripts && pnpm --filter @exre/exui-tokens lint && pnpm --filter @exre/exui lint && pnpm --filter @exre/exui-showcase lint",
     "test:visual": "pnpm --filter @exre/exui-showcase test:visual",
     "tokens:check": "pnpm --filter @exre/exui-tokens tokens:check",
-    "build": "pnpm --filter @exre/exui-tokens build && pnpm --filter @exre/exui build && pnpm --filter @exre/exui-showcase build",
     "verify:pack": "node scripts/verify-packages.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
