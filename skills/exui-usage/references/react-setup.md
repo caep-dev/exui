@@ -46,7 +46,7 @@ Hairline borders and dividers, focus rings, shadows, the capsule radius, and thi
 
 Use rem strings for new scalable lengths in React styles: `padding: "1.5rem"` follows the root font size, whereas `padding: 24` stays in pixels. Preserve unitless properties such as `lineHeight: 1.5` and fixed effects such as `border: "1px solid var(--exui-border-default)"`. Prefer the existing component and Token values before inventing new geometry.
 
-Keep root-font control at application level and let content wrap or grow when text gets larger. Use [EXUI_SCALING_RULES.md](../EXUI_SCALING_RULES.md) for concise authoring rules and a global CSS scale reference: 16px by default, 21px at viewport heights of at least 1440px, and 32px at heights of at least 2160px. Third-party developers can copy that file alone into their AI instructions.
+Keep root-font control at application level and let content wrap or grow when text gets larger. Use [EXUI_SCALING_RULES.md](../guides/EXUI_SCALING_RULES.md) for concise authoring rules and a global CSS scale reference: 16px by default, 21px at viewport heights of at least 1440px, and 32px at heights of at least 2160px. Third-party developers can copy that file alone into their AI instructions.
 
 ## Implementation dependencies are bundled
 

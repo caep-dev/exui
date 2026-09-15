@@ -50,4 +50,4 @@ ExUI's scalable dimensions use `rem` against a 16px root font size. When the app
 
 For example, React `style={{ padding: "1.5rem", borderWidth: "1px" }}` scales the padding while keeping the border width fixed; `padding: 24` would remain 24px.
 
-Copy [EXUI_SCALING_RULES.md](skills/exui-usage/EXUI_SCALING_RULES.md) into a third-party project's AI instructions or attach it to an AI request. It is a concise standalone English rule document covering scalable lengths, allowed pixel exceptions, and an application-level scale reference based on viewport height.
+Copy [EXUI_SCALING_RULES.md](skills/exui-usage/guides/EXUI_SCALING_RULES.md) into a third-party project's AI instructions or attach it to an AI request. It is a concise standalone English rule document covering scalable lengths, allowed pixel exceptions, and an application-level scale reference based on viewport height.
