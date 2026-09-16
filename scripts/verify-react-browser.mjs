@@ -57,8 +57,96 @@ async function verifyReactBrowser(consumerRoot) {
     await dialog.waitFor({ state: "hidden" })
     await page.waitForFunction(() => document.activeElement?.textContent === "Open")
 
+    // The packed stylesheet must follow the application root font size with no
+    // extra consumer configuration, and it must not fight an application that
+    // sets one of its own.
+    const setRootFontSize = (value) =>
+      page.evaluate((fontSize) => {
+        document.documentElement.style.fontSize = fontSize
+      }, value)
+    const measure = (locator, property) =>
+      locator.evaluate((element, name) => {
+        const style = getComputedStyle(element)
+        return {
+          value: Number.parseFloat(style.getPropertyValue(name)),
+          rootFontSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+        }
+      }, property)
+    const closeEnough = (actual, expected, label) => {
+      assert.ok(
+        Math.abs(actual - expected) <= 0.5,
+        `${label}: expected about ${expected}px, received ${actual}px`
+      )
+    }
+    // Buttons use `transition-all`, so a root font size change animates the
+    // geometry. Wait for the transition to settle before measuring.
+    const settle = (selector, property, expected) =>
+      page.waitForFunction(
+        ({ selector: target, property: cssProperty, expected: value }) => {
+          const element = document.querySelector(target)
+          if (!element) {
+            return false
+          }
+          const actual = Number.parseFloat(getComputedStyle(element).getPropertyValue(cssProperty))
+          return Number.isFinite(actual) && Math.abs(actual - value) <= 0.5
+        },
+        { selector, property, expected }
+      )
+    const triggerSelector = "[aria-haspopup='dialog']"
+
+    await setRootFontSize("16px")
+    try {
+      await settle(triggerSelector, "height", 36)
+      const base = await measure(trigger, "height")
+      assert.equal(base.rootFontSize, 16, "the application root font size must remain 16px")
+      closeEnough(base.value, 36, "the default Button height at a 16px root font size")
+
+      await setRootFontSize("32px")
+      await settle(triggerSelector, "height", 72)
+      await settle(triggerSelector, "font-size", 28)
+      const doubled = await measure(trigger, "height")
+      assert.equal(doubled.rootFontSize, 32, "the application root font size must reach 32px")
+      closeEnough(doubled.value, 72, "the default Button height at a 32px root font size")
+      closeEnough(
+        (await measure(trigger, "font-size")).value,
+        28,
+        "the default Button font size at a 32px root font size"
+      )
+      closeEnough(
+        (await measure(trigger, "border-top-width")).value,
+        1,
+        "the default Button hairline border at a 32px root font size"
+      )
+      closeEnough(
+        (await measure(trigger, "border-radius")).value,
+        9999,
+        "the default Button capsule radius at a 32px root font size"
+      )
+
+      await trigger.click()
+      const scaledDialog = page.getByRole("dialog", { name: "Subscribe" })
+      await scaledDialog.waitFor({ state: "visible" })
+      await page.waitForFunction(() => {
+        const element = document.querySelector("[data-slot='dialog-content']")
+        if (!element) {
+          return false
+        }
+        return Math.abs(Number.parseFloat(getComputedStyle(element).paddingTop) - 48) <= 0.5
+      })
+      const scaledPadding = await measure(scaledDialog, "padding-top")
+      closeEnough(scaledPadding.value, 48, "the portal Dialog padding at a 32px root font size")
+      await page.keyboard.press("Escape")
+      await scaledDialog.waitFor({ state: "hidden" })
+    } finally {
+      await setRootFontSize("16px")
+    }
+
+    await settle(triggerSelector, "height", 36)
+    const restored = await measure(trigger, "height")
+    closeEnough(restored.value, 36, "the default Button height after restoring the root font size")
+
     assert.deepEqual(pageErrors, [], "packed consumer must not raise browser runtime errors")
-    console.log("Packed browser consumer passed: chart hover/legend, dialog portal, form submission, focus return")
+    console.log("Packed browser consumer passed: chart hover/legend, dialog portal, form submission, focus return, rem scaling")
   } finally {
     try {
       await browser?.close()

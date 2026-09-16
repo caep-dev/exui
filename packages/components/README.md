@@ -7,26 +7,32 @@ Exre brand React component library built with Vite, Tailwind CSS v4, shadcn/ui, 
 Install the package together with the React host runtime it expects:
 
 ```bash
-npm add @exre/exui react react-dom
-npm add -D @types/react @types/react-dom
+npm add @exre/exui react@19 react-dom@19
+npm add -D @types/react@19 @types/react-dom@19
 ```
 
 React and React DOM are optional peers: the component entry needs them at runtime and their type packages for TypeScript, but the package never installs them for you. Then import the built stylesheet once:
 
 ```tsx
 import "@exre/exui/style.css"
-import { Button, ThemeProvider } from "@exre/exui"
+import { Button } from "@exre/exui"
 
 export function App() {
   return (
-    <ThemeProvider>
-      <Button>Continue</Button>
-    </ThemeProvider>
+    <Button>Continue</Button>
   )
 }
 ```
 
 `@exre/exui/style.css` is the complete component stylesheet, including token variables and fonts.
+
+The React root is ESM-only and supports React 19 (`>=19.0.0 <20`). General-purpose layout utilities are not part of the stylesheet contract; use your own CSS or utility setup for application layout.
+
+### Themes
+
+In a browser application, wrap the app with the root `ThemeProvider` and use `useTheme()` to switch between `"light"`, `"dark"`, and `"system"`. The default is `"system"`, and choices are stored under the `"theme"` localStorage key. Mount `Toaster` and call `toast` from the same `@exre/exui` root for notifications that follow the provider.
+
+`ThemeProvider` reads localStorage during rendering and cannot render on a server. Mount it only in the browser after hydration when using an SSR framework; `"use client"` alone does not prevent prerendering. The `.pitch-black` token class is managed separately and is not a provider theme value.
 
 ### Framework-neutral tokens
 
@@ -38,6 +44,22 @@ import "@exre/exui/tokens/style.css"
 ```
 
 `@exre/exui/tokens` publishes ESM and CommonJS entries. `@exre/exui/tokens/style.css` carries only token variables for the three themes, and `@exre/exui/tokens/font.css` loads the optional font assets.
+
+### Sizing and root font size
+
+ExUI publishes its scalable sizes in `rem`, calibrated so that a 16px root font size reproduces the original pixel design exactly. Type, control heights, padding, gaps, icons, and ordinary radii therefore resize together when the application sets its own root font size:
+
+```css
+html {
+  font-size: 20px; /* every scalable ExUI size grows by 20 / 16 */
+}
+```
+
+ExUI never sets a root font size itself and declares no scale variable, so this stays an application decision. Keep the root at `16px` for the previous rendering; applications that already set a different root font size will see differently sized components after upgrading.
+
+The following stay fixed pixels on purpose and do **not** scale: hairline borders and dividers, focus rings, shadows, and the capsule (`9999px`) radius. Third-party geometry is outside this contract too — the internals of Sonner and Recharts keep their own fixed sizes, so do not expect toasts or chart axes to scale in lockstep. ExUI's own legend, tooltip, and icon content does scale.
+
+Numeric positioning props such as `sideOffset` and `alignOffset` keep their upstream pixel contract and are never multiplied by the root font size.
 
 ### Bundled implementation dependencies
 
@@ -104,6 +126,7 @@ pnpm dev
 pnpm typecheck
 pnpm lint
 pnpm build
+pnpm --filter @exre/exui-showcase exec playwright install chromium
 pnpm verify:pack
 ```
 

@@ -13,6 +13,15 @@ import "@exre/exui/style.css"
 
 ## Usage
 
-Use as a form control. Prefer controlled props when integrating with form state, and pass aria-invalid or field messaging through the Field components when validation is visible.
+`Input` accepts native input props. Use `value`/`onChange` for controlled text, or `defaultValue` for an initial uncontrolled value.
+
+```tsx
+<label>
+  Email
+  <Input name="email" type="email" autoComplete="email" required />
+</label>
+```
+
+Keep a visible label; a placeholder alone is insufficient. Add `aria-invalid` and connect descriptive/error text with `aria-describedby` when using the [Field](Field.md) parts.
 
 For advanced props, use the TypeScript types exposed by the package-root import.

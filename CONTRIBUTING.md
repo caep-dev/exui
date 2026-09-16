@@ -8,7 +8,7 @@ Please be respectful and constructive in all interactions with the community.
 
 ## Development Setup
 
-Install from the repository root and use the aggregate checks:
+Use Node.js 24 and pnpm 11.9.0. Install from the repository root and use the aggregate checks:
 
 ```bash
 pnpm install
@@ -16,10 +16,19 @@ pnpm tokens:check
 pnpm typecheck
 pnpm lint
 pnpm build
+pnpm --filter @exre/exui-showcase exec playwright install chromium
 pnpm verify:pack
 ```
 
 Run shadcn commands from `packages/components`. The repository root, `packages/showcase`, and the internal `packages/tokens` workspace are private; only `@exre/exui` participates in Changesets and publication.
+
+Follow [TESTING.md](TESTING.md) for the complete checks, including visual tests and consumer examples. Keep Showcase imports on the public `@exre/exui` entries.
+
+## Documentation and pull requests
+
+Update affected READMEs and [consumer guidance](skills/exui-usage/SKILL.md) when public behavior changes. Maintain engineering documentation under `docs/` when present; place working notes, review reports, and plans under `notes/`. Generate token CSS and skill inventories with their existing generators rather than editing generated output.
+
+Pull requests should describe the user-facing change, link related issues, and list validation results. Include screenshots or recordings for visual component changes. Documentation-only changes do not need a Changeset unless they accompany release-worthy package behavior.
 
 ## Commit Messages
 
@@ -58,6 +67,4 @@ Review generated `package.json` and `CHANGELOG.md` changes before publishing. Do
 
 ## Reporting Issues
 
-## Questions?
-
-Open an issue for discussion.
+Include the installed ExUI version, React version, environment, reproduction steps, and expected versus actual behavior. For visual issues, include a screenshot and the application's root font size and theme. Open an issue for questions as well.

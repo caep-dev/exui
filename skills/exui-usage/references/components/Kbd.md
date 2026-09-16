@@ -14,6 +14,12 @@ import "@exre/exui/style.css"
 
 ## Usage
 
-Use directly from the package root. Prefer the exported parts instead of reaching into internal source paths.
+Render a keyboard hint with `Kbd`; group several keys with `KbdGroup`.
+
+```tsx
+<KbdGroup><Kbd>Ctrl</Kbd><Kbd>K</Kbd></KbdGroup>
+```
+
+These components only display the keys. Register any shortcut in the application and display the appropriate platform-specific label.
 
 For advanced props, use the TypeScript types exposed by the package-root import.

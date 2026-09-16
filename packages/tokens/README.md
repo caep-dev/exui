@@ -22,6 +22,14 @@ The CommonJS entry exists for runtimes that cannot load ESM, such as server buil
 
 The public copy of these artifacts is verified in the packed-consumer gates with a NodeNext CommonJS consumer.
 
+## Length units
+
+Scalable lengths are authored in `rem` against a 16px base: density geometry, the four body/small font-size and line-height Tokens, ordinary radii, and the length fields of every component recipe. Setting the application root font size rescales all of them together, and a 16px root font size reproduces the original pixel design exactly. Nothing in this workspace sets a root font size, and no scale variable or runtime listener is involved.
+
+Fixed-pixel exceptions are intentional and machine-checked: `radii.none` is `0`, `radii.full` is `9999px`, `componentRecipes.menu.separator.thickness` is `1px`, and every shadow Token stays pixel-based. Recipe durations stay `ms`, `componentRecipes.menu.shortcut.letterSpacing` stays `em`, and `componentRecipes.menu.shortcut.marginInlineStart` stays `auto`.
+
+`RecipeLength` accepts `${number}rem`, `${number}px`, and `"0"`, so consumer-authored recipes may keep passing pixel values even though the built-in values use `rem`.
+
 ## Accessibility baseline
 
 Default text and primary or danger control text must maintain at least a 4.5:1 contrast ratio. Focus indicators must maintain at least 3:1 against the page background.

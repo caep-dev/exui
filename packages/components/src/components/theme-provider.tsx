@@ -166,3 +166,13 @@ export function useTheme() {
 
   return context
 }
+
+// Internal helper for package components that should read the current theme
+// without forcing the consumer to mount <ThemeProvider> (e.g. the bundled
+// <Toaster />). Returns `undefined` when no provider is present so callers
+// can choose their own fallback. Not re-exported from the package root —
+// not part of the public API surface.
+export function useOptionalTheme(): Theme | undefined {
+  const context = React.useContext(ThemeProviderContext)
+  return context?.theme
+}

@@ -3,6 +3,11 @@ import { fileURLToPath } from "node:url"
 import path from "node:path"
 
 import { createCssVariables, renderCss } from "./generate-css.mjs"
+import {
+  RECIPE_LENGTH_FIELDS,
+  collectLengthPolicyViolations,
+  isContractLength,
+} from "./token-length-policy.mjs"
 import { componentRecipes, exuiTokens } from "../dist/index.js"
 
 const packageRoot = fileURLToPath(new URL("..", import.meta.url))
@@ -47,6 +52,12 @@ function validateDensity() {
       }
     }
   }
+}
+
+function validateScalableLengthPolicy() {
+  failures.push(
+    ...collectLengthPolicyViolations({ contract: exuiTokens, recipes: componentRecipes })
+  )
 }
 
 function validateFrozen(value, prefix = "exuiTokens") {
@@ -157,11 +168,7 @@ function validateRecipeContract() {
       "background", "foreground", "border", "placeholder", "indicator",
       "color", "listBackground", "triggerSelectedBackground",
     ])
-    const lengthFields = new Set([
-      "height", "minHeight", "padding", "paddingInline", "paddingBlock", "gap",
-      "iconSize", "thickness", "marginBlock", "marginInlineStart", "backdropBlur",
-      "top", "right", "offset", "radius", "fontSize", "lineHeight",
-    ])
+    const lengthFields = RECIPE_LENGTH_FIELDS
     const fontSizeReferences = new Set(["typography.bodyFontSize", "typography.smallFontSize"])
     const lineHeightReferences = new Set(["typography.bodyLineHeight", "typography.smallLineHeight"])
     const fontWeightReferences = new Set([
@@ -187,7 +194,7 @@ function validateRecipeContract() {
       }
       if (fieldName === "radius" &&
         (value.kind !== "foundation" || !value.path.startsWith("radii."))) {
-        failures.push(`${valuePath} must use a radius foundation reference or px length`)
+        failures.push(`${valuePath} must use a radius foundation reference or a rem/px length`)
       }
       if (fieldName === "fontFamily" &&
         (value.kind !== "foundation" || value.path !== "typography.fontFamily")) {
@@ -195,11 +202,11 @@ function validateRecipeContract() {
       }
       if (fieldName === "fontSize" &&
         (value.kind !== "foundation" || !fontSizeReferences.has(value.path))) {
-        failures.push(`${valuePath} must use a font-size foundation reference or px length`)
+        failures.push(`${valuePath} must use a font-size foundation reference or a rem/px length`)
       }
       if (fieldName === "lineHeight" &&
         (value.kind !== "foundation" || !lineHeightReferences.has(value.path))) {
-        failures.push(`${valuePath} must use a line-height foundation reference or px length`)
+        failures.push(`${valuePath} must use a line-height foundation reference or a rem/px length`)
       }
       if (fieldName === "fontWeight" &&
         (value.kind !== "foundation" || !fontWeightReferences.has(value.path))) {
@@ -214,9 +221,10 @@ function validateRecipeContract() {
       failures.push(`${valuePath} must be a number between 0 and 1`)
     } else if (fieldName === "marginInlineStart" && value === "auto") {
       // `auto` is the sole non-length layout keyword in the public recipe contract.
-    } else if (lengthFields.has(fieldName) &&
-      (typeof value !== "string" || !/^-?(?:\d+\.?\d*|\.\d+)px$|^0$/.test(value))) {
-      failures.push(`${valuePath} must be a px length`)
+    } else if (lengthFields.has(fieldName) && !isContractLength(value)) {
+      failures.push(
+        `${valuePath} must be a finite rem or px length, or 0; found ${JSON.stringify(value)}`
+      )
     } else if (fieldName === "duration" &&
       (typeof value !== "string" || !/^(?:\d+\.?\d*|\.\d+)ms$/.test(value))) {
       failures.push(`${valuePath} must be a millisecond duration`)
@@ -374,6 +382,7 @@ validateDensity()
 validateFrozen(exuiTokens)
 validateFrozen(componentRecipes, "componentRecipes")
 validateRecipeContract()
+validateScalableLengthPolicy()
 validateColors(exuiTokens.themes)
 validateContrast()
 await validateGeneratedCss()
