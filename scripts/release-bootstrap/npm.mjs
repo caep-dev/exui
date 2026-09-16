@@ -14,7 +14,12 @@ export async function registryStatus(name, version, fetcher = fetch) {
   if (response.status !== 200 && response.status !== 404) throw new Error(`REGISTRY_UNAVAILABLE: HTTP ${response.status}`)
   let body
   try { body = await response.json() } catch { throw new Error("REGISTRY_INCONSISTENT: invalid JSON") }
-  if (response.status === 404 && typeof body.error === "string" && body.error) return "absent"
+  if (response.status === 404) {
+    // The registry describes a missing package or version with a bare message
+    // string; older responses and some proxies use an `error` field instead.
+    const description = typeof body === "string" ? body : body?.error
+    if (typeof description === "string" && description.trim()) return "absent"
+  }
   if (response.status === 200 && body.name === name && body.version === version) return "present"
   throw new Error("REGISTRY_INCONSISTENT: unexpected package metadata")
 }
