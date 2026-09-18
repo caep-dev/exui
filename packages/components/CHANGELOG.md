@@ -1,5 +1,18 @@
 # @exre/exui
 
+## 0.5.0
+
+### Minor Changes
+
+- ef0a770: Tokens are now overridable from consumer CSS, foundation Tokens included.
+
+  - Every Token is a CSS custom property on `:root`, and the stylesheet resolves its recipe values through those properties. Typography, radii, and shadows used to be resolved into the recipe variables as literal values at build time, so overriding a foundation Token changed the variable and nothing else: components kept the frozen value, with no error and no visual clue that the override had stopped. Those 61 references are now emitted as `var(--exui-…)`, the same way semantic references already were, and the foundation group is published as its own variables: `--exui-font-size-body`, `--exui-font-size-small`, `--exui-line-height-body`, `--exui-line-height-small`, `--exui-radius-none|small|medium|large|extra-large|full`, and `--exui-shadow-small|medium|large|focus|invalid`. `--exui-font-family`, `--exui-font-family-mono`, `--exui-font-family-emoji`, and `--exui-font-weight-*` already existed and are now the declarations the recipes read.
+  - `--radius` resolves to `--exui-radius-large` instead of carrying its own copy, so the Tailwind radius scale (`rounded-sm` … `rounded-4xl`) and the components that use that radius move together.
+  - An override is a plain unlayered `:root` rule placed after the stylesheet, plus a `.dark` block when the brand value has a dark counterpart, because `.dark` and `.pitch-black` carry only the values that differ from `:root`. An override written inside `@layer base` or a Tailwind `@theme` block loses to the library value: the Token declarations are emitted outside any layer, and unlayered declarations win.
+  - Three recipe radii stay standalone values — the button action radius, and the dialog and menu surface radii — and follow only their own `--exui-component-…-radius`. The shadcn aliases (`--primary`, `--background`, `--ring`, `--chart-1`, `--sidebar-*`) also still hold their own copies of the same colours, so `--exui-control-primary` and `--primary` have to be set together. `--density-*` remains published but unreferenced: no component styling consumes it.
+
+  No computed value changes, so nothing renders differently until an override is added. `pnpm tokens:check` gained a `foundation-reference-policy.mjs` gate that fails when a recipe falls back to a literal foundation value, when the variable map and the contract disagree, or when a recipe variable references a variable the stylesheet never declares.
+
 ## 0.4.0
 
 ### Minor Changes
