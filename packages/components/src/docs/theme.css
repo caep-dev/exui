@@ -1,0 +1,23 @@
+/* ExUI's theming contract for Fumadocs UI.
+ *
+ * Two things have to hold for a Fumadocs UI site to render in ExUI colours:
+ *
+ * 1. The ExUI token sheet has to be loaded at all. Fumadocs maps its own
+ *    `--color-fd-*` names onto shadcn's short variables (`--background`,
+ *    `--primary`, `--sidebar`, ...) without fallbacks, so a page that loads
+ *    only the Fumadocs sheets computes every `--color-fd-*` value to an
+ *    unset custom property. Nothing errors; the site just renders unstyled.
+ * 2. The Fumadocs colour sheet has to precede the Fumadocs preset, which is
+ *    the order Fumadocs documents for its own setup.
+ *
+ * The three imports are therefore pinned in this order. The relative path
+ * resolves in the published layout, where `dist/docs/theme.css` sits next to
+ * `dist/tokens/style.css`; it is not a path into this source directory.
+ *
+ * ExUI names Fumadocs in no dependency field, so `fumadocs-ui` is the
+ * consumer's own installation. It has to be present for the last two imports
+ * to resolve, and the failure is loud when it is not.
+ */
+@import "../tokens/style.css";
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/preset.css";

@@ -30,6 +30,7 @@ function publicManifest() {
       },
       "./tokens/style.css": { types: "./dist/tokens/style.css.d.ts", default: "./dist/tokens/style.css" },
       "./tokens/font.css": { types: "./dist/tokens/font.css.d.ts", default: "./dist/tokens/font.css" },
+      "./docs/theme.css": { types: "./types/docs/theme.css.d.ts", default: "./dist/docs/theme.css" },
     },
     peerDependencies: { react: ">=19.0.0 <20", "react-dom": ">=19.0.0 <20" },
     peerDependenciesMeta: { react: { optional: true }, "react-dom": { optional: true } },
@@ -98,6 +99,27 @@ test("tokens exports, peer, and dependency boundaries are enforced", () => {
     () => assertPublishableManifest({ ...complete, peerDependencies: { react: "^19", "react-dom": ">=19.0.0 <20" } }),
     /peer contract/u
   )
+})
+
+test("the docs theme export and its dependency boundary are enforced", () => {
+  const complete = publicManifest()
+  const withoutDocsTheme = { ...complete, exports: { ...complete.exports } }
+  delete withoutDocsTheme.exports["./docs/theme.css"]
+  assert.throws(() => assertPublishableManifest(withoutDocsTheme), /must expose \.\/docs\/theme\.css/u)
+  assert.throws(
+    () =>
+      assertPublishableManifest({
+        ...complete,
+        exports: { ...complete.exports, "./docs/theme.css": "./dist/docs/theme.css" },
+      }),
+    /must expose \.\/docs\/theme\.css/u
+  )
+  for (const field of ["dependencies", "optionalDependencies", "peerDependencies"]) {
+    assert.throws(
+      () => assertPublishableManifest({ ...complete, [field]: { ...complete[field], "fumadocs-ui": "^16.15.0" } }),
+      /must not add fumadocs-ui/u
+    )
+  }
 })
 
 test("workspace dependency detection covers every publishable dependency field", () => {
