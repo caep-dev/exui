@@ -56,6 +56,7 @@ Do not install these libraries to use ExUI:
 
 - They add nothing: the components already run on the bundled copies.
 - A separately installed copy is a different instance. For notifications this breaks silently: a `sonner` copy you install yourself has its own toast state, so its `toast` calls never reach the ExUI `Toaster`.
+- The same instance rule covers providers. A Radix or Base UI provider you render yourself belongs to your copy, not ExUI's, so it cannot supply context to ExUI components. Where you would reach for an upstream provider, use ExUI's exported one instead — `DirectionProvider`, `TooltipProvider`, or `SidebarProvider`.
 
 Use notifications through the package root so you share the bundled instance:
 
