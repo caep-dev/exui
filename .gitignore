@@ -29,5 +29,3 @@ dist-ssr
 /.comet/*
 !/.comet/config.yaml
 # <<< Comet managed project state <<<
-
-__screenshots__
