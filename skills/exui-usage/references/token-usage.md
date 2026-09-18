@@ -46,6 +46,12 @@ Do not copy resolved colors, lengths, shadows, or typography values into applica
 
 Consult the [generated Token path inventory](generated/token-paths.md) for exact `exuiTokens` paths, `componentRecipes` paths, and CSS custom-property names. That inventory intentionally lists no concrete values.
 
+## Density
+
+`exuiTokens.density` publishes two sets of control geometry, `standard` and `compact` — control height, inline padding, control radius, control gap, and icon size. The stylesheet emits them as five `--density-*` custom properties: the `standard` values under `:root`, and a `.density-compact` block that overrides all five. Apply the class to the root element or any ancestor; it is a separate axis from the theme classes, so it combines with `.dark` or `.pitch-black`.
+
+Density is a foundation layer, like `typography`, `radii`, and `shadows`. ExUI's own components size themselves from the `--exui-component-*` recipe values, so adding `.density-compact` does not resize them. Read `exuiTokens.density` directly when your own CSS needs to match either control size.
+
 ## Sizing and root font size
 
 For custom React components and content, follow the standalone [ExUI scaling rules](../guides/EXUI_SCALING_RULES.md). That file can be copied directly into another project's AI instructions; the Token-specific conversion details follow here.
@@ -78,5 +84,8 @@ Supported consumer entries are:
 - `@exre/exui/tokens`
 - `@exre/exui/tokens/style.css`
 - `@exre/exui/tokens/font.css`
+- `@exre/exui/docs/theme.css`
+
+`docs/theme.css` is the Fumadocs UI colour contract, not a general-purpose stylesheet; see [Fumadocs docs theme](docs-theme.md) before using it.
 
 Do not import from package `src/`, `dist/`, or `types/` paths, and do not reference the internal `@exre/exui-tokens` workspace, which is not published.

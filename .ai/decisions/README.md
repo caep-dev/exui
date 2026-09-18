@@ -12,6 +12,7 @@
 | --- | --- | --- | --- |
 | [[tokens/01-rem-scalable-lengths]] | 内建可缩放长度统一使用 rem，固定效果保持像素 | 已接受 | 2026-09-16 |
 | [[tokens/02-commonjs-compatibility-entry]] | Token 提供 CommonJS 兼容入口 | 已接受 | 2026-08-28 |
+| [[tokens/03-foundation-references-in-emitted-css]] | 产物样式表把 foundation 引用生成为 CSS 变量引用 | 已接受 | 2026-09-18 |
 
 ## components
 

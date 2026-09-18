@@ -118,38 +118,67 @@ const semanticVariableByReference = {
   "shadow.menu": "--exui-shadow-menu",
 }
 
-function createFoundationValueByReference(contract) {
-  return {
-    "radii.none": contract.radii.none,
-    "radii.small": contract.radii.small,
-    "radii.medium": contract.radii.medium,
-    "radii.large": contract.radii.large,
-    "radii.extraLarge": contract.radii.extraLarge,
-    "radii.full": contract.radii.full,
-    "typography.fontFamily": contract.typography.fontFamily,
-    "typography.fontWeightRegular": contract.typography.fontWeightRegular,
-    "typography.fontWeightMedium": contract.typography.fontWeightMedium,
-    "typography.fontWeightBold": contract.typography.fontWeightBold,
-    "typography.bodyFontSize": contract.typography.bodyFontSize,
-    "typography.bodyLineHeight": contract.typography.bodyLineHeight,
-    "typography.smallFontSize": contract.typography.smallFontSize,
-    "typography.smallLineHeight": contract.typography.smallLineHeight,
-    "shadows.small": contract.shadows.small,
-    "shadows.medium": contract.shadows.medium,
-    "shadows.large": contract.shadows.large,
-    "shadows.focus": contract.shadows.focus,
-    "shadows.invalid": contract.shadows.invalid,
+/**
+ * Every foundation contract path and the CSS variable it is published as.
+ *
+ * Foundation Tokens are referenced by the recipe tree just like semantic ones,
+ * so the stylesheet resolves both to `var(--exui-…)`. A literal copy would
+ * leave a consumer override of the Token visible in `:root` while component
+ * styling kept the frozen value. The map covers the contract exactly, which
+ * `foundation-reference-policy.mjs` asserts.
+ */
+export const foundationVariableByReference = {
+  "radii.extraLarge": "--exui-radius-extra-large",
+  "radii.full": "--exui-radius-full",
+  "radii.large": "--exui-radius-large",
+  "radii.medium": "--exui-radius-medium",
+  "radii.none": "--exui-radius-none",
+  "radii.small": "--exui-radius-small",
+  "shadows.focus": "--exui-shadow-focus",
+  "shadows.invalid": "--exui-shadow-invalid",
+  "shadows.large": "--exui-shadow-large",
+  "shadows.medium": "--exui-shadow-medium",
+  "shadows.small": "--exui-shadow-small",
+  "typography.bodyFontSize": "--exui-font-size-body",
+  "typography.bodyLineHeight": "--exui-line-height-body",
+  "typography.fontFamily": "--exui-font-family",
+  "typography.fontFamilyEmoji": "--exui-font-family-emoji",
+  "typography.fontFamilyMono": "--exui-font-family-mono",
+  "typography.fontWeightBold": "--exui-font-weight-bold",
+  "typography.fontWeightMedium": "--exui-font-weight-medium",
+  "typography.fontWeightRegular": "--exui-font-weight-regular",
+  "typography.smallFontSize": "--exui-font-size-small",
+  "typography.smallLineHeight": "--exui-line-height-small",
+}
+
+function readFoundationValue(contract, path) {
+  let current = contract
+
+  for (const segment of path.split(".")) {
+    if (current === null || typeof current !== "object" || !(segment in current)) {
+      throw new Error(`Unsupported foundation token path: ${path}`)
+    }
+
+    current = current[segment]
+  }
+
+  return String(current)
+}
+
+function addFoundationVariables(variables, contract) {
+  for (const [path, variableName] of Object.entries(foundationVariableByReference)) {
+    variables[variableName] = readFoundationValue(contract, path)
   }
 }
 
-function resolveRecipeValue(value, foundationValueByReference) {
+function resolveRecipeValue(value) {
   if (value !== null && typeof value === "object") {
     if (value.kind === "foundation") {
-      const resolved = foundationValueByReference[value.path]
-      if (resolved === undefined) {
+      const variableName = foundationVariableByReference[value.path]
+      if (variableName === undefined) {
         throw new Error(`Unsupported foundation recipe reference: ${value.path}`)
       }
-      return String(resolved)
+      return `var(${variableName})`
     }
 
     if (value.kind === "semantic") {
@@ -164,12 +193,7 @@ function resolveRecipeValue(value, foundationValueByReference) {
   return String(value)
 }
 
-function flattenRecipeVariables(
-  variables,
-  prefix,
-  value,
-  foundationValueByReference
-) {
+function flattenRecipeVariables(variables, prefix, value) {
   for (const [name, child] of Object.entries(value)) {
     if (name === "defaultVariant" || name === "defaultSize") {
       continue
@@ -181,25 +205,15 @@ function flattenRecipeVariables(
       (child.kind === "foundation" || child.kind === "semantic")
 
     if (child !== null && typeof child === "object" && !isReference) {
-      flattenRecipeVariables(
-        variables,
-        variableName,
-        child,
-        foundationValueByReference
-      )
+      flattenRecipeVariables(variables, variableName, child)
     } else {
-      variables[variableName] = resolveRecipeValue(child, foundationValueByReference)
+      variables[variableName] = resolveRecipeValue(child)
     }
   }
 }
 
-function addComponentVariables(variables, contract, recipes) {
-  flattenRecipeVariables(
-    variables,
-    "--exui-component",
-    recipes,
-    createFoundationValueByReference(contract)
-  )
+function addComponentVariables(variables, recipes) {
+  flattenRecipeVariables(variables, "--exui-component", recipes)
 }
 
 function toKebabCase(value) {
@@ -235,15 +249,10 @@ export function createCssVariables(contract, recipes) {
     "--density-control-padding-inline": contract.density.standard.controlPaddingInline,
     "--density-control-radius": contract.density.standard.controlRadius,
     "--density-icon-size": contract.density.standard.iconSize,
-    "--exui-font-family": contract.typography.fontFamily,
-    "--exui-font-family-emoji": contract.typography.fontFamilyEmoji,
-    "--exui-font-family-mono": contract.typography.fontFamilyMono,
-    "--exui-font-weight-bold": contract.typography.fontWeightBold,
-    "--exui-font-weight-medium": contract.typography.fontWeightMedium,
-    "--exui-font-weight-regular": contract.typography.fontWeightRegular,
-    "--radius": contract.radii.large,
+    "--radius": `var(${foundationVariableByReference["radii.large"]})`,
   })
-  addComponentVariables(light, contract, recipes)
+  addFoundationVariables(light, contract)
+  addComponentVariables(light, recipes)
 
   const compact = {
     "--density-control-gap": contract.density.compact.controlGap,

@@ -34,6 +34,43 @@ In a browser application, wrap the app with the root `ThemeProvider` and use `us
 
 `ThemeProvider` reads localStorage during rendering and cannot render on a server. Mount it only in the browser after hydration when using an SSR framework; `"use client"` alone does not prevent prerendering. The `.pitch-black` token class is managed separately and is not a provider theme value.
 
+### Customizing tokens
+
+Every Token is a CSS custom property declared on `:root`, and the component stylesheet resolves its recipe values through those properties rather than copying them. Re-declare the ones you need after the stylesheet:
+
+```css
+@import "@exre/exui/style.css";
+
+:root {
+  --exui-control-primary: #0f62fe;
+  --exui-control-primary-foreground: #ffffff;
+  --primary: #0f62fe;                    /* the shadcn alias holds its own copy */
+  --exui-font-family: "Inter", sans-serif;
+  --exui-radius-extra-large: 0.75rem;
+}
+
+.dark {
+  --exui-control-primary: #6ea8ff;
+  --primary: #6ea8ff;
+}
+```
+
+An override is a declaration that wins the cascade, so two rules matter more than the list of names:
+
+- **Keep it unlayered.** ExUI emits its Token declarations outside any `@layer`, and unlayered declarations beat layered ones. An override written inside `@layer base` or a Tailwind `@theme` block resolves back to the library value and fails with no error; a plain `:root` rule placed after the stylesheet import is enough, and its position in the cascade is what makes it win.
+- **`.dark` and `.pitch-black` carry only the values that differ from `:root`.** An unlayered `:root` override placed after the stylesheet therefore applies to all three themes. Add a `.dark` block when the brand value has a dark counterpart; the foundation Tokens and `--density-*` are declared once and are theme-independent.
+
+What the layers cover:
+
+- **Semantic Tokens** — `--exui-control-*`, `--exui-surface-*`, `--exui-text-*`, `--exui-border-*`, `--exui-feedback-*`, `--exui-sidebar-*`, `--exui-chart-*`, `--exui-editor-*`. Recolouring an application is normally these alone.
+- **Foundation Tokens** — `--exui-font-family`, `--exui-font-family-mono`, `--exui-font-family-emoji`, `--exui-font-weight-*`, `--exui-font-size-*`, `--exui-line-height-*`, `--exui-radius-*` and `--exui-shadow-*`. They are theme-independent, and every recipe field that references one resolves through its variable, so changing `--exui-font-family` or `--exui-radius-extra-large` moves the components as well. Three recipe radii are deliberately standalone values — the button action radius, and the dialog and menu surface radii — and follow only their own `--exui-component-…-radius`.
+- **`--radius`** is derived: it resolves to `--exui-radius-large`, so the Tailwind radius scale (`rounded-sm` … `rounded-4xl`) and the components that use that radius move together.
+- **The shadcn aliases** — `--background`, `--primary`, `--ring`, `--chart-1`, `--sidebar-*` and the rest — are separate declarations carrying their own copies of the same colours for shadcn-styled markup. Overriding `--exui-control-primary` does not move `--primary`; set both when both are in use.
+- **`--density-*`** (with the `.density-compact` block) is published but unused: no component styling references it today, so overriding it changes nothing. Treat it as data for Token consumers, not as a density switch.
+- **Recipe variables** (`--exui-component-…`) are the component-internal layer. Overriding one is supported and precise — a few hundred of them cover the default, hover, focus, active and disabled state of every variant — but they are not the theming surface.
+
+The library keeps no override layer of its own, so nothing has to be re-applied after an upgrade; an override that stops matching a Token name simply stops applying.
+
 ### Framework-neutral tokens
 
 Projects that do not use React can consume the visual contract alone; no React, React DOM, or React type packages are required:
