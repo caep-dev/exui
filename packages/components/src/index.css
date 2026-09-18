@@ -60,4 +60,23 @@
   html {
     @apply font-sans;
     }
+  /* Tailwind v4 stopped giving buttons a pointer cursor, so the library states
+     it once here rather than in every component's class list. Anything set
+     through a utility still wins over this: a disabled control keeps
+     `not-allowed`, the input group's addon keeps `text`, and the sidebar rail
+     keeps its resize cursors. The `option` and `menuitem*` roles are listed
+     because Radix, Base UI, and cmdk render those controls as non-buttons, and
+     they mark a disabled one with `aria-disabled="true"` rather than
+     `:disabled`. Their `data-disabled` attribute is deliberately not tested:
+     Radix writes `""`, cmdk writes `"true"` or `"false"`, so it cannot be
+     matched without also catching enabled items. */
+  button:not(:disabled),
+  select:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="option"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([aria-disabled="true"]),
+  [role="menuitemcheckbox"]:not([aria-disabled="true"]),
+  [role="menuitemradio"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+    }
 }
