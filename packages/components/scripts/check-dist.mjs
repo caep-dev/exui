@@ -1,6 +1,7 @@
 import { readFile, readdir, stat } from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+import { DOCS_THEME_IMPORTS, extractCssImports } from "./docs-theme-contract.mjs"
 import { extractBareSpecifiers } from "./module-specifiers.mjs"
 
 const packageRoot = fileURLToPath(new URL("..", import.meta.url))
@@ -60,8 +61,10 @@ async function run() {
     "dist/tokens/style.css.d.ts",
     "dist/tokens/font.css",
     "dist/tokens/font.css.d.ts",
+    "dist/docs/theme.css",
     "types/index.d.ts",
     "types/index.css.d.ts",
+    "types/docs/theme.css.d.ts",
   ]
   for (const relative of requiredFiles) {
     requireCondition(
@@ -132,6 +135,20 @@ async function run() {
   requireCondition(
     componentCss.includes("@font-face"),
     "dist/index.css no longer contains the bundled font faces"
+  )
+
+  // The docs theme sheet ships unprocessed on purpose: its imports are
+  // resolved by the consumer's own Tailwind build, exactly like the Fumadocs
+  // sheets it pulls in. The artifact check therefore verifies the contract
+  // (which sheets, in which order) instead of a compiled result.
+  const docsThemeCss = await readFile(path.join(distRoot, "docs", "theme.css"), "utf8")
+  requireCondition(
+    JSON.stringify(extractCssImports(docsThemeCss)) === JSON.stringify(DOCS_THEME_IMPORTS),
+    `dist/docs/theme.css must import ${DOCS_THEME_IMPORTS.join(", ")} in that order, received ${JSON.stringify(extractCssImports(docsThemeCss))}`
+  )
+  requireCondition(
+    !docsThemeCss.includes("@exre/exui-tokens"),
+    "dist/docs/theme.css references the internal tokens workspace"
   )
 
   const notices = await readFile(path.join(distRoot, "third-party-notices.md"), "utf8")

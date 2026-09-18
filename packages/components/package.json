@@ -36,6 +36,10 @@
     "./tokens/font.css": {
       "types": "./dist/tokens/font.css.d.ts",
       "default": "./dist/tokens/font.css"
+    },
+    "./docs/theme.css": {
+      "types": "./types/docs/theme.css.d.ts",
+      "default": "./dist/docs/theme.css"
     }
   },
   "publishConfig": {
@@ -46,6 +50,7 @@
     "dist",
     "types",
     "src/components",
+    "src/docs",
     "src/hooks",
     "src/lib",
     "src/index.css",
@@ -56,7 +61,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit && vite build && node scripts/copy-tokens-dist.mjs && pnpm build:types && node scripts/generate-notices.mjs && node scripts/check-dist.mjs",
-    "build:types": "node scripts/clean-types.mjs && tsc -p tsconfig.lib.json && tsc-alias -p tsconfig.lib.json && node scripts/fix-css-dts.mjs && node scripts/bundle-types.mjs",
+    "build:types": "node scripts/clean-types.mjs && tsc -p tsconfig.lib.json && tsc-alias -p tsconfig.lib.json && node scripts/fix-css-dts.mjs && node scripts/build-docs-theme.mjs && node scripts/bundle-types.mjs",
     "lint": "oxlint src",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "pack:check": "pnpm build && pnpm pack"

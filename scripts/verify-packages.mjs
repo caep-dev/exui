@@ -12,6 +12,11 @@ const npmCommand = "npm"
 const typescriptVersion = "~6.0.2"
 const viteVersion = "^8.1.1"
 const reactVersion = "19.2.7"
+const tailwindcssVersion = "^4.3.2"
+const tailwindcssViteVersion = "^4.3.2"
+// The docs theme sheet targets a Fumadocs installation the consumer owns, so
+// the range is pinned here rather than declared in the package manifest.
+const fumadocsUiVersion = "^16.15.0"
 
 function run(command, args, cwd) {
   const result = spawnSync(command, args, {
@@ -204,6 +209,13 @@ async function assertTokensOnlyTree(consumerRoot) {
     "tokens-only consumer must install the public font dependency"
   )
   requireCondition(names.has("@exre/exui"), "tokens-only consumer must install the public package")
+  // Fumadocs is not a dependency of the package, in any field: naming it
+  // would let the installer drag the Fumadocs tree, and its React
+  // implementation libraries, into this tree.
+  requireCondition(
+    !names.has("fumadocs-ui") && !pnpmStore.has("fumadocs-ui"),
+    "tokens-only consumer installed fumadocs-ui; the package must not declare it"
+  )
 }
 
 const tokensRuntimeCheck = `
@@ -464,6 +476,93 @@ export default defineConfig({
   requireCondition(!built.includes("--tw-"), "tokens stylesheet build leaked component Tailwind styles")
 }
 
+// The docs theme sheet ships unprocessed, so the only way to prove the
+// contract is to compile it with a real Tailwind build in a consumer that
+// installed the Fumadocs version it targets. Mirrors verifyTokensStylesheet.
+async function verifyDocsThemeConsumer(tarballPath) {
+  const consumerRoot = join(temporaryRoot, "docs-theme-consumer")
+  await mkdir(consumerRoot, { recursive: true })
+  await writeFile(
+    join(consumerRoot, "package.json"),
+    `${JSON.stringify(
+      {
+        name: "exui-docs-theme-consumer",
+        private: true,
+        type: "module",
+        dependencies: {
+          "@exre/exui": `file:${toDependencyPath(tarballPath)}`,
+          "fumadocs-ui": fumadocsUiVersion,
+          react: reactVersion,
+          "react-dom": reactVersion,
+        },
+        devDependencies: {
+          "@tailwindcss/vite": tailwindcssViteVersion,
+          tailwindcss: tailwindcssVersion,
+          vite: viteVersion,
+        },
+      },
+      null,
+      2
+    )}\n`
+  )
+  await writeFile(
+    join(consumerRoot, "app.css"),
+    '@import "tailwindcss";\n@import "@exre/exui/docs/theme.css";\n'
+  )
+  await writeFile(join(consumerRoot, "theme-entry.ts"), 'import "./app.css"\n')
+  await writeFile(
+    join(consumerRoot, "vite.config.mjs"),
+    `import tailwindcss from "@tailwindcss/vite"
+import { defineConfig } from "vite"
+
+export default defineConfig({
+  plugins: [tailwindcss()],
+  build: {
+    lib: {
+      entry: "theme-entry.ts",
+      cssFileName: "docs-theme",
+      fileName: () => "docs-theme.js",
+      formats: ["es"],
+    },
+    minify: false,
+  },
+})
+`
+  )
+
+  // The package never names Fumadocs in a dependency field, so the fixture
+  // has to install the Fumadocs version a consumer would own itself.
+  run(npmCommand, ["install", "--no-fund", "--no-audit"], consumerRoot)
+  run("node", [join(consumerRoot, "node_modules", "vite", "bin", "vite.js"), "build"], consumerRoot)
+
+  const built = await readFile(join(consumerRoot, "dist", "docs-theme.css"), "utf8")
+
+  // The token sheet arrives through the package's own relative import, which
+  // only resolves once dist/docs/theme.css sits next to dist/tokens/.
+  requireCondition(
+    built.includes("--exui-component-"),
+    "docs theme build did not resolve the ExUI token sheet"
+  )
+  // Fumadocs maps its own colour names onto shadcn's short variables without
+  // fallbacks; this mapping is what makes an ExUI-themed docs site work.
+  requireCondition(
+    /--color-fd-background:\s*var\(--background\)/.test(built),
+    "docs theme build lost the Fumadocs-to-ExUI colour mapping"
+  )
+  // The preset's inline source list is what generates the Fumadocs utilities
+  // without scanning the fumadocs-ui installation.
+  requireCondition(
+    (built.match(/\.bg-fd-[a-z0-9-]+/g) ?? []).length > 0,
+    "docs theme build generated no Fumadocs utilities"
+  )
+  requireCondition(
+    !/@import\s+["']fumadocs-ui\//.test(built),
+    "docs theme build left an unresolved Fumadocs import"
+  )
+
+  console.log("docs theme consumer build ok:", built.length, "chars of compiled stylesheet")
+}
+
 async function verifyReactConsumer(tarballPath) {
   const consumerRoot = join(temporaryRoot, "react-consumer")
   await mkdir(consumerRoot, { recursive: true })
@@ -685,11 +784,14 @@ try {
     "dist/tokens/style.css.d.ts",
     "dist/tokens/font.css",
     "dist/tokens/font.css.d.ts",
+    "dist/docs/theme.css",
     "types/index.d.ts",
     "types/index.css.d.ts",
+    "types/docs/theme.css.d.ts",
     "types/vendor/vendor-packages.json",
     "src/index.ts",
     "src/index.css",
+    "src/docs/theme.css",
     "components.json",
   ])
 
@@ -700,6 +802,7 @@ try {
   const npmTokensConsumer = await verifyTokensOnlyConsumer(componentPackage.filename, { packageManager: "npm" })
   await verifyTokensTypecheck(componentPackage.filename, npmTokensConsumer)
   await verifyTokensStylesheet(componentPackage.filename, npmTokensConsumer)
+  await verifyDocsThemeConsumer(componentPackage.filename)
   await verifyTokensOnlyConsumer(componentPackage.filename, { packageManager: "pnpm" })
   await verifyReactConsumer(componentPackage.filename)
 

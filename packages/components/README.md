@@ -45,6 +45,31 @@ import "@exre/exui/tokens/style.css"
 
 `@exre/exui/tokens` publishes ESM and CommonJS entries. `@exre/exui/tokens/style.css` carries only token variables for the three themes, and `@exre/exui/tokens/font.css` loads the optional font assets.
 
+### Theming Fumadocs UI
+
+A documentation site built with [Fumadocs UI](https://www.fumadocs.dev/docs/ui) renders in ExUI colours by importing one stylesheet:
+
+```tsx
+import "@exre/exui/docs/theme.css"
+```
+
+It imports `@exre/exui/tokens/style.css`, then Fumadocs' `css/shadcn.css` and `css/preset.css`, in that order. Fumadocs maps its own `--color-fd-*` names onto shadcn's short variables without fallbacks, so the token sheet has to be present: without it every docs colour computes to an unset custom property, and the page renders unstyled without reporting an error.
+
+ExUI declares no dependency on `fumadocs-ui` in any field — a stylesheet is not worth adding the Fumadocs tree and its React implementation libraries to every consumer's dependency graph. Install it yourself, since a Fumadocs site needs it anyway. The sheet is verified against `^16.15.0`:
+
+```bash
+npm add fumadocs-ui
+```
+
+The sheet ships unprocessed, exactly like Fumadocs' own `css/*` sheets, so your Tailwind build resolves the three imports. Without `fumadocs-ui` installed they fail loudly instead of producing an unstyled page.
+
+Boundaries worth knowing before relying on it:
+
+- **Colour only.** Fumadocs keeps its own radii, spacing, and animations; they do not follow ExUI's `--radius` or its density classes.
+- **No component wrapping.** Fumadocs ships its own `Tabs` and `Accordion` with APIs that differ from ExUI's (`<Tabs items={[...]}><Tab value="...">` against ExUI's `<TabsList>` composition). Import those from `fumadocs-ui` directly; ExUI does not re-export them.
+- **One theme driver per page.** Fumadocs' `RootProvider` uses next-themes and ExUI's `ThemeProvider` keeps its own state, but both read and write the same `theme` localStorage key. In an SSR framework use Fumadocs' provider — it is hydration-safe, while `ThemeProvider` is not.
+- **Stylesheet subpath only.** There is no `@exre/exui/docs` JavaScript entry.
+
 ### Sizing and root font size
 
 ExUI publishes its scalable sizes in `rem`, calibrated so that a 16px root font size reproduces the original pixel design exactly. Type, control heights, padding, gaps, icons, and ordinary radii therefore resize together when the application sets its own root font size:

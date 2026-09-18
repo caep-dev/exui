@@ -123,6 +123,10 @@ export function assertPublishableManifest(manifest, { expectedName, expectedVers
     types: "./dist/tokens/font.css.d.ts",
     default: "./dist/tokens/font.css",
   })
+  requireExportsEntry(manifest, "./docs/theme.css", {
+    types: "./types/docs/theme.css.d.ts",
+    default: "./dist/docs/theme.css",
+  })
 
   requireCondition(
     manifest.peerDependencies?.react === ">=19.0.0 <20" &&
@@ -134,6 +138,23 @@ export function assertPublishableManifest(manifest, { expectedName, expectedVers
       manifest.peerDependenciesMeta?.["react-dom"]?.optional === true,
     `${COMPONENT_PACKAGE_NAME} React peers must stay optional`
   )
+
+  // The docs theme sheet is a theme contract for a Fumadocs UI installation
+  // the consumer owns, not a wrapper around it. The package therefore names
+  // Fumadocs in no dependency field at all: npm and pnpm would otherwise pull
+  // the Fumadocs tree, and its React implementation libraries, into every
+  // consumer's production graph — including the tokens-only tree that must
+  // stay free of React.
+  //
+  // The compatible range is not declared in the manifest. It is pinned by the
+  // docs theme fixture in scripts/verify-packages.mjs and stated in the
+  // package README instead.
+  for (const field of ["dependencies", "optionalDependencies", "peerDependencies"]) {
+    requireCondition(
+      manifest[field]?.["fumadocs-ui"] === undefined,
+      `${COMPONENT_PACKAGE_NAME} ${field} must not add fumadocs-ui to a consumer dependency graph`
+    )
+  }
 
   return manifest
 }

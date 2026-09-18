@@ -3,4 +3,5 @@
 /.github/workflows/tag-npm.yml text eol=lf
 /.release-bootstrap.yaml text eol=lf
 /packages/tokens/src/style.css text eol=lf
+/packages/components/src/docs/theme.css text eol=lf
 /skills/exui-usage/references/generated/*.md text eol=lf
