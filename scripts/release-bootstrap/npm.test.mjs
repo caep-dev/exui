@@ -5,6 +5,12 @@ test("registry classification distinguishes absence from failures and mismatched
   const { registryStatus } = await import("./npm.mjs")
   const query = (status, body) => registryStatus("@exre/exui", "0.2.0", async () => new Response(JSON.stringify(body), { status }))
   assert.equal(await query(404, { error: "Not found" }), "absent")
+  // The live registry describes a missing package or version with a bare JSON
+  // string rather than an object carrying an `error` field.
+  assert.equal(await query(404, "Not Found"), "absent")
+  assert.equal(await query(404, "version not found: 0.2.0"), "absent")
+  await assert.rejects(query(404, ""), /REGISTRY_INCONSISTENT/)
+  await assert.rejects(query(404, {}), /REGISTRY_INCONSISTENT/)
   assert.equal(await query(200, { name: "@exre/exui", version: "0.2.0" }), "present")
   for (const status of [401, 403, 429, 500]) await assert.rejects(query(status, {}), /REGISTRY_UNAVAILABLE/)
   await assert.rejects(query(200, { name: "@exre/exui", version: "0.1.0" }), /REGISTRY_INCONSISTENT/)
