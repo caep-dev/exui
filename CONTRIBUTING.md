@@ -2,6 +2,14 @@
 
 Thank you for contributing
 
+Read this file before creating a commit or a Pull Request. Repository-specific rules in `AGENTS.md`, module documentation, and CI configuration take precedence over this file.
+
+## Changes
+
+- Keep changes focused; do not mix in unrelated refactors, formatting, or generated files.
+- Add or update the tests and documentation that a behavior change requires.
+- Before committing, run the verification that matches the scope of the change, and report any check you did not run or that was blocked.
+
 ## Code of Conduct
 
 Please be respectful and constructive in all interactions with the community.
@@ -28,7 +36,7 @@ Follow [TESTING.md](TESTING.md) for the complete checks, including visual tests 
 
 Update affected READMEs and [consumer guidance](skills/exui-usage/SKILL.md) when public behavior changes. Maintain engineering documentation under `docs/` when present; place working notes, review reports, and plans under `.notes/`. Generate token CSS and skill inventories with their existing generators rather than editing generated output.
 
-Pull requests should describe the user-facing change, link related issues, and list validation results. Include screenshots or recordings for visual component changes. Documentation-only changes do not need a Changeset unless they accompany release-worthy package behavior.
+Pull requests should describe the user-facing change, link related issues, and list validation results. Call out breaking changes, migration steps, known limitations, or follow-up work. Include screenshots or recordings for visual component changes. Documentation-only changes do not need a Changeset unless they accompany release-worthy package behavior.
 
 ## Commit Messages
 
@@ -46,6 +54,8 @@ All commits should include DCO sign-off:
 ```text
 Signed-off-by: Your Name <your.email@example.com>
 ```
+
+The commit message should state the purpose of the change. Never commit credentials, private configuration, or unrelated artifacts.
 
 ## Version Management
 
