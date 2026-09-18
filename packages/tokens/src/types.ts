@@ -60,6 +60,8 @@ export interface ControlTokens {
   readonly primaryForeground: string
   readonly hover: string
   readonly active: string
+  readonly linkHover: string
+  readonly linkActive: string
   readonly disabled: string
   readonly neutral: string
   readonly neutralForeground: string
@@ -186,4 +188,5 @@ export interface ShadowTokens {
   readonly medium: string
   readonly large: string
   readonly focus: string
+  readonly invalid: string
 }

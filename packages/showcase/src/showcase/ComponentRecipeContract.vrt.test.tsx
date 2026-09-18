@@ -293,6 +293,17 @@ describe.each(themes)("%s recipe contract", (theme) => {
     )
     await expect.element(page.getByTestId("recipe-tabs")).toMatchScreenshot(`recipe-tabs-${theme}-${viewportName}`)
 
+    const primaryTrigger = page.getByTestId("recipe-tab-primary-overview")
+    expect(computed(primaryTrigger, "background-color")).toBe(
+      colorFromVariable("--exui-component-tabs-primary-selected-background")
+    )
+    expect(computed(primaryTrigger, "color")).toBe(
+      colorFromVariable("--exui-component-tabs-primary-selected-foreground")
+    )
+    expect(computed(primaryTrigger, "border-top-color")).toBe(
+      colorFromVariable("--exui-component-tabs-trigger-selected-border")
+    )
+
     await page.getByRole("button", { name: "Test real menu" }).click()
     const menu = page.getByTestId("recipe-menu-content")
     await expect.element(menu).toBeVisible()

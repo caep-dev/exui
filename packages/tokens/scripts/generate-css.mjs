@@ -88,6 +88,8 @@ const semanticVariableByReference = {
   "control.primaryForeground": "--exui-control-primary-foreground",
   "control.hover": "--exui-control-hover",
   "control.active": "--exui-control-active",
+  "control.linkHover": "--exui-control-link-hover",
+  "control.linkActive": "--exui-control-link-active",
   "control.disabled": "--exui-control-disabled",
   "control.neutral": "--exui-control-neutral",
   "control.neutralForeground": "--exui-control-neutral-foreground",
@@ -136,6 +138,7 @@ function createFoundationValueByReference(contract) {
     "shadows.medium": contract.shadows.medium,
     "shadows.large": contract.shadows.large,
     "shadows.focus": contract.shadows.focus,
+    "shadows.invalid": contract.shadows.invalid,
   }
 }
 

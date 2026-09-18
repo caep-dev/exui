@@ -83,7 +83,11 @@ function ActionButton({
       data-slot="action-button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size }), className)}
+      className={cn(
+        buttonVariants({ variant, size }),
+        "rounded-[var(--exui-component-button-action-radius)]",
+        className
+      )}
       {...props}
     />
   )

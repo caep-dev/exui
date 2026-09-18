@@ -387,6 +387,19 @@ describe.each(scalingMatrix)(
         expectScaled(pixels(getComputedStyle(icon).width), 16, scale, `${testId} icon width`)
       }
 
+      // ActionButton replaces the capsule with the tighter shared radius, which
+      // is ordinary geometry and therefore has to scale with the root font size.
+      const actionButtons = [
+        "recipe-action-button-default",
+        "recipe-action-button-secondary",
+        "recipe-action-button-danger",
+        "recipe-action-button-small",
+        "recipe-action-button-large",
+      ] as const
+      for (const testId of actionButtons) {
+        expectScaledProperty(locate(testId), "border-radius", 12, scale)
+      }
+
       const input = locate("recipe-input-default")
       expectScaledProperty(input, "height", 36, scale)
       expectScaledProperty(input, "padding-inline-start", 12, scale)
