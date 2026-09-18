@@ -2,13 +2,18 @@ import { access, readFile } from "node:fs/promises"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
 
-import { createCssVariables, renderCss } from "./generate-css.mjs"
+import {
+  createCssVariables,
+  foundationVariableByReference,
+  renderCss,
+} from "./generate-css.mjs"
 import {
   RECIPE_LENGTH_FIELDS,
   collectLengthPolicyViolations,
   isContractLength,
 } from "./token-length-policy.mjs"
 import { collectColorContrastViolations } from "./color-contrast-policy.mjs"
+import { collectFoundationReferenceViolations } from "./foundation-reference-policy.mjs"
 import { componentRecipes, exuiTokens } from "../dist/index.js"
 
 const packageRoot = fileURLToPath(new URL("..", import.meta.url))
@@ -64,6 +69,17 @@ function validateScalableLengthPolicy() {
 function validateColorContrastPolicy() {
   failures.push(
     ...collectColorContrastViolations({ contract: exuiTokens, recipes: componentRecipes })
+  )
+}
+
+function validateFoundationReferences() {
+  failures.push(
+    ...collectFoundationReferenceViolations({
+      contract: exuiTokens,
+      recipes: componentRecipes,
+      variables: createCssVariables(exuiTokens, componentRecipes).light,
+      variableByReference: foundationVariableByReference,
+    })
   )
 }
 
@@ -392,6 +408,7 @@ validateFrozen(componentRecipes, "componentRecipes")
 validateRecipeContract()
 validateScalableLengthPolicy()
 validateColorContrastPolicy()
+validateFoundationReferences()
 validateColors(exuiTokens.themes)
 validateContrast()
 await validateGeneratedCss()

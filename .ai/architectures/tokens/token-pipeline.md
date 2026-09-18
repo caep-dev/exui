@@ -39,7 +39,7 @@ validate-tokens scripts/validate-tokens.mjs → 结构与取值校验
 | `.pitch-black` | 同上，第三套主题 |
 | `.density-compact` | 只包含五个 `--density-*` 变量 |
 
-配方值在生成期解析：`{ kind: "foundation" }` 引用被替换为字面值，`{ kind: "semantic" }` 引用被替换为 `var(--exui-…)`。因此组件配方既可以被非 React 消费者作为数据读取，也可以在组件样式表里以变量形式生效。`defaultVariant` 与 `defaultSize` 不作为变量输出。相关决策见 [[tokens/01-rem-scalable-lengths]]。
+配方值在生成期解析：`{ kind: "foundation" }` 与 `{ kind: "semantic" }` 引用都被替换为 `var(--exui-…)`。因此组件配方既可以被非 React 消费者作为数据读取，也可以在组件样式表里以变量形式生效，消费者覆盖 foundation 或语义 Token 都会传导到组件。foundation Token 因此各自都有一个对应的 CSS 变量（`--exui-font-family`、`--exui-font-size-*`、`--exui-line-height-*`、`--exui-radius-*`、`--exui-shadow-*`），`--radius` 自身是 `var(--exui-radius-large)`。`defaultVariant` 与 `defaultSize` 不作为变量输出。相关决策见 [[tokens/01-rem-scalable-lengths]] 与 [[tokens/03-foundation-references-in-emitted-css]]。
 
 变量命名前缀区分用途：`--exui-*` 为 Token，`--density-*` 为密度，`--exui-component-*` 为配方，`--exui-shadow-*` 为阴影，其余无前缀的短名是 shadcn/ui 语义别名。
 
@@ -52,14 +52,17 @@ typecheck → build:js → build:cjs → verify-cjs → generate-css --check
           → copy-css → validate-tokens → node --test scripts/**/*.test.mjs
 ```
 
-其中三项承担契约级断言：
+其中四项承担契约级断言：
 
 - `verify-cjs.mjs`：require/import 两棵 Token 树与配方树逐值相等、深度冻结，且主题、密度、配方键名集合完整（防止产物为空或截断时被"两边都空"掩盖）。
 - `generate-css.mjs --check`：已提交的 `src/style.css` 与重新生成的字符串**逐字节相等**，否则报 stale。
+- `foundation-reference-policy.mjs`：foundation 变量映射与契约的 foundation 叶子集合互相覆盖、每个被命名的变量都已声明且取值等于契约值、配方变量不引用未声明变量，且每条 foundation 引用的出现次数等于引用它的配方叶子数（防止某处退回字面值）。
 - `token-length-policy.mjs` 与 `color-contrast-policy.mjs`：纯策略模块，由 `*.test.mjs` 在内存副本上施加，永不改写真实源文件。
 
-长度策略与对比度策略都区分"内建值"与"公共契约"：内建可缩放长度只接受 `rem` 与 `0`，而公共的 `RecipeLength` 继续接受 px，使消费者已有的自定义配方保持合法。
+长度策略与对比度策略都区分"内建值"与"公共契约"：内建可缩放长度只接受 `rem` 与 `0`，而公共的 `RecipeLength` 继续接受 px，使消费者已有的自定义配方保持合法。foundation 引用策略同样在 JS 层判定，因此把产物改成 `var()` 不改变长度策略的结论。
 
 ## 消费面
 
 包内消费者通过 `@exre/exui-tokens` 及其 `style.css`、`font.css` 子路径解析；仓库外消费者只能使用公共包上的等价子路径。两者共享同一份产物，公开侧只是构建期复制的结果，结构见 `architectures/components/public-surface.md`。
+
+样式表同时是消费者的定制面：Token 都是 `:root`（以及 `.dark`、`.pitch-black`，二者只含与 light 不同的取值）上的自定义属性，且产物里这些声明**不在任何 `@layer` 内**，因此消费者只需在样式表之后、不放进任何 layer 地重声明同名属性即可覆盖，foundation 覆盖会经 `var()` 传导到组件。`--density-*` 与 `.density-compact` 目前没有任何消费者，覆盖它们不产生视觉效果。
