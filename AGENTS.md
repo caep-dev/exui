@@ -6,7 +6,7 @@ This repository is a private pnpm workspace for the ExUI visual foundation. `pac
 
 ## Documentation Locations
 
-Use `/docs/` for maintained engineering documentation that is intended to be part of the project record. Use `/notes/` for development notes and agent-authored working material. All AI-generated reports, ADRs, RFCs, implementation plans, audits, and similar planning artifacts must be created under `/notes/`, not in `/docs/`, unless a maintainer explicitly promotes them.
+Use `/docs/` for maintained engineering documentation that is intended to be part of the project record. Use `/.notes/` for development notes and agent-authored working material. All AI-generated reports, ADRs, RFCs, implementation plans, audits, and similar planning artifacts must be created under `/.notes/`, not in `/docs/`, unless a maintainer explicitly promotes them.
 
 ## Build, Test, and Development Commands
 

@@ -8,6 +8,7 @@ import {
   collectLengthPolicyViolations,
   isContractLength,
 } from "./token-length-policy.mjs"
+import { collectColorContrastViolations } from "./color-contrast-policy.mjs"
 import { componentRecipes, exuiTokens } from "../dist/index.js"
 
 const packageRoot = fileURLToPath(new URL("..", import.meta.url))
@@ -57,6 +58,12 @@ function validateDensity() {
 function validateScalableLengthPolicy() {
   failures.push(
     ...collectLengthPolicyViolations({ contract: exuiTokens, recipes: componentRecipes })
+  )
+}
+
+function validateColorContrastPolicy() {
+  failures.push(
+    ...collectColorContrastViolations({ contract: exuiTokens, recipes: componentRecipes })
   )
 }
 
@@ -146,14 +153,15 @@ function validateRecipeContract() {
     "typography.fontFamily", "typography.fontWeightRegular", "typography.fontWeightMedium",
     "typography.fontWeightBold", "typography.bodyFontSize", "typography.bodyLineHeight",
     "typography.smallFontSize", "typography.smallLineHeight", "shadows.small", "shadows.medium",
-    "shadows.large", "shadows.focus",
+    "shadows.large", "shadows.focus", "shadows.invalid",
   ])
   const semanticReferences = new Set([
     "surface.background", "surface.secondary", "surface.tertiary", "surface.accent",
     "surface.accentForeground", "surface.popover", "surface.popoverForeground", "surface.modal",
     "surface.menu", "surface.sidebar", "surface.input", "surface.overlay", "text.primary",
     "text.secondary", "text.placeholder", "text.link", "text.inverse", "control.primary",
-    "control.primaryForeground", "control.hover", "control.active", "control.disabled",
+    "control.primaryForeground", "control.hover", "control.active", "control.linkHover",
+    "control.linkActive", "control.disabled",
     "control.neutral", "control.neutralForeground", "control.danger", "control.dangerForeground",
     "control.invalid", "control.selected", "control.focusRing", "border.default", "border.strong",
     "border.input", "border.focused", "border.divider", "feedback.danger",
@@ -383,6 +391,7 @@ validateFrozen(exuiTokens)
 validateFrozen(componentRecipes, "componentRecipes")
 validateRecipeContract()
 validateScalableLengthPolicy()
+validateColorContrastPolicy()
 validateColors(exuiTokens.themes)
 validateContrast()
 await validateGeneratedCss()

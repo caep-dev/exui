@@ -250,6 +250,13 @@ export function ComponentRecipeContract() {
               <Button data-testid="recipe-button-danger" variant="danger">Danger</Button>
               <Button data-testid="recipe-button-disabled" disabled>Disabled</Button>
             </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <ActionButton data-testid="recipe-action-button-default">Action</ActionButton>
+              <ActionButton data-testid="recipe-action-button-secondary" variant="secondary">Secondary action</ActionButton>
+              <ActionButton data-testid="recipe-action-button-danger" variant="danger">Danger action</ActionButton>
+              <ActionButton data-testid="recipe-action-button-small" size="sm">Small action</ActionButton>
+              <ActionButton data-testid="recipe-action-button-large" size="lg">Large action</ActionButton>
+            </div>
           </div>
         </PreviewPanel>
 
@@ -407,6 +414,12 @@ export function ComponentRecipeContract() {
               <TabsList data-testid="recipe-tabs-line-list" variant="line">
                 <TabsTrigger data-testid="recipe-tab-line-overview" value="overview">Overview</TabsTrigger>
                 <TabsTrigger data-testid="recipe-tab-line-details" value="details">Details</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Tabs defaultValue="overview">
+              <TabsList data-testid="recipe-tabs-primary-list" variant="primary">
+                <TabsTrigger data-testid="recipe-tab-primary-overview" value="overview">Overview</TabsTrigger>
+                <TabsTrigger data-testid="recipe-tab-primary-details" value="details">Details</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

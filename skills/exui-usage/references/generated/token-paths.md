@@ -23,6 +23,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `exuiTokens.radii.none`
 - `exuiTokens.radii.small`
 - `exuiTokens.shadows.focus`
+- `exuiTokens.shadows.invalid`
 - `exuiTokens.shadows.large`
 - `exuiTokens.shadows.medium`
 - `exuiTokens.shadows.small`
@@ -43,6 +44,8 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `exuiTokens.themes.dark.control.focusRing`
 - `exuiTokens.themes.dark.control.hover`
 - `exuiTokens.themes.dark.control.invalid`
+- `exuiTokens.themes.dark.control.linkActive`
+- `exuiTokens.themes.dark.control.linkHover`
 - `exuiTokens.themes.dark.control.neutral`
 - `exuiTokens.themes.dark.control.neutralForeground`
 - `exuiTokens.themes.dark.control.primary`
@@ -134,6 +137,8 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `exuiTokens.themes.light.control.focusRing`
 - `exuiTokens.themes.light.control.hover`
 - `exuiTokens.themes.light.control.invalid`
+- `exuiTokens.themes.light.control.linkActive`
+- `exuiTokens.themes.light.control.linkHover`
 - `exuiTokens.themes.light.control.neutral`
 - `exuiTokens.themes.light.control.neutralForeground`
 - `exuiTokens.themes.light.control.primary`
@@ -225,6 +230,8 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `exuiTokens.themes.pitchBlack.control.focusRing`
 - `exuiTokens.themes.pitchBlack.control.hover`
 - `exuiTokens.themes.pitchBlack.control.invalid`
+- `exuiTokens.themes.pitchBlack.control.linkActive`
+- `exuiTokens.themes.pitchBlack.control.linkHover`
 - `exuiTokens.themes.pitchBlack.control.neutral`
 - `exuiTokens.themes.pitchBlack.control.neutralForeground`
 - `exuiTokens.themes.pitchBlack.control.primary`
@@ -312,6 +319,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 
 ## componentRecipes
 
+- `componentRecipes.button.action.radius`
 - `componentRecipes.button.danger.active.background.kind`
 - `componentRecipes.button.danger.active.background.path`
 - `componentRecipes.button.danger.active.border.kind`
@@ -338,8 +346,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.button.danger.disabled.shadow`
 - `componentRecipes.button.danger.focus.background.kind`
 - `componentRecipes.button.danger.focus.background.path`
-- `componentRecipes.button.danger.focus.border.kind`
-- `componentRecipes.button.danger.focus.border.path`
+- `componentRecipes.button.danger.focus.border`
 - `componentRecipes.button.danger.focus.foreground.kind`
 - `componentRecipes.button.danger.focus.foreground.path`
 - `componentRecipes.button.danger.focus.opacity`
@@ -389,8 +396,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.button.ghost.disabled.opacity`
 - `componentRecipes.button.ghost.disabled.shadow`
 - `componentRecipes.button.ghost.focus.background`
-- `componentRecipes.button.ghost.focus.border.kind`
-- `componentRecipes.button.ghost.focus.border.path`
+- `componentRecipes.button.ghost.focus.border`
 - `componentRecipes.button.ghost.focus.foreground.kind`
 - `componentRecipes.button.ghost.focus.foreground.path`
 - `componentRecipes.button.ghost.focus.opacity`
@@ -450,8 +456,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.button.link.disabled.opacity`
 - `componentRecipes.button.link.disabled.shadow`
 - `componentRecipes.button.link.focus.background`
-- `componentRecipes.button.link.focus.border.kind`
-- `componentRecipes.button.link.focus.border.path`
+- `componentRecipes.button.link.focus.border`
 - `componentRecipes.button.link.focus.foreground.kind`
 - `componentRecipes.button.link.focus.foreground.path`
 - `componentRecipes.button.link.focus.opacity`
@@ -489,8 +494,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.button.outline.disabled.shadow`
 - `componentRecipes.button.outline.focus.background.kind`
 - `componentRecipes.button.outline.focus.background.path`
-- `componentRecipes.button.outline.focus.border.kind`
-- `componentRecipes.button.outline.focus.border.path`
+- `componentRecipes.button.outline.focus.border`
 - `componentRecipes.button.outline.focus.foreground.kind`
 - `componentRecipes.button.outline.focus.foreground.path`
 - `componentRecipes.button.outline.focus.opacity`
@@ -530,8 +534,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.button.primary.disabled.shadow`
 - `componentRecipes.button.primary.focus.background.kind`
 - `componentRecipes.button.primary.focus.background.path`
-- `componentRecipes.button.primary.focus.border.kind`
-- `componentRecipes.button.primary.focus.border.path`
+- `componentRecipes.button.primary.focus.border`
 - `componentRecipes.button.primary.focus.foreground.kind`
 - `componentRecipes.button.primary.focus.foreground.path`
 - `componentRecipes.button.primary.focus.opacity`
@@ -571,8 +574,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.button.secondary.disabled.shadow`
 - `componentRecipes.button.secondary.focus.background.kind`
 - `componentRecipes.button.secondary.focus.background.path`
-- `componentRecipes.button.secondary.focus.border.kind`
-- `componentRecipes.button.secondary.focus.border.path`
+- `componentRecipes.button.secondary.focus.border`
 - `componentRecipes.button.secondary.focus.foreground.kind`
 - `componentRecipes.button.secondary.focus.foreground.path`
 - `componentRecipes.button.secondary.focus.opacity`
@@ -670,8 +672,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.formControl.disabled.shadow`
 - `componentRecipes.formControl.focus.background.kind`
 - `componentRecipes.formControl.focus.background.path`
-- `componentRecipes.formControl.focus.border.kind`
-- `componentRecipes.formControl.focus.border.path`
+- `componentRecipes.formControl.focus.border`
 - `componentRecipes.formControl.focus.foreground.kind`
 - `componentRecipes.formControl.focus.foreground.path`
 - `componentRecipes.formControl.focus.opacity`
@@ -679,16 +680,14 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.formControl.focus.shadow.path`
 - `componentRecipes.formControl.hover.background.kind`
 - `componentRecipes.formControl.hover.background.path`
-- `componentRecipes.formControl.hover.border.kind`
-- `componentRecipes.formControl.hover.border.path`
+- `componentRecipes.formControl.hover.border`
 - `componentRecipes.formControl.hover.foreground.kind`
 - `componentRecipes.formControl.hover.foreground.path`
 - `componentRecipes.formControl.hover.opacity`
 - `componentRecipes.formControl.hover.shadow`
 - `componentRecipes.formControl.invalid.background.kind`
 - `componentRecipes.formControl.invalid.background.path`
-- `componentRecipes.formControl.invalid.border.kind`
-- `componentRecipes.formControl.invalid.border.path`
+- `componentRecipes.formControl.invalid.border`
 - `componentRecipes.formControl.invalid.foreground.kind`
 - `componentRecipes.formControl.invalid.foreground.path`
 - `componentRecipes.formControl.invalid.opacity`
@@ -702,8 +701,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.menu.checkedItem.indicator.path`
 - `componentRecipes.menu.item.active.background.kind`
 - `componentRecipes.menu.item.active.background.path`
-- `componentRecipes.menu.item.active.border.kind`
-- `componentRecipes.menu.item.active.border.path`
+- `componentRecipes.menu.item.active.border`
 - `componentRecipes.menu.item.active.foreground.kind`
 - `componentRecipes.menu.item.active.foreground.path`
 - `componentRecipes.menu.item.active.opacity`
@@ -728,8 +726,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.menu.item.disabled.shadow`
 - `componentRecipes.menu.item.focus.background.kind`
 - `componentRecipes.menu.item.focus.background.path`
-- `componentRecipes.menu.item.focus.border.kind`
-- `componentRecipes.menu.item.focus.border.path`
+- `componentRecipes.menu.item.focus.border`
 - `componentRecipes.menu.item.focus.foreground.kind`
 - `componentRecipes.menu.item.focus.foreground.path`
 - `componentRecipes.menu.item.focus.opacity`
@@ -762,8 +759,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.menu.shortcut.marginInlineStart`
 - `componentRecipes.menu.submenuTrigger.active.background.kind`
 - `componentRecipes.menu.submenuTrigger.active.background.path`
-- `componentRecipes.menu.submenuTrigger.active.border.kind`
-- `componentRecipes.menu.submenuTrigger.active.border.path`
+- `componentRecipes.menu.submenuTrigger.active.border`
 - `componentRecipes.menu.submenuTrigger.active.foreground.kind`
 - `componentRecipes.menu.submenuTrigger.active.foreground.path`
 - `componentRecipes.menu.submenuTrigger.active.opacity`
@@ -782,8 +778,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.menu.submenuTrigger.disabled.shadow`
 - `componentRecipes.menu.submenuTrigger.focus.background.kind`
 - `componentRecipes.menu.submenuTrigger.focus.background.path`
-- `componentRecipes.menu.submenuTrigger.focus.border.kind`
-- `componentRecipes.menu.submenuTrigger.focus.border.path`
+- `componentRecipes.menu.submenuTrigger.focus.border`
 - `componentRecipes.menu.submenuTrigger.focus.foreground.kind`
 - `componentRecipes.menu.submenuTrigger.focus.foreground.path`
 - `componentRecipes.menu.submenuTrigger.focus.opacity`
@@ -816,8 +811,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.menu.surface.shadow.path`
 - `componentRecipes.sidebarItem.active.background.kind`
 - `componentRecipes.sidebarItem.active.background.path`
-- `componentRecipes.sidebarItem.active.border.kind`
-- `componentRecipes.sidebarItem.active.border.path`
+- `componentRecipes.sidebarItem.active.border`
 - `componentRecipes.sidebarItem.active.foreground.kind`
 - `componentRecipes.sidebarItem.active.foreground.path`
 - `componentRecipes.sidebarItem.active.opacity`
@@ -846,8 +840,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.sidebarItem.disabled.opacity`
 - `componentRecipes.sidebarItem.disabled.shadow`
 - `componentRecipes.sidebarItem.focus.background`
-- `componentRecipes.sidebarItem.focus.border.kind`
-- `componentRecipes.sidebarItem.focus.border.path`
+- `componentRecipes.sidebarItem.focus.border`
 - `componentRecipes.sidebarItem.focus.foreground.kind`
 - `componentRecipes.sidebarItem.focus.foreground.path`
 - `componentRecipes.sidebarItem.focus.opacity`
@@ -900,6 +893,16 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.tabs.list.padding`
 - `componentRecipes.tabs.list.radius.kind`
 - `componentRecipes.tabs.list.radius.path`
+- `componentRecipes.tabs.primary.indicatorOpacity`
+- `componentRecipes.tabs.primary.listBackground.kind`
+- `componentRecipes.tabs.primary.listBackground.path`
+- `componentRecipes.tabs.primary.selected.background.kind`
+- `componentRecipes.tabs.primary.selected.background.path`
+- `componentRecipes.tabs.primary.selected.border`
+- `componentRecipes.tabs.primary.selected.foreground.kind`
+- `componentRecipes.tabs.primary.selected.foreground.path`
+- `componentRecipes.tabs.primary.selected.opacity`
+- `componentRecipes.tabs.primary.selected.shadow`
 - `componentRecipes.tabs.trigger.default.background`
 - `componentRecipes.tabs.trigger.default.border`
 - `componentRecipes.tabs.trigger.default.foreground.kind`
@@ -913,8 +916,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.tabs.trigger.disabled.opacity`
 - `componentRecipes.tabs.trigger.disabled.shadow`
 - `componentRecipes.tabs.trigger.focus.background`
-- `componentRecipes.tabs.trigger.focus.border.kind`
-- `componentRecipes.tabs.trigger.focus.border.path`
+- `componentRecipes.tabs.trigger.focus.border`
 - `componentRecipes.tabs.trigger.focus.foreground.kind`
 - `componentRecipes.tabs.trigger.focus.foreground.path`
 - `componentRecipes.tabs.trigger.focus.opacity`
@@ -937,13 +939,11 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `componentRecipes.tabs.trigger.radius.path`
 - `componentRecipes.tabs.trigger.selected.background.kind`
 - `componentRecipes.tabs.trigger.selected.background.path`
-- `componentRecipes.tabs.trigger.selected.border.kind`
-- `componentRecipes.tabs.trigger.selected.border.path`
+- `componentRecipes.tabs.trigger.selected.border`
 - `componentRecipes.tabs.trigger.selected.foreground.kind`
 - `componentRecipes.tabs.trigger.selected.foreground.path`
 - `componentRecipes.tabs.trigger.selected.opacity`
-- `componentRecipes.tabs.trigger.selected.shadow.kind`
-- `componentRecipes.tabs.trigger.selected.shadow.path`
+- `componentRecipes.tabs.trigger.selected.shadow`
 
 ## CSS custom properties
 
@@ -975,6 +975,7 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `--exui-chart-series3`
 - `--exui-chart-series4`
 - `--exui-chart-series5`
+- `--exui-component-button-action-radius`
 - `--exui-component-button-danger-active-background`
 - `--exui-component-button-danger-active-border`
 - `--exui-component-button-danger-active-foreground`
@@ -1364,6 +1365,13 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `--exui-component-tabs-list-height`
 - `--exui-component-tabs-list-padding`
 - `--exui-component-tabs-list-radius`
+- `--exui-component-tabs-primary-indicator-opacity`
+- `--exui-component-tabs-primary-list-background`
+- `--exui-component-tabs-primary-selected-background`
+- `--exui-component-tabs-primary-selected-border`
+- `--exui-component-tabs-primary-selected-foreground`
+- `--exui-component-tabs-primary-selected-opacity`
+- `--exui-component-tabs-primary-selected-shadow`
 - `--exui-component-tabs-trigger-default-background`
 - `--exui-component-tabs-trigger-default-border`
 - `--exui-component-tabs-trigger-default-foreground`
@@ -1402,6 +1410,8 @@ This inventory lists public names only. It intentionally excludes resolved Token
 - `--exui-control-focus-ring`
 - `--exui-control-hover`
 - `--exui-control-invalid`
+- `--exui-control-link-active`
+- `--exui-control-link-hover`
 - `--exui-control-neutral`
 - `--exui-control-neutral-foreground`
 - `--exui-control-primary`

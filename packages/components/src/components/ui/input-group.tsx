@@ -14,7 +14,13 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="input-group"
       role="group"
       className={cn(
-        "group/input-group relative flex h-9 w-full min-w-0 items-center rounded-4xl border border-transparent bg-input/50 transition-[color,box-shadow,background-color] outline-none in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:ring-0 has-data-[align=block-end]:rounded-3xl has-data-[align=block-start]:rounded-3xl has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-2 has-[[data-slot=input-group-control]:focus-visible]:ring-ring has-[[data-slot][aria-invalid=true]]:border-destructive has-[[data-slot][aria-invalid=true]]:ring-3 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[textarea]:rounded-2xl has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-1.5 has-[>[data-align=inline-start]]:[&>input]:pl-1.5",
+        // The group owns the form-control chrome, so it also owns the state
+        // rings: it paints the recipe's focus and invalid shadows on its own
+        // border box, exactly as `Input` and `SelectTrigger` do, and the
+        // control inside stops painting its own (`InputGroupInput`). Without
+        // that split the control's ring is a rectangle around the middle
+        // segment and the group's border straddles it.
+        "group/input-group relative flex h-9 w-full min-w-0 items-center rounded-4xl border border-transparent bg-input/50 transition-[color,box-shadow,background-color] outline-none in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:[box-shadow:none] has-data-[align=block-end]:rounded-3xl has-data-[align=block-start]:rounded-3xl has-[[data-slot=input-group-control]:focus-visible]:[box-shadow:var(--exui-component-form-control-focus-shadow)] has-[[data-slot][aria-invalid=true]]:[box-shadow:var(--exui-component-form-control-invalid-shadow)] has-[textarea]:rounded-2xl has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-1.5 has-[>[data-align=inline-start]]:[&>input]:pl-1.5",
         className
       )}
       {...props}
@@ -119,7 +125,14 @@ function InputGroupInput({
     <Input
       data-slot="input-group-control"
       className={cn(
-        "flex-1 rounded-none border-0 bg-transparent shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
+        // The control overrides the form-control recipe background with the same
+        // `background` shorthand the Input declares, so the two merge into one
+        // declaration. A `bg-transparent` utility would set `background-color`
+        // instead, survive the merge, and lose the cascade to the shorthand.
+        // The state shadows need the opposite treatment: they are the group's
+        // to paint, so the control clears them with the same arbitrary-property
+        // form, which merges with the recipe's own declaration.
+        "flex-1 rounded-none border-0 shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 focus-visible:[box-shadow:none] aria-invalid:[box-shadow:none] [background:transparent] hover:[background:transparent] focus-visible:[background:transparent] disabled:[background:transparent] aria-invalid:[background:transparent]",
         className
       )}
       {...props}
@@ -135,7 +148,7 @@ function InputGroupTextarea({
     <Textarea
       data-slot="input-group-control"
       className={cn(
-        "flex-1 resize-none rounded-none border-0 bg-transparent py-2.5 shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent",
+        "flex-1 resize-none rounded-none border-0 py-2.5 shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 focus-visible:[box-shadow:none] aria-invalid:[box-shadow:none] [background:transparent] hover:[background:transparent] focus-visible:[background:transparent] disabled:[background:transparent] aria-invalid:[background:transparent]",
         className
       )}
       {...props}

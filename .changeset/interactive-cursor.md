@@ -1,0 +1,5 @@
+---
+"@exre/exui": patch
+---
+
+Interactive elements point again. Tailwind v4 dropped the `cursor: pointer` that v3's preflight put on buttons, so every button, tab, select, checkbox, radio, switch, and menu item fell back to the browser's arrow cursor and stopped reading as clickable next to the links beside them. The rule now lives in one `@layer base` block covering `button`, `select`, and the `option`, `menuitem`, `menuitemcheckbox`, and `menuitemradio` roles that Radix, Base UI, and cmdk render as non-buttons; the menu-family items that explicitly asked for `cursor-default` no longer do, so they follow the same rule. Deliberate cursors are untouched: `not-allowed` on a disabled form control, `text` over an input group's addon, and the resize cursors on the sidebar rail and a resizable handle. A disabled option is excluded through `aria-disabled` rather than `data-disabled`, because Radix writes `""` there while cmdk writes `"true"` and `"false"`, and no selector can tell cmdk's enabled `"false"` apart from a disabled item.

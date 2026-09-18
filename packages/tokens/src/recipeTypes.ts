@@ -18,6 +18,7 @@ export type FoundationTokenReference =
   | "shadows.medium"
   | "shadows.large"
   | "shadows.focus"
+  | "shadows.invalid"
 
 /** Theme-aware semantic-token references supported by component recipes. */
 export type SemanticTokenReference =
@@ -42,6 +43,8 @@ export type SemanticTokenReference =
   | "control.primaryForeground"
   | "control.hover"
   | "control.active"
+  | "control.linkHover"
+  | "control.linkActive"
   | "control.disabled"
   | "control.neutral"
   | "control.neutralForeground"
@@ -181,6 +184,11 @@ export interface ButtonSizeRecipe {
   readonly lineHeight: RecipeLineHeight
 }
 
+/** Shape shared by every ActionButton size, which uses a tighter radius than Button. */
+export interface ButtonActionRecipe {
+  readonly radius: RecipeRadius
+}
+
 /** Complete public Button recipe. */
 export interface ButtonRecipe {
   readonly defaultVariant: ButtonVariantName
@@ -195,6 +203,7 @@ export interface ButtonRecipe {
   readonly small: ButtonSizeRecipe
   readonly large: ButtonSizeRecipe
   readonly icon: ButtonSizeRecipe
+  readonly action: ButtonActionRecipe
 }
 
 /** Base geometry, typography, and chrome shared by form controls. */
@@ -358,7 +367,7 @@ export interface DialogRecipe {
 }
 
 /** Supported public Tabs visual variants. */
-export type TabsVariantName = "default" | "line"
+export type TabsVariantName = "default" | "primary" | "line"
 
 /** Tabs list geometry and chrome. */
 export interface TabsListRecipe {
@@ -402,6 +411,11 @@ export interface TabsLineVariantRecipe extends TabsVariantRecipe {
   readonly triggerSelectedBackground: RecipeColor
 }
 
+/** Selected tab styled as a filled control, used by the `primary` variant. */
+export interface TabsPrimaryVariantRecipe extends TabsVariantRecipe {
+  readonly selected: InteractiveStateRecipe
+}
+
 /** Complete public Tabs recipe. */
 export interface TabsRecipe {
   readonly defaultVariant: TabsVariantName
@@ -410,6 +424,7 @@ export interface TabsRecipe {
   readonly indicator: TabsIndicatorRecipe
   readonly default: TabsVariantRecipe
   readonly line: TabsLineVariantRecipe
+  readonly primary: TabsPrimaryVariantRecipe
 }
 
 /** Public component-recipe collection released through `@exre/exui/tokens`. */
