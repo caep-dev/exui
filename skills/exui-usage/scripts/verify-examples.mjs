@@ -1,7 +1,7 @@
 // verify-examples.mjs — the exui-usage example gate.
 //
 // Contract approved by team-lead on 2026-09-11 (design report and rulings in
-// notes/skill-refine/). The gate discovers every skill example, enforces the
+// .notes/skill-refine/). The gate discovers every skill example, enforces the
 // import allowlist, requires documentation links in both directions (no
 // orphan examples, no dangling example links), and compiles all examples in
 // an isolated packed consumer with strict TypeScript checks

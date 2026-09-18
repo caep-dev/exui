@@ -26,7 +26,7 @@ Follow [TESTING.md](TESTING.md) for the complete checks, including visual tests 
 
 ## Documentation and pull requests
 
-Update affected READMEs and [consumer guidance](skills/exui-usage/SKILL.md) when public behavior changes. Maintain engineering documentation under `docs/` when present; place working notes, review reports, and plans under `notes/`. Generate token CSS and skill inventories with their existing generators rather than editing generated output.
+Update affected READMEs and [consumer guidance](skills/exui-usage/SKILL.md) when public behavior changes. Maintain engineering documentation under `docs/` when present; place working notes, review reports, and plans under `.notes/`. Generate token CSS and skill inventories with their existing generators rather than editing generated output.
 
 Pull requests should describe the user-facing change, link related issues, and list validation results. Include screenshots or recordings for visual component changes. Documentation-only changes do not need a Changeset unless they accompany release-worthy package behavior.
 
