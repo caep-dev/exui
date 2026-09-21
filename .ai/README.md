@@ -1,6 +1,6 @@
 # ExUI 仓库知识库
 
-最后更新：2026-09-18
+最后更新：2026-09-21
 
 本目录记录 ExUI 仓库中**不能直接从源码读出来**的知识：系统边界与依赖方向、已被接受的技术决策及其理由、以及只有在真实运行或 CI 中才会暴露的约束。这些结论全部来自仓库证据（代码、配置、CI、变更记录与已归档的设计文档），不包含推测。
 
@@ -51,7 +51,7 @@
 ## 主要证据来源
 
 - 工作区与构建：`package.json`、`pnpm-workspace.yaml`、`tsconfig.json`、各包的 `package.json` 与 `vite.config.ts`
-- 生成与校验：`packages/tokens/scripts/`（`generate-css.mjs`、`verify-cjs.mjs`、`validate-tokens.mjs`、`token-length-policy.mjs`、`color-contrast-policy.mjs`、`foundation-reference-policy.mjs`）、`scripts/package-contract.mjs`、`scripts/verify-packages.mjs`、`scripts/verify-react-browser.mjs`
+- 生成与校验：`packages/tokens/scripts/`（`generate-css.mjs`、`verify-cjs.mjs`、`validate-tokens.mjs`、`token-length-policy.mjs`、`color-contrast-policy.mjs`、`foundation-reference-policy.mjs`、`glass-policy.mjs`）、`scripts/package-contract.mjs`、`scripts/verify-packages.mjs`、`scripts/verify-react-browser.mjs`
 - 交付与发布：`.github/workflows/ci.yml`、`release.yml`、`tag-npm.yml`、`.release-bootstrap.yaml`、`scripts/release-bootstrap/`、`.changeset/config.json`
 - 测试与视觉基线：`TESTING.md`、`packages/showcase/vitest.config.ts`、`packages/showcase/src/showcase/*.vrt.test.tsx` 与其 `__screenshots__/` 基线
-- 设计依据：`.notes/archive/` 与 `.notes/rem-sizing/` 下已归档且被实现印证的设计文档
+- 设计依据：`.notes/archive/`、`.notes/rem-sizing/` 与 `.notes/glass-effects/` 下已归档或已被实现印证的设计文档

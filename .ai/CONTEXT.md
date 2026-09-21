@@ -1,6 +1,6 @@
 # Exre UI
 
-最后更新：2026-09-18
+最后更新：2026-09-21
 
 Exre UI 是 Exre 品牌界面的共享 React 组件库，由本仓库发布。它存在的意义是让其他 UI 应用依赖一个品牌自有的组件包，而不是各自复制组件代码。
 
@@ -49,3 +49,19 @@ _Avoid_: 组件样式表、主题配置
 **密度（Density）**:
 同一套组件在标准与紧凑两档下切换控件几何的机制，通过 `density` Token 集合与 `.density-compact` 变量块实现，与主题正交。
 _Avoid_: 尺寸模式、紧凑主题
+
+**玻璃材质（Glass Material）**:
+由 `glass` 布尔属性或 `ex-glass` 类开启的共享半透明表面：半透明底色、背景模糊、饱和调整与不改变盒尺寸的 inset 边缘，可选叠加 SVG 折射。
+_Avoid_: 毛玻璃特效、glassmorphism 组件、液体玻璃
+
+**基础材质与增强（Base Material / Enhancement）**:
+同一种材质的两个层次。基础材质是完全由 CSS 提供的半透明与模糊，任何时候都可用；增强是依赖 SVG 滤镜与每个 document 的种子的折射，只有资格检查通过时才生效。
+_Avoid_: 回退材质、高级模式、降级层
+
+**材质标记（Material Marker）**:
+开启材质的那个标记本身：普通表面是 `ex-glass` 类，委托型表面（如 `Bubble`）是 `data-exui-glass-delegate` 属性。它以空白分词整体匹配，不从 class 字符串里推测。
+_Avoid_: glass 类名、样式钩子、玻璃开关
+
+**滤镜种子（Filter Seed）**:
+`GlassSeed` 渲染的静态 SVG 滤镜定义。每个 document 一个；它不是 provider，不渲染 children，不占布局，也不提供调参入口。
+_Avoid_: Provider、滤镜容器、玻璃根节点

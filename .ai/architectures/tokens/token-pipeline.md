@@ -1,6 +1,6 @@
 # Token 生成与消费结构
 
-最后更新：2026-09-18
+最后更新：2026-09-21
 
 ## 源与产物
 
@@ -8,7 +8,7 @@
 
 | 源文件 | 内容 |
 | --- | --- |
-| `src/tokens.ts` | `exuiTokens`：`themes`（`light` / `dark` / `pitchBlack`）、`density`（`standard` / `compact`）、`typography`、`radii`、`shadows`，以及各主题下的 `surface`、`text`、`control`、`border`、`feedback`、`sidebar`、`chart`、`editor` 分组 |
+| `src/tokens.ts` | `exuiTokens`：`themes`（`light` / `dark` / `pitchBlack`）、`density`（`standard` / `compact`）、`typography`、`radii`、`shadows`，以及各主题下的 `surface`、`text`、`control`、`border`、`feedback`、`sidebar`、`chart`、`editor`、`glass` 分组 |
 | `src/recipes.ts` | `componentRecipes`：`button`、`dialog`、`formControl`、`menu`、`sidebarItem`、`tabs` 六类组件配方 |
 | `src/types.ts` | Token 契约类型（`ExuiTokenContract`、`ThemeTokens`、各分组类型） |
 | `src/recipeTypes.ts` | 配方契约类型；`RecipeLength` 是长度值的公共类型 |
@@ -41,6 +41,17 @@ validate-tokens scripts/validate-tokens.mjs → 结构与取值校验
 
 配方值在生成期解析：`{ kind: "foundation" }` 与 `{ kind: "semantic" }` 引用都被替换为 `var(--exui-…)`。因此组件配方既可以被非 React 消费者作为数据读取，也可以在组件样式表里以变量形式生效，消费者覆盖 foundation 或语义 Token 都会传导到组件。foundation Token 因此各自都有一个对应的 CSS 变量（`--exui-font-family`、`--exui-font-size-*`、`--exui-line-height-*`、`--exui-radius-*`、`--exui-shadow-*`），`--radius` 自身是 `var(--exui-radius-large)`。`defaultVariant` 与 `defaultSize` 不作为变量输出。相关决策见 [[tokens/01-rem-scalable-lengths]] 与 [[tokens/03-foundation-references-in-emitted-css]]。
 
+`glass` 是**唯一不按字面值展平**的主题分组，它的部分叶子在生成期被改写成引用，理由是这些值必须随各自的语义 Token 一起被消费者覆盖，写成字面副本会让覆盖停在 `:root`：
+
+| 叶子 | 发射形式 | 原因 |
+| --- | --- | --- |
+| `glass.foreground` | `var(--exui-text-primary)` | 跟随主题正文色 |
+| `glass.shadow` | `inset 0 0 0 <厚度> var(--exui-glass-border)` | 边缘色跟随同组 `border`，而不是复制一份 |
+| `glass.danger.foreground` / `.border` / `.fallbackBackground` | `var(--exui-control-danger-foreground)` / `var(--exui-control-danger)` | 危险语义跟随语义色 |
+| `glass.danger.<default\|hover\|active\|selected>Background` | `color-mix(in srgb, var(--exui-control-danger) <90\|94\|98\|98>%, transparent)` | 危险状态只差不透明度，基色保持引用 |
+
+其余叶子（含 `blur` 与 `saturation`）按常规展平。因此 `.dark` 与 `.pitch-black` 块里只会出现**取值确实不同**的玻璃叶子：危险状态引用的是同一串 `color-mix()` 文本，三主题下字符串相同，故不进差集块，危险材质靠 `--exui-control-danger` 自身的主题差异跟随主题。材质本身的结构与落点见 [玻璃材质的结构与落点](../components/glass-material.md)。
+
 变量命名前缀区分用途：`--exui-*` 为 Token，`--density-*` 为密度，`--exui-component-*` 为配方，`--exui-shadow-*` 为阴影，其余无前缀的短名是 shadcn/ui 语义别名。
 
 ## 校验入口
@@ -52,11 +63,12 @@ typecheck → build:js → build:cjs → verify-cjs → generate-css --check
           → copy-css → validate-tokens → node --test scripts/**/*.test.mjs
 ```
 
-其中四项承担契约级断言：
+其中五项承担契约级断言：
 
 - `verify-cjs.mjs`：require/import 两棵 Token 树与配方树逐值相等、深度冻结，且主题、密度、配方键名集合完整（防止产物为空或截断时被"两边都空"掩盖）。
 - `generate-css.mjs --check`：已提交的 `src/style.css` 与重新生成的字符串**逐字节相等**，否则报 stale。
 - `foundation-reference-policy.mjs`：foundation 变量映射与契约的 foundation 叶子集合互相覆盖、每个被命名的变量都已声明且取值等于契约值、配方变量不引用未声明变量，且每条 foundation 引用的出现次数等于引用它的配方叶子数（防止某处退回字面值）。
+- `glass-policy.mjs`：材质分组的形状、rem 长度与正的 saturation、各主题的 `foreground`/危险基色/边缘是否真的由它们应当跟随的语义 Token 派生、产物是否把这些派生保持为 `var()` 与 `color-mix()` 引用而没有内联成字面值，以及每个材质状态在主题页色与黑白两端背景上的对比度。材质是唯一会被通用对比度策略漏掉的分组——那条策略配对同级的 `<name>`/`<name>Foreground` 键与配方状态元组，因此既看不到 `glass.foreground` 旁边的 `glass.background`，也看不到嵌套的 `glass.danger`。
 - `token-length-policy.mjs` 与 `color-contrast-policy.mjs`：纯策略模块，由 `*.test.mjs` 在内存副本上施加，永不改写真实源文件。
 
 长度策略与对比度策略都区分"内建值"与"公共契约"：内建可缩放长度只接受 `rem` 与 `0`，而公共的 `RecipeLength` 继续接受 px，使消费者已有的自定义配方保持合法。foundation 引用策略同样在 JS 层判定，因此把产物改成 `var()` 不改变长度策略的结论。
