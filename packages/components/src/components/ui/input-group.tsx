@@ -4,15 +4,21 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { glassClassName, type GlassSurfaceProps } from "@/lib/glass"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
-function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
+function InputGroup({
+  className,
+  glass,
+  ...props
+}: React.ComponentProps<"div"> & GlassSurfaceProps) {
   return (
     <div
       data-slot="input-group"
       role="group"
+      data-exui-glass-interactive=""
       className={cn(
         // The group owns the form-control chrome, so it also owns the state
         // rings: it paints the recipe's focus and invalid shadows on its own
@@ -20,7 +26,8 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
         // control inside stops painting its own (`InputGroupInput`). Without
         // that split the control's ring is a rectangle around the middle
         // segment and the group's border straddles it.
-        "group/input-group relative flex h-9 w-full min-w-0 items-center rounded-4xl border border-transparent bg-input/50 transition-[color,box-shadow,background-color] outline-none in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:[box-shadow:none] has-data-[align=block-end]:rounded-3xl has-data-[align=block-start]:rounded-3xl has-[[data-slot=input-group-control]:focus-visible]:[box-shadow:var(--exui-component-form-control-focus-shadow)] has-[[data-slot][aria-invalid=true]]:[box-shadow:var(--exui-component-form-control-invalid-shadow)] has-[textarea]:rounded-2xl has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-1.5 has-[>[data-align=inline-start]]:[&>input]:pl-1.5",
+        "group/input-group relative flex h-9 w-full min-w-0 items-center rounded-4xl border border-transparent bg-input/50 transition-[color,box-shadow,background-color] outline-none in-data-[slot=combobox-content]:focus-within:border-inherit in-data-[slot=combobox-content]:focus-within:[box-shadow:none] has-data-[align=block-end]:rounded-3xl has-data-[align=block-start]:rounded-3xl has-[[data-slot=input-group-control]:focus-visible]:[box-shadow:var(--exui-component-form-control-focus-shadow)] has-[[data-slot=input-group-control]:focus-visible]:[--_exui-glass-host-shadow:var(--exui-component-form-control-focus-shadow)] has-[[data-slot][aria-invalid=true]]:[box-shadow:var(--exui-component-form-control-invalid-shadow)] has-[[data-slot][aria-invalid=true]]:[--_exui-glass-host-shadow:var(--exui-component-form-control-invalid-shadow)] has-[textarea]:rounded-2xl has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>textarea]:h-auto has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-1.5 has-[>[data-align=inline-start]]:[&>input]:pl-1.5",
+        glassClassName(glass),
         className
       )}
       {...props}

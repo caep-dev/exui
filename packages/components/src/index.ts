@@ -5,6 +5,7 @@ import "./index.css"
 // alongside `ThemeProvider` and `useTheme`, which is not part of the public
 // surface.
 export { ThemeProvider, useTheme } from "./components/theme-provider"
+export { GlassSeed } from "./components/glass-seed"
 export * from "./components/ui/accordion"
 export * from "./components/ui/alert"
 export * from "./components/ui/alert-dialog"

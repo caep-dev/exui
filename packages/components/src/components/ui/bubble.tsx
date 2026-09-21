@@ -3,6 +3,12 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import {
+  glassClassName,
+  hasGlassClassName,
+  stripGlassClassName,
+  type GlassSurfaceProps,
+} from "@/lib/glass"
 
 function BubbleGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -45,17 +51,28 @@ function Bubble({
   variant = "default",
   align = "start",
   className,
+  glass,
   ...props
 }: React.ComponentProps<"div"> &
   VariantProps<typeof bubbleVariants> & {
     align?: "start" | "end"
-  }) {
+  } & GlassSurfaceProps) {
+  // Bubble itself paints no background: the variant decides the look of the
+  // direct BubbleContent child. So both entry points — the prop and an
+  // explicit `ex-glass` class — delegate the material to that child instead of
+  // painting the root, and the marker is taken off the root so the two levels
+  // never stack. A standalone BubbleContent can still enable the material for
+  // itself.
+  const delegated = glass === true || hasGlassClassName(className)
+
   return (
     <div
       data-slot="bubble"
       data-variant={variant}
       data-align={align}
-      className={cn(bubbleVariants({ variant }), className)}
+      data-exui-glass-delegate={delegated ? "bubble" : undefined}
+      data-exui-glass-tone={variant === "destructive" ? "danger" : undefined}
+      className={cn(bubbleVariants({ variant }), stripGlassClassName(className))}
       {...props}
     />
   )
@@ -64,10 +81,11 @@ function Bubble({
 function BubbleContent({
   asChild = false,
   className,
+  glass,
   ...props
 }: React.ComponentProps<"div"> & {
   asChild?: boolean
-}) {
+} & GlassSurfaceProps) {
   const Comp = asChild ? Slot.Root : "div"
 
   return (
@@ -75,6 +93,7 @@ function BubbleContent({
       data-slot="bubble-content"
       className={cn(
         "w-fit max-w-full min-w-0 overflow-hidden rounded-3xl border border-transparent px-3.5 py-2.5 text-sm leading-relaxed wrap-break-word group-data-[align=end]/bubble:self-end [button]:text-left [button,a]:transition-colors [button,a]:outline-none [button,a]:focus-visible:border-ring [button,a]:focus-visible:ring-2 [button,a]:focus-visible:ring-ring",
+        glassClassName(glass),
         className
       )}
       {...props}
@@ -106,17 +125,18 @@ function BubbleReactions({
   side = "bottom",
   align = "end",
   className,
+  glass,
   ...props
 }: React.ComponentProps<"div"> & {
   align?: "start" | "end"
   side?: "top" | "bottom"
-}) {
+} & GlassSurfaceProps) {
   return (
     <div
       data-slot="bubble-reactions"
       data-align={align}
       data-side={side}
-      className={cn(bubbleReactionsVariants({ side, align }), className)}
+      className={cn(bubbleReactionsVariants({ side, align }), glassClassName(glass), className)}
       {...props}
     />
   )

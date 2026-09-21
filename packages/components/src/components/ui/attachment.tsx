@@ -3,6 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { glassClassName, type GlassSurfaceProps } from "@/lib/glass"
 import { Button } from "@/components/ui/button"
 
 const attachmentVariants = cva(
@@ -28,18 +29,19 @@ function Attachment({
   state = "done",
   size = "default",
   orientation = "horizontal",
+  glass,
   ...props
 }: React.ComponentProps<"div"> &
   VariantProps<typeof attachmentVariants> & {
     state?: "idle" | "uploading" | "processing" | "error" | "done"
-  }) {
+  } & GlassSurfaceProps) {
   return (
     <div
       data-slot="attachment"
       data-state={state}
       data-size={size}
       data-orientation={orientation}
-      className={cn(attachmentVariants({ size, orientation }), className)}
+      className={cn(attachmentVariants({ size, orientation }), glassClassName(glass), className)}
       {...props}
     />
   )

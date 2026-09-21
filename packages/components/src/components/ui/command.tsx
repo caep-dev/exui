@@ -4,6 +4,7 @@ import * as React from "react"
 import { Command as CommandPrimitive } from "cmdk"
 
 import { cn } from "@/lib/utils"
+import { glassClassName, hasGlassClassName, type GlassSurfaceProps } from "@/lib/glass"
 import {
   Dialog,
   DialogContent,
@@ -19,13 +20,15 @@ import { SearchIcon, CheckIcon } from "lucide-react"
 
 function Command({
   className,
+  glass,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive>) {
+}: React.ComponentProps<typeof CommandPrimitive> & GlassSurfaceProps) {
   return (
     <CommandPrimitive
       data-slot="command"
       className={cn(
         "flex size-full flex-col overflow-hidden rounded-4xl bg-popover p-1 text-popover-foreground",
+        glassClassName(glass),
         className
       )}
       {...props}
@@ -39,13 +42,20 @@ function CommandDialog({
   children,
   className,
   showCloseButton = false,
+  glass,
   ...props
 }: React.ComponentProps<typeof Dialog> & {
   title?: string
   description?: string
   className?: string
   showCloseButton?: boolean
-}) {
+} & GlassSurfaceProps) {
+  // The material belongs to the dialog surface. The attribute below marks the
+  // surface as a command dialog so the palette's own opaque background can step
+  // aside for it, and only for a direct Command that did not ask for the
+  // material itself — an explicitly glass Command keeps its own nested surface.
+  const materialRequested = glass === true || hasGlassClassName(className)
+
   return (
     <Dialog {...props}>
       <DialogHeader className="sr-only">
@@ -53,6 +63,8 @@ function CommandDialog({
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <DialogContent
+        data-exui-glass-command-dialog={materialRequested ? "" : undefined}
+        glass={glass}
         className={cn(
           "top-1/3 translate-y-0 overflow-hidden rounded-4xl! p-0",
           className

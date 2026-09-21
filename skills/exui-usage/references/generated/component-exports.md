@@ -536,6 +536,10 @@ This inventory covers exports reachable from the public `@exre/exui` package roo
 - `ThemeProvider` — value
 - `useTheme` — value
 
+## Glass material
+
+- `GlassSeed` — value
+
 ## Hooks
 
 - `useIsMobile` — value

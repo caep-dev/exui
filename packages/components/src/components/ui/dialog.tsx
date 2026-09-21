@@ -4,6 +4,7 @@ import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { glassClassName, type GlassSurfaceProps } from "@/lib/glass"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
 
@@ -51,10 +52,11 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  glass,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
-}) {
+} & GlassSurfaceProps) {
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -62,6 +64,8 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-[var(--exui-component-dialog-surface-gap)] rounded-[var(--exui-component-dialog-surface-radius)] border [border-color:var(--exui-component-dialog-surface-border)] [background:var(--exui-component-dialog-surface-background)] p-[var(--exui-component-dialog-surface-padding)] [color:var(--exui-component-dialog-surface-foreground)] text-sm [box-shadow:var(--exui-component-dialog-surface-shadow)] duration-[var(--exui-component-dialog-overlay-duration)] outline-none sm:max-w-md data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          glassClassName(glass),
+          "[--_exui-glass-host-shadow:var(--exui-component-dialog-surface-shadow)]",
           className
         )}
         {...props}

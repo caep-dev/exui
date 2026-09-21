@@ -6,6 +6,7 @@ import { Slot } from "radix-ui"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { glassClassName, hasGlassClassName, migrateGlass, type GlassSurfaceProps } from "@/lib/glass"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -155,12 +156,13 @@ function Sidebar({
   className,
   children,
   dir,
+  glass,
   ...props
 }: React.ComponentProps<"div"> & {
   side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
-}) {
+} & GlassSurfaceProps) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
   if (collapsible === "none") {
@@ -169,6 +171,7 @@ function Sidebar({
         data-slot="sidebar"
         className={cn(
           "flex h-full w-(--sidebar-width) flex-col bg-sidebar text-sidebar-foreground",
+          glassClassName(glass),
           className
         )}
         {...props}
@@ -179,6 +182,12 @@ function Sidebar({
   }
 
   if (isMobile) {
+    // The mobile branch draws inside a Sheet and never applied the caller's
+    // className, so only the material marker is carried over here. Turning
+    // className on for this branch would change layout behaviour that has
+    // nothing to do with the material.
+    const mobileGlass = glass === true || hasGlassClassName(className)
+
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
@@ -186,6 +195,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
+          glass={mobileGlass ? true : undefined}
           className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
           style={
             {
@@ -203,6 +213,14 @@ function Sidebar({
       </Sheet>
     )
   }
+
+  // On desktop the caller's className belongs to the fixed container and paints
+  // nothing itself, so the marker moves to the inner panel that carries the
+  // background. The container keeps every other class untouched.
+  const { className: containerClassName, glassClassName: innerGlassClassName } = migrateGlass(
+    glass,
+    className
+  )
 
   return (
     <div
@@ -234,14 +252,17 @@ function Sidebar({
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
-          className
+          containerClassName
         )}
         {...props}
       >
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-2xl group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
+          className={cn(
+            "flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-2xl group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border",
+            innerGlassClassName
+          )}
         >
           {children}
         </div>
@@ -301,12 +322,17 @@ function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   )
 }
 
-function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+function SidebarInset({
+  className,
+  glass,
+  ...props
+}: React.ComponentProps<"main"> & GlassSurfaceProps) {
   return (
     <main
       data-slot="sidebar-inset"
       className={cn(
         "relative flex w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-2xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
+        glassClassName(glass),
         className
       )}
       {...props}
