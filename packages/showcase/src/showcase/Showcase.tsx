@@ -49,6 +49,7 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
+  GlassSeed,
   Input,
   InputGroup,
   InputGroupAddon,
@@ -129,9 +130,12 @@ import {
   SunIcon,
 } from "lucide-react"
 
+import { GlassSample } from "./GlassSample"
+
 const sections = [
   "Recipes",
   "Foundation",
+  "Glass",
   "Actions",
   "Forms",
   "Data",
@@ -157,6 +161,9 @@ function Showcase() {
 
   return (
     <TooltipProvider>
+      {/* Mounted once for the whole application; the material still works
+          without it, just without the refraction. */}
+      <GlassSeed />
       <div className="min-h-svh bg-background text-foreground">
         <header className="sticky top-0 border-b bg-background/95 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3">
@@ -212,6 +219,7 @@ function Showcase() {
             <IntroPanel />
             <ComponentRecipeContract />
             <FoundationSection />
+            <GlassSection />
             <ActionsSection />
             <FormsSection />
             <DataSection />
@@ -524,6 +532,20 @@ function FoundationSection() {
             <Badge variant="destructive">Destructive</Badge>
           </div>
         </div>
+      </PreviewPanel>
+    </ShowcaseSection>
+  )
+}
+
+function GlassSection() {
+  return (
+    <ShowcaseSection
+      id="glass"
+      title="Glass"
+      description="One shared translucent material, with an optional refraction enhancement."
+    >
+      <PreviewPanel title="Material on the surfaces that opt in">
+        <GlassSample />
       </PreviewPanel>
     </ShowcaseSection>
   )

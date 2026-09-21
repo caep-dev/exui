@@ -594,7 +594,7 @@ async function verifyReactConsumer(tarballPath) {
   const application = `
 import "@exre/exui/style.css"
 import { useState } from "react"
-import { Button, ThemeProvider, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, Field, Input, Label, Recharts, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartConfig, useIsMobile } from "@exre/exui"
+import { Button, Card, CardContent, GlassSeed, ThemeProvider, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, Field, Input, Label, Recharts, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartConfig, useIsMobile } from "@exre/exui"
 
 const { BarChart, Bar, XAxis } = Recharts
 const chartData = [
@@ -610,11 +610,12 @@ export function App() {
   const [submittedEmail, setSubmittedEmail] = useState("")
   return (
     <ThemeProvider>
+      <GlassSeed />
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="default">Open</Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent glass>
           <DialogTitle>Subscribe</DialogTitle>
           <DialogDescription>Enter your email to subscribe.</DialogDescription>
           <form onSubmit={(event) => {
@@ -630,6 +631,12 @@ export function App() {
           </form>
         </DialogContent>
       </Dialog>
+      <Card glass>
+        <CardContent>
+          <Button glass variant="danger">Delete</Button>
+          <span data-testid="glass-class-surface" className="ex-glass rounded-xl p-4">Class entry point</span>
+        </CardContent>
+      </Card>
       <ChartContainer config={chartConfig} style={{ width: 480, height: 320 }}>
         <BarChart data={chartData}>
           <XAxis dataKey="month" />
@@ -643,6 +650,21 @@ export function App() {
   )
 }
 `
+  // The glass prop is a boolean on a fixed set of surfaces; these cases fail the
+  // type-check when the prop is widened, when it leaks onto a DOM element, or
+  // when the seed silently starts accepting content.
+  const glassTypes = `
+import { Button, GlassSeed } from "@exre/exui"
+
+// @ts-expect-error glass is a boolean, not a string.
+export const wrongType = <Button glass="yes">Nope</Button>
+
+// @ts-expect-error a DOM element has no glass prop; use the ex-glass class instead.
+export const onDomElement = <div glass>Nope</div>
+
+// @ts-expect-error GlassSeed takes no children and renders no content of its own.
+export const withChildren = <GlassSeed>Nope</GlassSeed>
+`
   const entry = `
 import { createRoot } from "react-dom/client"
 import { App } from "./app"
@@ -653,6 +675,7 @@ if (container) {
 }
 `
   await writeFile(join(consumerRoot, "app.tsx"), application)
+  await writeFile(join(consumerRoot, "glass-types.tsx"), glassTypes)
   await writeFile(join(consumerRoot, "main.tsx"), entry)
   await writeFile(
     join(consumerRoot, "index.html"),
@@ -673,7 +696,7 @@ if (container) {
           lib: ["ES2023", "DOM", "DOM.Iterable"],
           types: ["node", "vite/client"],
         },
-        include: ["app.tsx", "main.tsx"],
+        include: ["app.tsx", "main.tsx", "glass-types.tsx"],
       },
       null,
       2
@@ -693,7 +716,7 @@ export default defineConfig({
   const serverSmoke = `
 import { renderToString } from "react-dom/server"
 import { createElement } from "react"
-import { Button, Field, Input, Label, ChartContainer, ChartTooltip } from "@exre/exui"
+import { Button, Card, GlassSeed, Field, Input, Label, ChartContainer, ChartTooltip } from "@exre/exui"
 import { createRequire } from "node:module"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
@@ -708,7 +731,12 @@ const html = renderToString(
   createElement(
     "div",
     null,
+    // The seed must render its static markup without touching a browser global,
+    // and the material must render with and without the seed.
+    createElement(GlassSeed),
     createElement(Button, { variant: "default" }, "Continue"),
+    createElement(Button, { glass: true }, "Glass"),
+    createElement(Card, { glass: true }, createElement("span", null, "Glass card")),
     createElement(Field, null, createElement(Label, { htmlFor: "email" }, "Email"), createElement(Input, { id: "email", type: "email" })),
     createElement(ChartContainer, { config }, createElement("span", null, "chart")),
     createElement(ChartTooltip, null)
@@ -717,6 +745,10 @@ const html = renderToString(
 
 assert.match(html, /Continue/, "SSR output must contain the rendered button")
 assert.match(html, /type="email"/, "SSR output must contain the rendered form control")
+assert.match(html, /exui-glass-distortion-v1/, "SSR output must contain the static filter definition")
+assert.match(html, /aria-hidden="true"/, "the seed must stay out of the accessibility tree on the server")
+assert.match(html, /ex-glass/, "SSR output must contain the material marker")
+assert.doesNotMatch(html, /glass="/, "the glass prop must never reach the server markup as an attribute")
 
 const require = createRequire(import.meta.url)
 const rootReact = require.resolve("react")
@@ -798,6 +830,55 @@ try {
   const packedTokenCss = readPackedText(componentPackage.filename, "package/dist/tokens/style.css")
   const componentVariableCount = (packedTokenCss.match(/--exui-component-/g) ?? []).length
   requireCondition(componentVariableCount > 0, "packed tokens stylesheet contains no component recipe CSS variables")
+
+  // The glass group is the one Token group whose emitted values are references
+  // rather than literals, so a count of variable names cannot tell whether the
+  // material survived packing. Read the declarations themselves.
+  const themeBlock = (selector) => {
+    const start = packedTokenCss.indexOf(`${selector} {`)
+    requireCondition(start >= 0, `packed tokens stylesheet is missing the ${selector} block`)
+    return packedTokenCss.slice(start, packedTokenCss.indexOf("}", start))
+  }
+  const lightBlock = themeBlock(":root")
+
+  for (const leaf of ["background", "foreground", "border", "shadow", "blur", "saturation"]) {
+    requireCondition(
+      lightBlock.includes(`--exui-glass-${leaf}:`),
+      `packed tokens stylesheet does not declare --exui-glass-${leaf} for the light theme`
+    )
+  }
+  requireCondition(
+    lightBlock.includes("--exui-glass-foreground: var(--exui-text-primary);"),
+    "the packed material foreground must stay a reference to the semantic text Token"
+  )
+  requireCondition(
+    lightBlock.includes("--exui-glass-shadow: inset 0 0 0"),
+    "the packed material edge must stay an inset shadow rather than a border width"
+  )
+  requireCondition(
+    lightBlock.includes("--exui-glass-danger-background: color-mix(in srgb, var(--exui-control-danger)"),
+    "the packed danger material must stay a color-mix over the semantic danger colour"
+  )
+  requireCondition(
+    lightBlock.includes("--exui-glass-danger-foreground: var(--exui-control-danger-foreground);"),
+    "the packed danger material must keep its danger foreground"
+  )
+
+  // The material is retinted per theme through the neutral values, and the
+  // danger states follow `control.danger` through the reference above.
+  for (const selector of [".dark", ".pitch-black"]) {
+    const block = themeBlock(selector)
+    for (const leaf of ["background", "border"]) {
+      requireCondition(
+        block.includes(`--exui-glass-${leaf}:`),
+        `packed tokens stylesheet does not retint --exui-glass-${leaf} for ${selector}`
+      )
+    }
+    requireCondition(
+      !block.includes("--exui-glass-background: rgba(255, 255, 255, 0.72);"),
+      `${selector} must not reuse the light material surface colour`
+    )
+  }
 
   const npmTokensConsumer = await verifyTokensOnlyConsumer(componentPackage.filename, { packageManager: "npm" })
   await verifyTokensTypecheck(componentPackage.filename, npmTokensConsumer)
