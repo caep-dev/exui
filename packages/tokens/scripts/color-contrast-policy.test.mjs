@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { test } from "node:test"
 
 import { componentRecipes, exuiTokens } from "../dist/index.js"
-import { collectColorContrastViolations, contrastRatio } from "./color-contrast-policy.mjs"
+import { collectColorContrastViolations, contrastRatio, parseColor } from "./color-contrast-policy.mjs"
 
 function cloneSources() {
   return {
@@ -33,6 +33,22 @@ test("contrast ratio matches the WCAG reference extremes", () => {
   const white = { red: 255, green: 255, blue: 255, alpha: 1 }
   assert.equal(contrastRatio(black, white), 21)
   assert.equal(contrastRatio(white, white), 1)
+})
+
+test("out-of-range channels are rejected rather than judged", () => {
+  // A browser does not render these as written, so a policy that treated them
+  // as parseable would judge a colour the Token contract already rejects. The
+  // alpha cases are refused by the literal's own shape; the channel case is the
+  // one the parser has to check.
+  assert.equal(parseColor("rgba(999, 0, 0, 1)"), undefined)
+  assert.equal(parseColor("rgba(0, 0, 0, 2)"), undefined)
+  assert.equal(parseColor("rgba(0, 0, 0, -1)"), undefined)
+  assert.deepEqual(parseColor("rgba(0, 112, 243, 0.25)"), {
+    red: 0,
+    green: 112,
+    blue: 243,
+    alpha: 0.25,
+  })
 })
 
 test("a theme foreground pair below the text threshold is reported", () => {

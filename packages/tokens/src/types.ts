@@ -27,6 +27,44 @@ export interface ThemeTokens {
   readonly chart: ChartTokens
   readonly sidebar: SidebarTokens
   readonly shadow: ThemeShadowTokens
+  readonly glass: GlassTokens
+}
+
+/** Interaction backgrounds shared by the neutral and danger glass materials. */
+export interface GlassInteractionTokens {
+  readonly hoverBackground: string
+  readonly activeBackground: string
+  readonly selectedBackground: string
+}
+
+/**
+ * Glass material that keeps the danger semantics of the surface it is applied
+ * to. `border` and `fallbackBackground` stay opaque so the material still reads
+ * as danger when translucency or backdrop blur is unavailable.
+ */
+export interface GlassDangerTokens extends GlassInteractionTokens {
+  readonly background: string
+  readonly foreground: string
+  readonly border: string
+  readonly fallbackBackground: string
+}
+
+/**
+ * Glass material parameters.
+ *
+ * `border` carries the edge colour only and never a border width; `shadow`
+ * carries the material's own inset edge and never replaces a component's outer
+ * drop shadow or focus ring.
+ */
+export interface GlassTokens extends GlassInteractionTokens {
+  readonly background: string
+  readonly foreground: string
+  readonly border: string
+  readonly shadow: string
+  readonly blur: string
+  readonly saturation: number
+  readonly fallbackBackground: string
+  readonly danger: GlassDangerTokens
 }
 
 export interface SurfaceTokens {

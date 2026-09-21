@@ -57,7 +57,16 @@ function readPath(source, path) {
   return current
 }
 
-function parseColor(value) {
+/**
+ * Parse a supported sRGB hex or `rgb()`/`rgba()` literal.
+ *
+ * Returns `undefined` when the value is not a colour this project accepts.
+ * `FUNCTIONAL_PATTERN` already constrains the alpha to `0`–`1` and rejects a
+ * sign, so the extra check here is for channels: `rgba(999, 0, 0, 1)` is not a
+ * colour a browser renders as written, and treating it as parseable would let a
+ * policy judge a value the token contract rejects.
+ */
+export function parseColor(value) {
   if (typeof value !== "string") {
     return undefined
   }
@@ -77,15 +86,22 @@ function parseColor(value) {
     return undefined
   }
 
-  return {
+  const color = {
     red: Number(functional[1]),
     green: Number(functional[2]),
     blue: Number(functional[3]),
     alpha: functional[4] === undefined ? 1 : Number(functional[4]),
   }
+
+  if ([color.red, color.green, color.blue].some((channel) => channel > 255)) {
+    return undefined
+  }
+
+  return color
 }
 
-function composite(over, under) {
+/** Source-over composite of a translucent colour onto an opaque one. */
+export function composite(over, under) {
   const mix = (channel) => over[channel] * over.alpha + under[channel] * (1 - over.alpha)
   return {
     red: mix("red"),
