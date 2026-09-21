@@ -34,6 +34,34 @@ In a browser application, wrap the app with the root `ThemeProvider` and use `us
 
 `ThemeProvider` reads localStorage during rendering and cannot render on a server. Mount it only in the browser after hydration when using an SSR framework; `"use client"` alone does not prevent prerendering. The `.pitch-black` token class is managed separately and is not a provider theme value.
 
+### Glass material
+
+Glass is a shared translucent surface — a tinted backdrop blur with an inset edge — that any element can adopt, plus an optional SVG refraction enhancement driven by one seed per document.
+
+```tsx
+import "@exre/exui/style.css"
+import { Button, Card, GlassSeed } from "@exre/exui"
+
+export function App() {
+  return (
+    <>
+      <GlassSeed />
+      <Card glass>
+        <div className="ex-glass rounded-xl p-4">Any element, no component needed</div>
+        <Button glass variant="danger">Delete</Button>
+      </Card>
+    </>
+  )
+}
+```
+
+- Mount one `GlassSeed` per document. It renders no children, is not a provider, and adds no layout box; the material works without it and simply loses the refraction. It is safe to server-render: the enhancement is applied after hydration once the browser has confirmed it accepts the shared filter, and withdrawn when the seed unmounts.
+- The `glass` prop and the `ex-glass` class produce the same material. `glass` defaults to `false` and is never forwarded to the DOM; `glass={false}` does not remove a class you wrote yourself. `ex-glass-foo` is a different class and does not enable the material.
+- The material never changes layout: no `display`, `position`, `z-index`, size, padding, gap, radius, or `overflow` change, no wrapper element, and no new border width. The visible edge is an inset shadow, never a border: it paints an inner hairline on every glass surface while the surface's own border colour — including its hover, focus, invalid, disabled, error, and checked transitions — is left completely untouched. A bordered surface shows both its border and the material's hairline, and a surface that shipped `border-transparent` gains a visible inner edge. Existing outer shadows and focus rings are composed with the material rather than replaced.
+- Every surface opts in on its own; the marker does not spread to descendants. `Card`, `Button`, and the other supported surfaces are listed in the usage reference.
+- Restyle it with `--exui-glass-background`, `--exui-glass-foreground`, `--exui-glass-border`, `--exui-glass-shadow`, `--exui-glass-blur`, and `--exui-glass-saturation`, declared on the surface or any ancestor.
+- Where `backdrop-filter` is unavailable the surface falls back to an opaque themed background. A non-`none` `backdrop-filter` also makes the element a containing block for absolutely and fixed positioned descendants, so keep viewport-anchored content in a portal rather than inside a glass surface.
+
 ### Customizing tokens
 
 Every Token is a CSS custom property declared on `:root`, and the component stylesheet resolves its recipe values through those properties rather than copying them. Re-declare the ones you need after the stylesheet:
@@ -81,6 +109,8 @@ import "@exre/exui/tokens/style.css"
 ```
 
 `@exre/exui/tokens` publishes ESM and CommonJS entries. `@exre/exui/tokens/style.css` carries only token variables for the three themes, and `@exre/exui/tokens/font.css` loads the optional font assets.
+
+Adding to 0.4.0, `exuiTokens.themes.<theme>` gained a required `glass` group (`--exui-glass-*`), so a consumer that hand-writes a complete `ThemeTokens` object has to add it; copy the built-in theme's `glass` values as the starting point. Reading individual Tokens, spreading a built-in theme, and the CSS custom properties are unaffected. The glass material itself lives in the component stylesheet, so a token-only consumer gets the variables and none of the `.ex-glass` behaviour.
 
 ### Theming Fumadocs UI
 

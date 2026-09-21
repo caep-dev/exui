@@ -19,6 +19,7 @@ Check the consuming project's installed ExUI version, React version, stylesheet 
 | Build navigation or an application shell                      | [Sidebar](references/components/Sidebar.md) or [NavigationMenu](references/components/NavigationMenu.md) | Navigation and layout components                                                                         |
 | Add notifications                                             | [Sonner / Toaster / toast](references/components/Sonner.md)                                              | [Notification example](examples/sonner-notifications.tsx)                                                |
 | Switch themes or integrate SSR                                | [Theme usage](references/theme-usage.md)                                                                 | [Theme example](examples/theme-provider-usage.tsx); read the SSR limitation before mounting the provider |
+| Add a translucent glass surface                               | [Glass material](references/glass.md)                                                                    | [Glass example](examples/glass-surfaces.tsx); mount one `GlassSeed` per document                         |
 | Theme a Fumadocs UI docs site                                 | [Fumadocs docs theme](references/docs-theme.md)                                                          | [Theme usage](references/theme-usage.md) for the one-theme-driver rule                                   | 
 | Use CSS / JavaScript Tokens or recipes, with or without React | [Token usage](references/token-usage.md)                                                                 | [Exact Token paths and CSS properties](references/generated/token-paths.md)                              |
 | Add icons or icon-only controls                               | [Icon usage](references/icon-usage.md)                                                                   | [Button](references/components/Button.md) or [Tooltip](references/components/Tooltip.md)                 |
@@ -33,6 +34,7 @@ exui-usage/
 ├── references/
 │   ├── react-setup.md        React installation, CSS, dependency boundaries
 │   ├── theme-usage.md        Provider, hook, notifications, SSR limitations
+│   ├── glass.md              Shared translucent material and its seed, variables, and boundaries
 │   ├── docs-theme.md         Fumadocs UI colour contract and its boundaries
 │   ├── token-usage.md        Framework-neutral Tokens and component recipes
 │   ├── icon-usage.md         Lucide setup and accessible icon usage
@@ -77,6 +79,7 @@ These are complete TSX examples, not a standalone application. Follow React setu
 | [command-palette.tsx](examples/command-palette.tsx)               | Command palette composition                       | [Command](references/components/Command.md)                 |
 | [dialog-usage.tsx](examples/dialog-usage.tsx)                     | Dialog composition and state                      | [Dialog](references/components/Dialog.md)                   |
 | [field-usage.tsx](examples/field-usage.tsx)                       | Form labels, validation, errors                   | [Field](references/components/Field.md)                     |
+| [glass-surfaces.tsx](examples/glass-surfaces.tsx)                 | Seed plus glass prop and class surfaces           | [Glass material](references/glass.md)                       |
 | [message-scroller-usage.tsx](examples/message-scroller-usage.tsx) | Message list scrolling                            | [MessageScroller](references/components/MessageScroller.md) |
 | [select-usage.tsx](examples/select-usage.tsx)                     | Select composition                                | [Select](references/components/Select.md)                   |
 | [sidebar-layout.tsx](examples/sidebar-layout.tsx)                 | Sidebar application layout                        | [Sidebar](references/components/Sidebar.md)                 |
