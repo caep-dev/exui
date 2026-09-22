@@ -146,8 +146,8 @@ test("a material foreground that fails over the page colour is reported", () => 
 
   requireViolation(violations, "dark.glass.background contrast is")
   // The page colour is judged in its own right, not just the two extremes: the
-  // dark theme's page is #0b0b0b, which no extreme reproduces.
-  requireViolation(violations, "over backdrop (11, 11, 11)")
+  // dark theme's page is #0a0a0a, which no extreme reproduces.
+  requireViolation(violations, "over backdrop (10, 10, 10)")
 })
 
 test("a shadow that is not a string is reported", () => {

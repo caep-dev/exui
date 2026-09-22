@@ -199,7 +199,7 @@ const light: ThemeTokens = {
 
 const dark: ThemeTokens = {
   surface: {
-    background: "#0b0b0b",
+    background: "#0a0a0a",
     secondary: "#292929",
     tertiary: "#2e2e2e",
     accent: "#343434",
