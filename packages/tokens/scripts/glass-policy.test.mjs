@@ -3,7 +3,7 @@ import { test } from "node:test"
 
 import { componentRecipes, exuiTokens } from "../dist/index.js"
 import { createCssVariables, renderCss } from "./generate-css.mjs"
-import { collectGlassViolations } from "./glass-policy.mjs"
+import { GLASS_BLUR, collectGlassViolations } from "./glass-policy.mjs"
 
 function cloneSources() {
   return {
@@ -36,7 +36,7 @@ test("the stylesheet publishes the public material variables", () => {
   assert.match(css, /--exui-glass-foreground: var\(--exui-text-primary\);/)
   assert.match(css, /--exui-glass-border: rgba\(0, 0, 0, 0\.12\);/)
   assert.match(css, /--exui-glass-shadow: inset 0 0 0 0\.0625rem var\(--exui-glass-border\);/)
-  assert.match(css, /--exui-glass-blur: 0\.5rem;/)
+  assert.match(css, /--exui-glass-blur: 4px;/)
   assert.match(css, /--exui-glass-saturation: 1\.2;/)
 })
 
@@ -71,12 +71,12 @@ test("a non-positive or non-finite saturation is reported", () => {
   requireViolation(infinite, "dark.glass.saturation must be a positive finite number")
 })
 
-test("a blur that is not a rem length is reported", () => {
+test("a blur that is not the fixed built-in value is reported", () => {
   const violations = violationsAfter(({ contract }) => {
-    contract.themes.dark.glass.blur = "8px"
+    contract.themes.dark.glass.blur = "0.5rem"
   })
 
-  requireViolation(violations, "dark.glass.blur must be a rem length")
+  requireViolation(violations, `dark.glass.blur must stay ${GLASS_BLUR}`)
 })
 
 test("a non-colour material leaf is reported", () => {

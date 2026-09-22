@@ -30,8 +30,8 @@ const filterReference = 'url("#exui-glass-distortion-v1")'
 
 const referenceVariable = "--_exui-glass-reference"
 
-/** `backdrop-filter` of the base material at the default 16px root font size. */
-const baseBlur = "blur(8px)"
+/** `backdrop-filter` of the base material. */
+const baseBlur = "blur(4px)"
 
 const transparent = "rgba(0, 0, 0, 0)"
 const neutralBackground = "rgba(255, 255, 255, 0.72)"
@@ -139,6 +139,7 @@ describe("glass base material", () => {
     // border must not grow one.
     expect(treatedStyle.borderTopWidth).toBe("0px")
     expect(shadowTerms(treatedStyle.boxShadow)).toContain(1)
+    expect(treatedStyle.boxShadow).toMatch(/rgba\(255, 255, 255, [\d.]+\).*inset/)
 
     // Geometry, painting order, and clipping are the component's business.
     for (const property of [
@@ -345,7 +346,7 @@ describe("glass interaction states", () => {
 
     await expect
       .poll(() => computed("[data-testid='glass-input']", "box-shadow"))
-      .toContain("rgba(0, 112, 243, 0.25)")
+      .toContain("rgba(0, 136, 255, 0.25)")
 
     expect(computed("[data-testid='glass-input-invalid']", "box-shadow")).toContain(
       "rgba(231, 0, 11, 0.25)"

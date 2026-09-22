@@ -44,8 +44,10 @@
  *
  * The shadow list keeps the same Tailwind variables the shadow utilities
  * compose, then the host's own drop shadow, and appends the material's inset
- * edge. Missing pieces are transparent zero shadows rather than `none`, because
- * `none` is not valid inside a comma-separated shadow list.
+ * edge. A directional white inset supplies a lightweight specular highlight
+ * without a second layer or a geometry-dependent filter. Missing pieces are
+ * transparent zero shadows rather than `none`, because `none` is not valid
+ * inside a comma-separated shadow list.
  */
 .ex-glass,
 [data-exui-glass-delegate="bubble"] > [data-slot="bubble-content"] {
@@ -56,12 +58,10 @@
 
   background-color: var(--_exui-glass-default-background);
   color: var(--exui-glass-foreground);
-  -webkit-backdrop-filter:
-    blur(var(--exui-glass-blur))
+  -webkit-backdrop-filter: blur(var(--exui-glass-blur))
     saturate(var(--exui-glass-saturation))
     var(--_exui-glass-reference, brightness(1));
-  backdrop-filter:
-    blur(var(--exui-glass-blur))
+  backdrop-filter: blur(var(--exui-glass-blur))
     saturate(var(--exui-glass-saturation))
     var(--_exui-glass-reference, brightness(1));
   box-shadow:
@@ -70,7 +70,8 @@
     var(--tw-ring-offset-shadow, 0 0 #0000),
     var(--tw-ring-shadow, 0 0 #0000),
     var(--_exui-glass-host-shadow, 0 0 #0000),
-    var(--exui-glass-shadow);
+    var(--exui-glass-shadow),
+    inset 0 1px 3px rgba(255, 255, 255, 0.5);
 }
 
 /*
@@ -80,11 +81,14 @@
  * without repeating the edge width here.
  */
 .ex-glass[data-exui-glass-tone="danger"],
-[data-exui-glass-delegate="bubble"][data-exui-glass-tone="danger"] > [data-slot="bubble-content"] {
+[data-exui-glass-delegate="bubble"][data-exui-glass-tone="danger"]
+  > [data-slot="bubble-content"] {
   --_exui-glass-default-background: var(--exui-glass-danger-background);
   --_exui-glass-hover-background: var(--exui-glass-danger-hover-background);
   --_exui-glass-active-background: var(--exui-glass-danger-active-background);
-  --_exui-glass-selected-background: var(--exui-glass-danger-selected-background);
+  --_exui-glass-selected-background: var(
+    --exui-glass-danger-selected-background
+  );
   --exui-glass-border: var(--exui-glass-danger-border);
 
   color: var(--exui-glass-danger-foreground);
@@ -97,7 +101,8 @@
  * a deliberately glass Command keeps its own nested surface, and no deeper
  * business node is touched.
  */
-.ex-glass[data-exui-glass-command-dialog] > [data-slot="command"]:not(.ex-glass) {
+.ex-glass[data-exui-glass-command-dialog]
+  > [data-slot="command"]:not(.ex-glass) {
   background-color: transparent;
 }
 
@@ -116,16 +121,15 @@
 
 .ex-glass[data-slot="drawer-content"]::before {
   background-color: var(--_exui-glass-default-background);
-  -webkit-backdrop-filter:
-    blur(var(--exui-glass-blur))
+  -webkit-backdrop-filter: blur(var(--exui-glass-blur))
     saturate(var(--exui-glass-saturation))
     var(--_exui-glass-reference, brightness(1));
-  backdrop-filter:
-    blur(var(--exui-glass-blur))
+  backdrop-filter: blur(var(--exui-glass-blur))
     saturate(var(--exui-glass-saturation))
     var(--_exui-glass-reference, brightness(1));
   box-shadow:
     var(--tw-shadow, 0 0 #0000),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
     var(--exui-glass-shadow);
 }
 
@@ -159,7 +163,12 @@
  * an empty string while other libraries write `"true"` or `"false"`.
  */
 .ex-glass[data-exui-glass-interactive]:hover:where(
-    :not(:disabled, [aria-disabled="true"], [data-disabled="true"], [data-disabled=""])
+    :not(
+      :disabled,
+      [aria-disabled="true"],
+      [data-disabled="true"],
+      [data-disabled=""]
+    )
   ) {
   background-color: var(--_exui-glass-hover-background);
 }
@@ -172,12 +181,24 @@
     [data-state="checked"],
     [data-state="on"],
     [data-state="open"]
-  ):where(:not(:disabled, [aria-disabled="true"], [data-disabled="true"], [data-disabled=""])) {
+  ):where(
+    :not(
+      :disabled,
+      [aria-disabled="true"],
+      [data-disabled="true"],
+      [data-disabled=""]
+    )
+  ) {
   background-color: var(--_exui-glass-selected-background);
 }
 
 .ex-glass[data-exui-glass-interactive]:active:where(
-    :not(:disabled, [aria-disabled="true"], [data-disabled="true"], [data-disabled=""])
+    :not(
+      :disabled,
+      [aria-disabled="true"],
+      [data-disabled="true"],
+      [data-disabled=""]
+    )
   ) {
   background-color: var(--_exui-glass-active-background);
 }
@@ -190,7 +211,9 @@
  * that fallback too, so a translucent hover cannot paint over it and undo the
  * readable result. Interaction feedback is left to the component's own states.
  */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
   .ex-glass,
   [data-exui-glass-delegate="bubble"] > [data-slot="bubble-content"] {
     --_exui-glass-default-background: var(--exui-glass-fallback-background);
@@ -200,10 +223,19 @@
   }
 
   .ex-glass[data-exui-glass-tone="danger"],
-  [data-exui-glass-delegate="bubble"][data-exui-glass-tone="danger"] > [data-slot="bubble-content"] {
-    --_exui-glass-default-background: var(--exui-glass-danger-fallback-background);
-    --_exui-glass-hover-background: var(--exui-glass-danger-fallback-background);
-    --_exui-glass-active-background: var(--exui-glass-danger-fallback-background);
-    --_exui-glass-selected-background: var(--exui-glass-danger-fallback-background);
+  [data-exui-glass-delegate="bubble"][data-exui-glass-tone="danger"]
+    > [data-slot="bubble-content"] {
+    --_exui-glass-default-background: var(
+      --exui-glass-danger-fallback-background
+    );
+    --_exui-glass-hover-background: var(
+      --exui-glass-danger-fallback-background
+    );
+    --_exui-glass-active-background: var(
+      --exui-glass-danger-fallback-background
+    );
+    --_exui-glass-selected-background: var(
+      --exui-glass-danger-fallback-background
+    );
   }
 }

@@ -1,7 +1,7 @@
-import * as React from "react"
+import * as React from "react";
 
-import { GLASS_REFERENCE_VARIABLE } from "@/lib/glass"
-import { supportsGlassRefraction } from "@/lib/glass-capabilities"
+import { GLASS_REFERENCE_VARIABLE } from "@/lib/glass";
+import { supportsGlassRefraction } from "@/lib/glass-capabilities";
 
 /**
  * Stable id of the shared refraction filter definition.
@@ -9,9 +9,9 @@ import { supportsGlassRefraction } from "@/lib/glass-capabilities"
  * The material's CSS is generated from the Token package and cannot import a
  * JavaScript constant, so `glass.css` repeats this id. Keep the two in step.
  */
-export const GLASS_FILTER_ID = "exui-glass-distortion-v1"
+export const GLASS_FILTER_ID = "exui-glass-distortion-v1";
 
-const FILTER_REFERENCE = `url("#${GLASS_FILTER_ID}")`
+const FILTER_REFERENCE = `url("#${GLASS_FILTER_ID}")`;
 
 /**
  * What one document currently owes the mounted seeds.
@@ -23,55 +23,69 @@ const FILTER_REFERENCE = `url("#${GLASS_FILTER_ID}")`
  * still live or leave the value behind once the last one goes.
  */
 type DocumentReferenceState = {
-  count: number
-  previous: string
-  previousPriority: string
-}
+  count: number;
+  previous: string;
+  previousPriority: string;
+};
 
-const documentReferenceStates = new WeakMap<Document, DocumentReferenceState>()
+const documentReferenceStates = new WeakMap<Document, DocumentReferenceState>();
 
 /** Register one live seed against its document and return its cleanup. */
 function attachDocumentReference(root: HTMLElement): () => void {
-  const { ownerDocument } = root
-  const existing = documentReferenceStates.get(ownerDocument)
+  const { ownerDocument } = root;
+  const existing = documentReferenceStates.get(ownerDocument);
 
   if (existing === undefined) {
-    const previous = root.style.getPropertyValue(GLASS_REFERENCE_VARIABLE)
-    const previousPriority = root.style.getPropertyPriority(GLASS_REFERENCE_VARIABLE)
+    const previous = root.style.getPropertyValue(GLASS_REFERENCE_VARIABLE);
+    const previousPriority = root.style.getPropertyPriority(
+      GLASS_REFERENCE_VARIABLE,
+    );
 
-    documentReferenceStates.set(ownerDocument, { count: 1, previous, previousPriority })
+    documentReferenceStates.set(ownerDocument, {
+      count: 1,
+      previous,
+      previousPriority,
+    });
 
     // Write with the priority the host used rather than dropping it, so a seed
     // mounted into a document that marks the variable important does not
     // downgrade the host's own declaration.
-    root.style.setProperty(GLASS_REFERENCE_VARIABLE, FILTER_REFERENCE, previousPriority)
+    root.style.setProperty(
+      GLASS_REFERENCE_VARIABLE,
+      FILTER_REFERENCE,
+      previousPriority,
+    );
   } else {
-    existing.count += 1
+    existing.count += 1;
   }
 
   // Detach synchronously rather than through an effect, so a Strict Mode
   // setup/cleanup/setup cycle and a real unmount both leave the document
   // exactly as they found it and no surface keeps a dangling reference.
   return () => {
-    const state = documentReferenceStates.get(ownerDocument)
+    const state = documentReferenceStates.get(ownerDocument);
     if (state === undefined) {
-      return
+      return;
     }
 
-    state.count -= 1
+    state.count -= 1;
     if (state.count > 0) {
-      return
+      return;
     }
 
-    documentReferenceStates.delete(ownerDocument)
+    documentReferenceStates.delete(ownerDocument);
 
     if (state.previous === "") {
-      root.style.removeProperty(GLASS_REFERENCE_VARIABLE)
-      return
+      root.style.removeProperty(GLASS_REFERENCE_VARIABLE);
+      return;
     }
 
-    root.style.setProperty(GLASS_REFERENCE_VARIABLE, state.previous, state.previousPriority)
-  }
+    root.style.setProperty(
+      GLASS_REFERENCE_VARIABLE,
+      state.previous,
+      state.previousPriority,
+    );
+  };
 }
 
 /**
@@ -88,17 +102,17 @@ function attachDocumentReference(root: HTMLElement): () => void {
 function GlassSeed(): React.ReactElement {
   const attachSeed = React.useCallback((node: SVGSVGElement | null) => {
     if (node === null) {
-      return
+      return;
     }
 
-    const view = node.ownerDocument.defaultView
+    const view = node.ownerDocument.defaultView;
     if (view === null || !supportsGlassRefraction(view, FILTER_REFERENCE)) {
-      return
+      return;
     }
 
-    const root = node.ownerDocument.documentElement
-    return attachDocumentReference(root)
-  }, [])
+    const root = node.ownerDocument.documentElement;
+    return attachDocumentReference(root);
+  }, []);
 
   return (
     <svg
@@ -129,7 +143,7 @@ function GlassSeed(): React.ReactElement {
         >
           <feTurbulence
             type="fractalNoise"
-            baseFrequency="0.008 0.008"
+            baseFrequency="0.02 0.02"
             numOctaves="2"
             seed="92"
             result="noise"
@@ -138,7 +152,7 @@ function GlassSeed(): React.ReactElement {
           <feDisplacementMap
             in="SourceGraphic"
             in2="smooth-noise"
-            scale="8"
+            scale="12"
             xChannelSelector="R"
             yChannelSelector="G"
             result="distorted"
@@ -146,7 +160,7 @@ function GlassSeed(): React.ReactElement {
         </filter>
       </defs>
     </svg>
-  )
+  );
 }
 
-export { GlassSeed }
+export { GlassSeed };

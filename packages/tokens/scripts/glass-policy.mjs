@@ -23,6 +23,9 @@
 import { MIN_TEXT_CONTRAST, composite, contrastRatio, parseColor } from "./color-contrast-policy.mjs"
 import { REM_LENGTH_PATTERN } from "./token-length-policy.mjs"
 
+/** Fixed blur radius for the built-in glass material. */
+export const GLASS_BLUR = "4px"
+
 /** Glass leaves that are part of the public customisation surface. */
 export const GLASS_PUBLIC_LEAVES = [
   "background",
@@ -143,8 +146,8 @@ function validateGlassShape(failures, themeName, theme, glass) {
     failures.push(`${label}.saturation must be a positive finite number; found ${JSON.stringify(glass.saturation)}`)
   }
 
-  if (typeof glass.blur !== "string" || !REM_LENGTH_PATTERN.test(glass.blur)) {
-    failures.push(`${label}.blur must be a rem length; found ${JSON.stringify(glass.blur)}`)
+  if (glass.blur !== GLASS_BLUR) {
+    failures.push(`${label}.blur must stay ${GLASS_BLUR}; found ${JSON.stringify(glass.blur)}`)
   }
 
   if (typeof glass.shadow !== "string") {

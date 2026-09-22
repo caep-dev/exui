@@ -519,7 +519,7 @@
   --exui-font-weight-regular: 400;
   --exui-glass-active-background: rgba(235, 235, 235, 0.9);
   --exui-glass-background: rgba(255, 255, 255, 0.72);
-  --exui-glass-blur: 0.5rem;
+  --exui-glass-blur: 4px;
   --exui-glass-border: rgba(0, 0, 0, 0.12);
   --exui-glass-danger-active-background: color-mix(in srgb, var(--exui-control-danger) 98%, transparent);
   --exui-glass-danger-background: color-mix(in srgb, var(--exui-control-danger) 90%, transparent);
