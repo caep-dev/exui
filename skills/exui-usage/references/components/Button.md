@@ -58,3 +58,5 @@ Use `asChild` when the action should render as another element, such as a router
 Always provide accessible text. For icon-only buttons, use `aria-label` or an `sr-only` label. Keep destructive actions visually distinct with `danger` or `destructive`.
 
 The package also exports `buttonVariants`, the style function behind these variants, for applying button styling to custom elements.
+
+`Button` and `ActionButton` accept `glass?: boolean`. Combine it with the existing variant and size; danger and destructive variants keep their danger tone. The default button radius is the capsule Token, while `ActionButton` uses the independent `button.action.radius` recipe value (`0.75rem`). See [Glass material](../glass.md) for optional refraction and customization.

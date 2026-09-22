@@ -32,7 +32,7 @@ React consumers additionally install `react@19` and `react-dom@19`, which are op
 
 Use the most semantic public expression that fits:
 
-1. Prefer theme semantic Tokens for product UI: `surface`, `text`, `control`, `border`, `feedback`, `editor`, `chart`, `sidebar`, and theme `shadow`.
+1. Prefer theme semantic Tokens for product UI: `surface`, `text`, `control`, `border`, `feedback`, `editor`, `chart`, `sidebar`, theme `shadow`, and `glass` for translucent materials.
 2. Use `componentRecipes` only when a non-React consumer needs to reproduce the visual contract for `button`, `formControl`, `sidebarItem`, `menu`, `dialog`, or `tabs`.
 3. Use `density`, `typography`, `radii`, and foundation `shadows` directly only when the semantic and recipe layers cannot express the requirement.
 
@@ -45,6 +45,10 @@ Do not copy resolved colors, lengths, shadows, or typography values into applica
 - Use `@exre/exui/tokens/style.css` when styling can consume CSS custom properties directly. The stylesheet exposes Light under `:root`, Dark under `.dark`, and Pitch Black under `.pitch-black`.
 
 Consult the [generated Token path inventory](generated/token-paths.md) for exact `exuiTokens` paths, `componentRecipes` paths, and CSS custom-property names. That inventory intentionally lists no concrete values.
+
+To override colors, fonts, radii, or individual recipes, read [Token customization](token-customization.md). It covers unlayered overrides, the separate shadcn aliases, and root versus subtree scope.
+
+Each current `ThemeTokens` object requires a `glass` group. If you maintain complete custom themes, copy a built-in group's values before customizing them. Token-only CSS provides the material variables; the `.ex-glass` class behavior requires `@exre/exui/style.css` as described in [Glass material](glass.md).
 
 ## Density
 
@@ -66,7 +70,7 @@ html {
 
 Library code never sets a root font size and declares no scale variable; the root font size is an application decision. Keep it at `16px` to preserve the previous rendering. A changed root font size also affects every other `rem` value in the application, and percentages, `em` tracking, and `auto` keep their usual meaning.
 
-These stay fixed on purpose: hairline borders and dividers (`componentRecipes.menu.separator.thickness` is `1px`), focus rings and all shadow Tokens, `radii.none` (`0`), and `radii.full` (`9999px`). The array of exceptions above is enforced by the token checks, and `componentRecipes.menu.shortcut.letterSpacing` stays an `em` value that follows its own font size.
+These stay fixed on purpose: hairline borders and dividers (`componentRecipes.menu.separator.thickness` is `1px`), focus rings, foundation and theme drop shadows, `glass.blur` (`4px`), `radii.none` (`0`), and `radii.full` (`9999px`). The glass inset edge is a separate `0.0625rem` effect that scales. The token checks enforce these built-in values, and `componentRecipes.menu.shortcut.letterSpacing` stays an `em` value that follows its own font size.
 
 Because token values now carry the `rem` unit, do not read them with `parseFloat(token)` and treat the result as pixels. Pass the string to CSS unchanged. When an application really needs pixels, note which kind of value it holds:
 

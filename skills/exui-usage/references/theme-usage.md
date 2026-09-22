@@ -63,3 +63,7 @@ The Token stylesheet exposes the Pitch Black palette under the `.pitch-black` cl
 - The provider only adds and removes the `light` and `dark` classes on the root element. It does not clean up a manually applied `.pitch-black`, and switching between the two control styles does not reset the other one. If you mix them, class cleanup is your responsibility.
 
 See [Token usage](token-usage.md) for the Token-side theme contract.
+
+## Customize the palette
+
+Use [Token customization](token-customization.md) when changing brand colors, typography, radii, or shadows. The current Dark palette separates the `#0a0a0a` page from neutral `#1b1b1b` popover, modal, and menu surfaces; Pitch Black keeps a black page. Style new content with the corresponding semantic variables so it follows the selected palette.

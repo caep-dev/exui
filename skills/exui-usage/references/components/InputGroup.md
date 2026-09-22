@@ -42,4 +42,6 @@ export function SearchField() {
 - Put `InputGroupButton` inside an addon for actions; it takes the package button `variant` plus addon-specific `size` values (`"xs"` default, `"sm"`, `"icon-xs"`, `"icon-sm"`).
 - `InputGroupInput` and `InputGroupTextarea` are the control variants; pass standard input props through them.
 
+The group paints the shared background and the focus/invalid shadow. Inner controls stay transparent; set `aria-invalid` on the control to show the group-level invalid state. For a translucent input, use `<InputGroup glass>` and keep `glass` off `InputGroupInput` and `InputGroupTextarea`, whose public props are native control props. `InputGroupButton` separately inherits `glass` from `Button`. See [Glass material](../glass.md).
+
 For advanced props, use the TypeScript types exposed by the package-root import.

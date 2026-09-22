@@ -68,3 +68,7 @@ For grouped items, custom labels, separators, or full Radix Select control, comp
 `SelectItem` renders its own check indicator; put only the label in children. `SelectContent` opens in a portal with `position="item-aligned"` by default; set `position="popper"` for popover-style placement. The composed path follows the Radix Select API — `SelectField` is the Radix root, so `value`/`onValueChange`/`defaultValue` and the other root props apply.
 
 For form integration, wrap either variant in the [Field](Field.md) parts.
+
+## Glass surfaces
+
+`Select glass` and `className="ex-glass"` enable the simplified wrapper's trigger only. To enable glass on the popup, compose `SelectField`, `SelectTrigger`, and `SelectContent`; set `glass` separately on the trigger and content. `SelectField` is a state root and has no glass surface. See [Glass material](../glass.md).

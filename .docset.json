@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "reviewedCommit": "0ec18ee607e1ee780026c7047007266e5a79f77e",
-  "updatedAt": "2026-09-15",
+  "reviewedCommit": "d0d843024ebca5af13a8f96afb038e670cc1f147",
+  "updatedAt": "2026-09-22",
   "surfaces": [
     "**/README*.md",
     "CONTRIBUTING.md",
@@ -10,7 +10,17 @@
   ],
   "additionalPaths": [
     "CONTRIBUTING.md",
-    "TESTING.md"
+    "TESTING.md",
+    "skills/exui-usage"
   ],
-  "exclusions": []
+  "exclusions": [],
+  "baselineRepairs": [
+    {
+      "previousReviewedCommit": "0ec18ee607e1ee780026c7047007266e5a79f77e",
+      "correspondingMergeCommit": "8fe3e7eb20b52137dd0af2cb6fd523f4ee9f691d",
+      "reviewedCommit": "d0d843024ebca5af13a8f96afb038e670cc1f147",
+      "date": "2026-09-22",
+      "reason": "The previous baseline is not an ancestor of the current history; its work entered through PR #5. The user approved recording the current reviewed snapshot after documentation validation."
+    }
+  ]
 }

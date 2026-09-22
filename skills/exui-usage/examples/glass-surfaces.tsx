@@ -13,10 +13,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
   GlassSeed,
   Input,
   InputGroup,
   InputGroupInput,
+  SelectContent,
+  SelectField,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -26,8 +37,8 @@ import "@exre/exui/style.css"
 
 /**
  * One seed per document registers the shared refraction filter. It renders no
- * children and is not a provider: the material still works without it, just
- * without the refraction enhancement.
+ * children and is not a provider. Omit it for the base material; syntax support
+ * alone does not establish rendered refraction quality in the target browser.
  */
 export default function GlassSurfaces() {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -38,8 +49,10 @@ export default function GlassSurfaces() {
 
       {/* A real backdrop is what makes a translucent surface worth looking at. */}
       <div
-        className="grid gap-4 p-6"
         style={{
+          display: "grid",
+          gap: "1rem",
+          padding: "1.5rem",
           backgroundImage:
             "repeating-linear-gradient(45deg, #1d4ed8 0 14px, #0f172a 14px 28px, #e11d48 28px 42px, #f8fafc 42px 56px)",
         }}
@@ -52,7 +65,7 @@ export default function GlassSurfaces() {
               radius, padding, shadow, and states.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
+          <CardContent style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
             <Button glass>Neutral</Button>
             {/* Danger surfaces keep the danger material and its foreground. */}
             <Button glass variant="danger">
@@ -68,7 +81,7 @@ export default function GlassSurfaces() {
           Any element can use the material through the class, without a React
           component and without a glass prop.
         */}
-        <div className="ex-glass rounded-xl p-4">
+        <div className="ex-glass" style={{ borderRadius: "0.75rem", padding: "1rem" }}>
           A plain div material
         </div>
 
@@ -77,7 +90,18 @@ export default function GlassSurfaces() {
         </InputGroup>
         <Input glass placeholder="Input" aria-label="Glass input" />
 
-        <div className="flex flex-wrap gap-2">
+        {/* Trigger and portal panel opt in separately. */}
+        <SelectField defaultValue="all">
+          <SelectTrigger glass aria-label="Visibility">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent glass>
+            <SelectItem value="all">All items</SelectItem>
+            <SelectItem value="saved">Saved items</SelectItem>
+          </SelectContent>
+        </SelectField>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline">Open dialog</Button>
@@ -93,6 +117,19 @@ export default function GlassSurfaces() {
               </DialogHeader>
             </DialogContent>
           </Dialog>
+
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button variant="outline">Open drawer</Button>
+            </DrawerTrigger>
+            {/* The rounded surface is painted on the content's ::before. */}
+            <DrawerContent glass>
+              <DrawerHeader>
+                <DrawerTitle>Glass drawer</DrawerTitle>
+                <DrawerDescription>Drag the panel to close it.</DrawerDescription>
+              </DrawerHeader>
+            </DrawerContent>
+          </Drawer>
 
           <Tooltip>
             <TooltipTrigger asChild>

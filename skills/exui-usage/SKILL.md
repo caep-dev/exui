@@ -1,6 +1,6 @@
 ---
 name: exui-usage
-description: Guide external projects in choosing and using ExUI Tokens, component recipes, React components, and Lucide icons from the public @exre/exui package and its tokens and Fumadocs docs-theme subpaths.
+description: Use ExUI in consuming projects when customizing Tokens or themes, integrating React components or Lucide icons, adding glass surfaces, scaling UI, or theming Fumadocs through the public @exre/exui entries.
 ---
 
 # ExUI Usage
@@ -19,7 +19,8 @@ Check the consuming project's installed ExUI version, React version, stylesheet 
 | Build navigation or an application shell                      | [Sidebar](references/components/Sidebar.md) or [NavigationMenu](references/components/NavigationMenu.md) | Navigation and layout components                                                                         |
 | Add notifications                                             | [Sonner / Toaster / toast](references/components/Sonner.md)                                              | [Notification example](examples/sonner-notifications.tsx)                                                |
 | Switch themes or integrate SSR                                | [Theme usage](references/theme-usage.md)                                                                 | [Theme example](examples/theme-provider-usage.tsx); read the SSR limitation before mounting the provider |
-| Add a translucent glass surface                               | [Glass material](references/glass.md)                                                                    | [Glass example](examples/glass-surfaces.tsx); mount one `GlassSeed` per document                         |
+| Customize colors, fonts, radii, or recipe variables | [Token customization](references/token-customization.md) | [Exact Token paths and CSS properties](references/generated/token-paths.md) |
+| Add a translucent glass surface                               | [Glass material](references/glass.md)                                                                    | [Glass example](examples/glass-surfaces.tsx); add one `GlassSeed` per document only for optional refraction |
 | Theme a Fumadocs UI docs site                                 | [Fumadocs docs theme](references/docs-theme.md)                                                          | [Theme usage](references/theme-usage.md) for the one-theme-driver rule                                   | 
 | Use CSS / JavaScript Tokens or recipes, with or without React | [Token usage](references/token-usage.md)                                                                 | [Exact Token paths and CSS properties](references/generated/token-paths.md)                              |
 | Add icons or icon-only controls                               | [Icon usage](references/icon-usage.md)                                                                   | [Button](references/components/Button.md) or [Tooltip](references/components/Tooltip.md)                 |
@@ -37,6 +38,7 @@ exui-usage/
 │   ├── glass.md              Shared translucent material and its seed, variables, and boundaries
 │   ├── docs-theme.md         Fumadocs UI colour contract and its boundaries
 │   ├── token-usage.md        Framework-neutral Tokens and component recipes
+│   ├── token-customization.md  CSS overrides, aliases, and theme scope
 │   ├── icon-usage.md         Lucide setup and accessible icon usage
 │   ├── components/*.md      Component imports, composition, props, examples
 │   └── generated/*.md       Generated public exports and Token path inventories

@@ -50,14 +50,20 @@ The shadcn/ui aliases (`--background`, `--primary`, `--ring`, `--chart-1`, `--si
 
 Scalable lengths are authored in `rem` against a 16px base: density geometry, the four body/small font-size and line-height Tokens, ordinary radii, and the length fields of every component recipe. Setting the application root font size rescales all of them together, and a 16px root font size reproduces the original pixel design exactly. Nothing in this workspace sets a root font size, and no scale variable or runtime listener is involved.
 
-Fixed-pixel exceptions are intentional and machine-checked: `radii.none` is `0`, `radii.full` is `9999px`, `componentRecipes.menu.separator.thickness` is `1px`, and every shadow Token stays pixel-based. Recipe durations stay `ms`, `componentRecipes.menu.shortcut.letterSpacing` stays `em`, and `componentRecipes.menu.shortcut.marginInlineStart` stays `auto`.
+Fixed-pixel exceptions are intentional and machine-checked: `radii.none` is `0`, `radii.full` is `9999px`, `componentRecipes.menu.separator.thickness` is `1px`, foundation and theme drop shadows stay pixel-based, and `glass.blur` stays `4px`. The glass inset edge is `0.0625rem`, so it scales independently of the blur. Recipe durations stay `ms`, `componentRecipes.menu.shortcut.letterSpacing` stays `em`, and `componentRecipes.menu.shortcut.marginInlineStart` stays `auto`.
 
 `RecipeLength` accepts `${number}rem`, `${number}px`, and `"0"`, so consumer-authored recipes may keep passing pixel values even though the built-in values use `rem`.
 
 ## Accessibility baseline
 
-Default text and danger control text must maintain at least a 4.5:1 contrast ratio. Focus indicators must maintain at least 3:1 against the page background.
+The token validator checks default text and danger control text against a 4.5:1 contrast floor, and the semantic focus-ring color against a 3:1 floor on the page background.
 
 The brand fill is the one recorded exception. `control.primary` and `sidebar.primary` are judged at the 3:1 non-text floor instead, because white on the brand blue measures 3.52:1 and the only foregrounds that reach 4.5:1 on it are near-black labels, which is a different design rather than a darker version of this one. The pairing is still checked, just against the lower floor, so a fill that drops below 3:1 is still reported. `color-contrast-policy.mjs` holds the floor and the fill paths that use it; `validate-tokens.mjs` enforces the same threshold through that shared constant.
 
-The migration selects a contrast-safe foreground for each danger color and replaces translucent focus rings with solid two-pixel rings. Other Light and Dark values continue to target the pre-migration computed-style baseline.
+The focus-color check evaluates the semantic ring color against the page background; it does not prove the contrast of every component's rendered shadow. Current recipes reference the foundation focus and invalid shadows, which are translucent three-pixel effects.
+
+## Theme surfaces and glass
+
+The current source uses `#0088ff` for the primary brand fill. Dark uses `#0a0a0a` for the page and `#1b1b1b` for popover, modal, and menu surfaces; Pitch Black keeps a `#000000` page. Consume the semantic variables rather than copying these values into application styles.
+
+Every theme includes `glass`: neutral and danger colors, interaction backgrounds, fallback backgrounds, blur, saturation, and the inset edge. The generator keeps the text, danger colors, and edge linked to their source variables. The token stylesheet only supplies variables; `.ex-glass` behavior requires the public component stylesheet. See [Glass usage](../../skills/exui-usage/references/glass.md) and [Token customization](../../skills/exui-usage/references/token-customization.md).
