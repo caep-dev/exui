@@ -1,6 +1,6 @@
 # Showcase 消费模型与视觉测试
 
-最后更新：2026-09-18
+最后更新：2026-09-21
 
 ## 应用
 
@@ -10,6 +10,12 @@
 
 - 它消费的是**构建后的公共包产物**，不是组件源码。因此视觉测试前必须先完成一次 workspace 构建，否则测试会对着上一版产物运行。
 - Showcase 没有自己的 Tailwind 构建，只有组件产物里已经存在的工具类可用。测试夹具里需要额外样式时只能写 inline `style`，不能用自由生成的 Tailwind 类。
+
+## 组件目录
+
+`Showcase` 是单页开发者组件目录。它以语义分类（Foundation、Actions、Form controls、Data display、Feedback、Overlays、Navigation & layout）组织公开组件入口；Overview 同时列出全量目录卡片并支持按名称或用途搜索。分类选择写入 URL hash，浏览器前进、后退和直达链接都从 hash 恢复当前分类。
+
+分类页只渲染该类别的既有交互预览，避免把全部示例堆进长页；`Quality recipes` 是独立入口，承载 `ComponentRecipeContract` 的确定性视觉回归夹具。目录数据与选中状态在 `Showcase.tsx`，其响应式网格、桌面粘性侧栏、移动筛选面板和搜索框间距在同目录的 `Showcase.css`。后者是 Showcase 的本地 CSS，不依赖未编译进公共样式表的 Tailwind 工具类。
 
 ## 视觉测试配置
 
@@ -33,6 +39,7 @@
 | `RemSizing.vrt.test.tsx` | 根字号矩阵下的可缩放几何，以及固定像素例外 | 否 |
 | `InteractiveCursor.vrt.test.tsx` | 交互元素的 `cursor` 取值与刻意保留的例外 | 否 |
 | `InputGroup.vrt.test.tsx` | 输入组在多个状态下的背景与边框叠加 | 否 |
+| `ShowcaseCatalog.vrt.test.tsx` | 目录分类与 hash、全量目录搜索、目录计数和指标布局 | 否 |
 
 ### 公共夹具模式
 
