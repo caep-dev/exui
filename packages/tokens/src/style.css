@@ -468,7 +468,7 @@
   --exui-control-link-hover: #0059c4;
   --exui-control-neutral: #f4f4f4;
   --exui-control-neutral-foreground: #1a1a1a;
-  --exui-control-primary: #0070f3;
+  --exui-control-primary: #0088ff;
   --exui-control-primary-foreground: #ffffff;
   --exui-control-selected: #0088ff;
   --exui-editor-code: #2f3336;
@@ -543,7 +543,7 @@
   --exui-radius-none: 0;
   --exui-radius-small: 0.375rem;
   --exui-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --exui-shadow-focus: 0 0 0 3px rgba(0, 112, 243, 0.25);
+  --exui-shadow-focus: 0 0 0 3px rgba(0, 136, 255, 0.25);
   --exui-shadow-invalid: 0 0 0 3px rgba(231, 0, 11, 0.25);
   --exui-shadow-large: 0 16px 40px rgba(0, 0, 0, 0.12);
   --exui-shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.08);
@@ -555,7 +555,7 @@
   --exui-sidebar-background: #fafafa;
   --exui-sidebar-border: #e6e6e6;
   --exui-sidebar-foreground: #0b0b0b;
-  --exui-sidebar-primary: #0070f3;
+  --exui-sidebar-primary: #0088ff;
   --exui-sidebar-primary-foreground: #ffffff;
   --exui-sidebar-ring: #006dcc;
   --exui-surface-accent: #f2f2f2;
@@ -584,7 +584,7 @@
   --muted-foreground: #737373;
   --popover: #ffffff;
   --popover-foreground: #0b0b0b;
-  --primary: #0070f3;
+  --primary: #0088ff;
   --primary-foreground: #ffffff;
   --radius: var(--exui-radius-large);
   --ring: #006dcc;
@@ -595,7 +595,7 @@
   --sidebar-accent-foreground: #1a1a1a;
   --sidebar-border: #e6e6e6;
   --sidebar-foreground: #0b0b0b;
-  --sidebar-primary: #0070f3;
+  --sidebar-primary: #0088ff;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-ring: #006dcc;
 }

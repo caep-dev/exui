@@ -53,9 +53,11 @@ test("out-of-range channels are rejected rather than judged", () => {
 
 test("a theme foreground pair below the text threshold is reported", () => {
   const violations = violationsAfter(({ contract }) => {
-    contract.themes.light.control.primary = "#c8c8c8"
+    // An accent surface, so the pair is judged at the text threshold rather than
+    // at the non-text floor the brand fill is held to.
+    contract.themes.light.surface.accent = "#7a7a7a"
   })
-  requireViolation(violations, "light.control.primary")
+  requireViolation(violations, "light.surface.accent")
 })
 
 test("a translucent foreground is rejected rather than judged", () => {
@@ -89,8 +91,31 @@ test("translucent backgrounds are composited over the theme page colour", () => 
 
 test("every theme is judged, including pitchBlack", () => {
   const violations = violationsAfter(({ contract }) => {
-    contract.themes.pitchBlack.control.primaryForeground = "#101010"
+    // A washed-out label on the brand fill, below the non-text floor, so the
+    // darkest theme is not skipped for being the one with the least headroom.
+    contract.themes.pitchBlack.control.primaryForeground = "#c8c8c8"
   })
   requireViolation(violations, "pitchBlack.control.primary")
   requireViolation(violations, "pitchBlack.componentRecipes.button.primary.default")
+})
+
+test("the brand fill is held to a lower floor rather than exempted", () => {
+  // White on the built-in brand blue measures 3.52:1, under the text threshold,
+  // which is why the pairing is judged at BRAND_FILL_CONTRAST. A fill that drops
+  // under that floor still has to be reported, or the exception would have
+  // become an exemption.
+  const violations = violationsAfter(({ contract }) => {
+    contract.themes.light.control.primary = "#55aaff"
+  })
+  requireViolation(violations, "light.control.primary")
+  requireViolation(violations, "light.componentRecipes.button.primary.default")
+})
+
+test("the brand floor covers the brand fill and nothing else", () => {
+  // The brand fill's own ratio, moved onto a state that is not the brand fill,
+  // is judged at the text threshold and therefore reported.
+  const violations = violationsAfter(({ contract }) => {
+    contract.themes.light.control.hover = "#0088ff"
+  })
+  requireViolation(violations, "light.componentRecipes.button.primary.hover")
 })

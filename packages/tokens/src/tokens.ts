@@ -115,7 +115,7 @@ const light: ThemeTokens = {
     inverse: "#ffffff",
   },
   control: {
-    primary: "#0070f3",
+    primary: "#0088ff",
     primaryForeground: "#ffffff",
     hover: "#0062d6",
     active: "#0059c4",
@@ -170,7 +170,7 @@ const light: ThemeTokens = {
   sidebar: {
     background: "#fafafa",
     foreground: "#0b0b0b",
-    primary: "#0070f3",
+    primary: "#0088ff",
     primaryForeground: "#ffffff",
     accent: "#f2f2f2",
     accentForeground: "#1a1a1a",
@@ -223,7 +223,7 @@ const dark: ThemeTokens = {
     inverse: "#0b0b0b",
   },
   control: {
-    primary: "#0070f3",
+    primary: "#0088ff",
     primaryForeground: "#ffffff",
     hover: "#0062d6",
     active: "#0059c4",
@@ -278,7 +278,7 @@ const dark: ThemeTokens = {
   sidebar: {
     background: "#1f1f1f",
     foreground: "#fafafa",
-    primary: "#0070f3",
+    primary: "#0088ff",
     primaryForeground: "#ffffff",
     accent: "#2e2e2e",
     accentForeground: "#fafafa",
@@ -376,7 +376,7 @@ export const exuiTokens: ExuiTokenContract = {
     small: "0 1px 2px rgba(0, 0, 0, 0.05)",
     medium: "0 4px 8px rgba(0, 0, 0, 0.08)",
     large: "0 16px 40px rgba(0, 0, 0, 0.12)",
-    focus: "0 0 0 3px rgba(0, 112, 243, 0.25)",
+    focus: "0 0 0 3px rgba(0, 136, 255, 0.25)",
     invalid: "0 0 0 3px rgba(231, 0, 11, 0.25)",
   },
 }

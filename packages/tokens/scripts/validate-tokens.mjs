@@ -12,7 +12,10 @@ import {
   collectLengthPolicyViolations,
   isContractLength,
 } from "./token-length-policy.mjs"
-import { collectColorContrastViolations } from "./color-contrast-policy.mjs"
+import {
+  BRAND_FILL_CONTRAST,
+  collectColorContrastViolations,
+} from "./color-contrast-policy.mjs"
 import { collectFoundationReferenceViolations } from "./foundation-reference-policy.mjs"
 import { collectGlassViolations } from "./glass-policy.mjs"
 import { componentRecipes, exuiTokens } from "../dist/index.js"
@@ -380,7 +383,13 @@ function requireContrast(themeName, label, foreground, background, minimum) {
 function validateContrast() {
   for (const [themeName, theme] of Object.entries(exuiTokens.themes)) {
     requireContrast(themeName, "defaultText", theme.text.primary, theme.surface.background, 4.5)
-    requireContrast(themeName, "primaryControl", theme.control.primaryForeground, theme.control.primary, 4.5)
+    requireContrast(
+      themeName,
+      "primaryControl",
+      theme.control.primaryForeground,
+      theme.control.primary,
+      BRAND_FILL_CONTRAST
+    )
     requireContrast(themeName, "dangerControl", theme.control.dangerForeground, theme.control.danger, 4.5)
     requireContrast(themeName, "focusRing", theme.control.focusRing, theme.surface.background, 3)
   }

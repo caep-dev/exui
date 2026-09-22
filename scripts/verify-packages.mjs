@@ -279,7 +279,7 @@ async function main() {
   )
   assert.strictEqual(
     cjs.exuiTokens.shadows.focus,
-    "0 0 0 3px rgba(0, 112, 243, 0.25)",
+    "0 0 0 3px rgba(0, 136, 255, 0.25)",
     "focus rings must stay fixed"
   )
 

@@ -82,7 +82,7 @@ test("a published variable that drifted from the contract is rejected", () => {
     variables["--exui-shadow-focus"] = "0 0 0 2px red"
   })
 
-  requireViolation(violations, '--exui-shadow-focus must declare "0 0 0 3px rgba(0, 112, 243, 0.25)"')
+  requireViolation(violations, '--exui-shadow-focus must declare "0 0 0 3px rgba(0, 136, 255, 0.25)"')
 })
 
 test("a recipe variable that inlines a foundation value is rejected", () => {

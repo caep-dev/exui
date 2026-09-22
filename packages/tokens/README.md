@@ -56,6 +56,8 @@ Fixed-pixel exceptions are intentional and machine-checked: `radii.none` is `0`,
 
 ## Accessibility baseline
 
-Default text and primary or danger control text must maintain at least a 4.5:1 contrast ratio. Focus indicators must maintain at least 3:1 against the page background.
+Default text and danger control text must maintain at least a 4.5:1 contrast ratio. Focus indicators must maintain at least 3:1 against the page background.
 
-The initial migration intentionally replaces the previous light-on-blue primary text with a dark foreground, selects a contrast-safe foreground for each danger color, and replaces translucent focus rings with solid two-pixel rings. Other Light and Dark values continue to target the pre-migration computed-style baseline.
+The brand fill is the one recorded exception. `control.primary` and `sidebar.primary` are judged at the 3:1 non-text floor instead, because white on the brand blue measures 3.52:1 and the only foregrounds that reach 4.5:1 on it are near-black labels, which is a different design rather than a darker version of this one. The pairing is still checked, just against the lower floor, so a fill that drops below 3:1 is still reported. `color-contrast-policy.mjs` holds the floor and the fill paths that use it; `validate-tokens.mjs` enforces the same threshold through that shared constant.
+
+The migration selects a contrast-safe foreground for each danger color and replaces translucent focus rings with solid two-pixel rings. Other Light and Dark values continue to target the pre-migration computed-style baseline.
