@@ -29,3 +29,6 @@ dist-ssr
 /.comet/*
 !/.comet/config.yaml
 # <<< Comet managed project state <<<
+
+.playwright-cli
+__screenshots__
