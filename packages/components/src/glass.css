@@ -1,0 +1,241 @@
+/*
+ * Shared glass material.
+ *
+ * The material rules are deliberately unlayered. Component recipes live in the
+ * utilities layer, and an unlayered declaration outranks every layer, so a
+ * caller cannot accidentally defeat the material by reordering a class string.
+ * The one layered rule below is the `@layer base` reset, which has to lose to
+ * the utilities that carry a host's shadow. The material only ever sets paint
+ * properties: it never writes display, position, z-index, width, height,
+ * padding, gap, radius, overflow, or pointer-events, and it never sets a border
+ * width. The visible edge is an inset shadow instead, so a plain `div` does not
+ * grow a border it never asked for and an element that already had a border
+ * keeps its own colour and gains an inner hairline beside it.
+ *
+ * The `--exui-*` values come from the Token package and are the documented
+ * customisation surface. The private variables here are `--_exui-glass-*`: the
+ * per-surface state colours derived from the Token values, the host shadow the
+ * reset captures, and `--_exui-glass-reference`, which the seed sets on the
+ * document root once the browser has confirmed it accepts the shared filter.
+ * Without a seed the chain ends in the identity `brightness(1)`, so the
+ * material never carries a filter URL that resolves to nothing.
+ */
+
+@layer base {
+  /*
+   * Reset the run-time composition variables on each surface. Token variables
+   * are allowed to inherit, but a stale host shadow must not leak out of an
+   * outer glass surface into a nested one. Utilities still win over this: the
+   * base layer has lower priority than the recipe companions.
+   */
+  .ex-glass,
+  [data-exui-glass-delegate="bubble"] > [data-slot="bubble-content"] {
+    --_exui-glass-host-shadow: var(--tw-shadow, 0 0 #0000);
+  }
+}
+
+/*
+ * The base material.
+ *
+ * A surface that paints through one of its own children shares this rule, so
+ * the material is drawn once instead of stacking. The delegated form is
+ * identified by the attribute alone: a greedy ancestor such as `Bubble` moves
+ * the marker off its own class list precisely so that the root does not paint.
+ *
+ * The shadow list keeps the same Tailwind variables the shadow utilities
+ * compose, then the host's own drop shadow, and appends the material's inset
+ * edge. A directional white inset supplies a lightweight specular highlight
+ * without a second layer or a geometry-dependent filter. Missing pieces are
+ * transparent zero shadows rather than `none`, because `none` is not valid
+ * inside a comma-separated shadow list.
+ */
+.ex-glass,
+[data-exui-glass-delegate="bubble"] > [data-slot="bubble-content"] {
+  --_exui-glass-default-background: var(--exui-glass-background);
+  --_exui-glass-hover-background: var(--exui-glass-hover-background);
+  --_exui-glass-active-background: var(--exui-glass-active-background);
+  --_exui-glass-selected-background: var(--exui-glass-selected-background);
+
+  background-color: var(--_exui-glass-default-background);
+  color: var(--exui-glass-foreground);
+  -webkit-backdrop-filter: blur(var(--exui-glass-blur))
+    saturate(var(--exui-glass-saturation))
+    var(--_exui-glass-reference, brightness(1));
+  backdrop-filter: blur(var(--exui-glass-blur))
+    saturate(var(--exui-glass-saturation))
+    var(--_exui-glass-reference, brightness(1));
+  box-shadow:
+    var(--tw-inset-shadow, 0 0 #0000),
+    var(--tw-inset-ring-shadow, 0 0 #0000),
+    var(--tw-ring-offset-shadow, 0 0 #0000),
+    var(--tw-ring-shadow, 0 0 #0000),
+    var(--_exui-glass-host-shadow, 0 0 #0000),
+    var(--exui-glass-shadow),
+    inset 0 1px 3px rgba(255, 255, 255, 0.5);
+}
+
+/*
+ * Danger surfaces keep their own semantics instead of taking the theme's
+ * neutral material. Pointing the edge at the danger border is enough: the
+ * inset shadow already references `--exui-glass-border`, so the edge follows
+ * without repeating the edge width here.
+ */
+.ex-glass[data-exui-glass-tone="danger"],
+[data-exui-glass-delegate="bubble"][data-exui-glass-tone="danger"]
+  > [data-slot="bubble-content"] {
+  --_exui-glass-default-background: var(--exui-glass-danger-background);
+  --_exui-glass-hover-background: var(--exui-glass-danger-hover-background);
+  --_exui-glass-active-background: var(--exui-glass-danger-active-background);
+  --_exui-glass-selected-background: var(
+    --exui-glass-danger-selected-background
+  );
+  --exui-glass-border: var(--exui-glass-danger-border);
+
+  color: var(--exui-glass-danger-foreground);
+}
+
+/*
+ * A command dialog already owns a surface, so the palette inside it has to
+ * stop painting an opaque background or the material underneath is hidden.
+ * Only a direct Command that did not ask for the material itself steps aside:
+ * a deliberately glass Command keeps its own nested surface, and no deeper
+ * business node is touched.
+ */
+.ex-glass[data-exui-glass-command-dialog]
+  > [data-slot="command"]:not(.ex-glass) {
+  background-color: transparent;
+}
+
+/*
+ * A drawer paints its panel with a `::before` layer that owns the rounded
+ * shape, the inset, and the border, while the element itself is a transparent
+ * full-bleed box. Painting the material on the element would produce a
+ * rectangle covering that panel, so the material moves to the layer that
+ * actually draws the surface and the element stops painting altogether. Its
+ * existing shadow and border stay in the composition.
+ */
+.ex-glass[data-slot="drawer-content"] {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.ex-glass[data-slot="drawer-content"]::before {
+  background-color: var(--_exui-glass-default-background);
+  -webkit-backdrop-filter: blur(var(--exui-glass-blur))
+    saturate(var(--exui-glass-saturation))
+    var(--_exui-glass-reference, brightness(1));
+  backdrop-filter: blur(var(--exui-glass-blur))
+    saturate(var(--exui-glass-saturation))
+    var(--_exui-glass-reference, brightness(1));
+  box-shadow:
+    var(--tw-shadow, 0 0 #0000),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    var(--exui-glass-shadow);
+}
+
+/*
+ * A tooltip is an inverted surface by default, and its arrow carries that
+ * inversion as a solid foreground colour. On a glass surface the arrow has to
+ * follow the material instead, or a dark diamond is left hanging off a light
+ * panel. The arrow takes the surface colour only: it never starts a second
+ * refraction of its own.
+ */
+.ex-glass[data-slot="tooltip-content"] > [data-slot="tooltip-arrow"] {
+  background-color: var(--_exui-glass-default-background);
+  fill: var(--_exui-glass-default-background);
+}
+
+/*
+ * Interaction states.
+ *
+ * Only a surface that already had its own feedback reacts, which is why the
+ * library marks those with `data-exui-glass-interactive`: a plain `div` with
+ * `ex-glass` must not start behaving like a button just because the pointer
+ * crossed it. `:where()` keeps the disqualified states out of the specificity
+ * calculation, so hover, selected, and active all weigh the same and the source
+ * order below is what implements the required
+ * active > selected > hover > default priority.
+ *
+ * A disabled surface never switches material, and that applies to the selected
+ * branch too: a disabled control can still carry `aria-pressed`, `data-state`,
+ * or an expanded popup, and it must keep the default material there as well.
+ * `data-disabled` is matched by value rather than presence, because Radix writes
+ * an empty string while other libraries write `"true"` or `"false"`.
+ */
+.ex-glass[data-exui-glass-interactive]:hover:where(
+    :not(
+      :disabled,
+      [aria-disabled="true"],
+      [data-disabled="true"],
+      [data-disabled=""]
+    )
+  ) {
+  background-color: var(--_exui-glass-hover-background);
+}
+
+.ex-glass[data-exui-glass-interactive]:is(
+    [aria-checked="true"],
+    [aria-pressed="true"],
+    [aria-selected="true"],
+    [aria-expanded="true"],
+    [data-state="checked"],
+    [data-state="on"],
+    [data-state="open"]
+  ):where(
+    :not(
+      :disabled,
+      [aria-disabled="true"],
+      [data-disabled="true"],
+      [data-disabled=""]
+    )
+  ) {
+  background-color: var(--_exui-glass-selected-background);
+}
+
+.ex-glass[data-exui-glass-interactive]:active:where(
+    :not(
+      :disabled,
+      [aria-disabled="true"],
+      [data-disabled="true"],
+      [data-disabled=""]
+    )
+  ) {
+  background-color: var(--_exui-glass-active-background);
+}
+
+/*
+ * Degradation.
+ *
+ * When neither the standard nor the prefixed backdrop blur is available the
+ * material falls back to an opaque surface. The state variables are pointed at
+ * that fallback too, so a translucent hover cannot paint over it and undo the
+ * readable result. Interaction feedback is left to the component's own states.
+ */
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .ex-glass,
+  [data-exui-glass-delegate="bubble"] > [data-slot="bubble-content"] {
+    --_exui-glass-default-background: var(--exui-glass-fallback-background);
+    --_exui-glass-hover-background: var(--exui-glass-fallback-background);
+    --_exui-glass-active-background: var(--exui-glass-fallback-background);
+    --_exui-glass-selected-background: var(--exui-glass-fallback-background);
+  }
+
+  .ex-glass[data-exui-glass-tone="danger"],
+  [data-exui-glass-delegate="bubble"][data-exui-glass-tone="danger"]
+    > [data-slot="bubble-content"] {
+    --_exui-glass-default-background: var(
+      --exui-glass-danger-fallback-background
+    );
+    --_exui-glass-hover-background: var(
+      --exui-glass-danger-fallback-background
+    );
+    --_exui-glass-active-background: var(
+      --exui-glass-danger-fallback-background
+    );
+    --_exui-glass-selected-background: var(
+      --exui-glass-danger-fallback-background
+    );
+  }
+}

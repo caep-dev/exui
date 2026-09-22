@@ -4,6 +4,7 @@ import * as React from "react"
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { glassClassName, requestsGlass, type GlassSurfaceProps } from "@/lib/glass"
 import { CheckIcon, ChevronRightIcon } from "lucide-react"
 
 const menuItemRecipeClasses =
@@ -47,15 +48,17 @@ function DropdownMenuContent({
   className,
   align = "start",
   sideOffset = 4,
+  glass,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Content> &
+  GlassSurfaceProps) {
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         align={align}
-        className={cn("relative z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-48 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-[var(--exui-component-menu-surface-radius)] border [border-color:var(--exui-component-menu-surface-border)] [background:var(--exui-component-menu-surface-background)] p-[var(--exui-component-menu-surface-padding)] [color:var(--exui-component-menu-surface-foreground)] [box-shadow:var(--exui-component-menu-surface-shadow)] duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:overflow-hidden data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 animate-none! before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl before:backdrop-saturate-150", className )}
+        className={cn("relative z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-48 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-[var(--exui-component-menu-surface-radius)] border [border-color:var(--exui-component-menu-surface-border)] [background:var(--exui-component-menu-surface-background)] p-[var(--exui-component-menu-surface-padding)] [color:var(--exui-component-menu-surface-foreground)] [box-shadow:var(--exui-component-menu-surface-shadow)] [--_exui-glass-host-shadow:var(--exui-component-menu-surface-shadow)] duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:overflow-hidden data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 animate-none! before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit]", requestsGlass(glass, className) ? undefined : "before:backdrop-blur-2xl before:backdrop-saturate-150", glassClassName(glass), className )}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -258,12 +261,14 @@ function DropdownMenuSubTrigger({
 
 function DropdownMenuSubContent({
   className,
+  glass,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent> &
+  GlassSurfaceProps) {
   return (
     <DropdownMenuPrimitive.SubContent
       data-slot="dropdown-menu-sub-content"
-      className={cn("relative z-50 min-w-36 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-[var(--exui-component-menu-surface-radius)] border [border-color:var(--exui-component-menu-surface-border)] [background:var(--exui-component-menu-surface-background)] p-[var(--exui-component-menu-surface-padding)] [color:var(--exui-component-menu-surface-foreground)] [box-shadow:var(--exui-component-menu-surface-shadow)] duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 animate-none! before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl before:backdrop-saturate-150", className )}
+      className={cn("relative z-50 min-w-36 origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-[var(--exui-component-menu-surface-radius)] border [border-color:var(--exui-component-menu-surface-border)] [background:var(--exui-component-menu-surface-background)] p-[var(--exui-component-menu-surface-padding)] [color:var(--exui-component-menu-surface-foreground)] [box-shadow:var(--exui-component-menu-surface-shadow)] [--_exui-glass-host-shadow:var(--exui-component-menu-surface-shadow)] duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 animate-none! before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit]", requestsGlass(glass, className) ? undefined : "before:backdrop-blur-2xl before:backdrop-saturate-150", glassClassName(glass), className )}
       {...props}
     />
   )

@@ -3,6 +3,7 @@ import { type VariantProps } from "class-variance-authority"
 import { ToggleGroup as ToggleGroupPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { glassClassName, type GlassSurfaceProps } from "@/lib/glass"
 import { toggleVariants } from "@/components/ui/toggle"
 
 const ToggleGroupContext = React.createContext<
@@ -58,14 +59,17 @@ function ToggleGroupItem({
   children,
   variant = "default",
   size = "default",
+  glass,
   ...props
 }: React.ComponentProps<typeof ToggleGroupPrimitive.Item> &
-  VariantProps<typeof toggleVariants>) {
+  VariantProps<typeof toggleVariants> &
+  GlassSurfaceProps) {
   const context = React.useContext(ToggleGroupContext)
 
   return (
     <ToggleGroupPrimitive.Item
       data-slot="toggle-group-item"
+      data-exui-glass-interactive=""
       data-variant={context.variant || variant}
       data-size={context.size || size}
       data-spacing={context.spacing}
@@ -75,6 +79,7 @@ function ToggleGroupItem({
           variant: context.variant || variant,
           size: context.size || size,
         }),
+        glassClassName(glass),
         className
       )}
       {...props}

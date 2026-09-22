@@ -3,6 +3,29 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { glassClassName, type GlassSurfaceProps } from "@/lib/glass"
+
+/**
+ * Focus rings the glass material has to keep.
+ *
+ * The material draws its own `box-shadow`, and an unlayered rule outranks the
+ * utilities layer, so a variant's focus ring would otherwise disappear. These
+ * hand the recipe's ring to the material through its private composition
+ * variable, in the same state the recipe declares it.
+ *
+ * Kept as a map beside the variants rather than appended to each variant's
+ * class list, so the recipe strings stay readable and a new variant gets caught
+ * by the exhaustiveness of the lookup.
+ */
+const glassFocusShadowByVariant = {
+  default: "focus-visible:[--_exui-glass-host-shadow:var(--exui-component-button-primary-focus-shadow)]",
+  danger: "focus-visible:[--_exui-glass-host-shadow:var(--exui-component-button-danger-focus-shadow)]",
+  destructive: "focus-visible:[--_exui-glass-host-shadow:var(--exui-component-button-danger-focus-shadow)]",
+  outline: "focus-visible:[--_exui-glass-host-shadow:var(--exui-component-button-outline-focus-shadow)]",
+  secondary: "focus-visible:[--_exui-glass-host-shadow:var(--exui-component-button-secondary-focus-shadow)]",
+  ghost: "focus-visible:[--_exui-glass-host-shadow:var(--exui-component-button-ghost-focus-shadow)]",
+  link: "focus-visible:[--_exui-glass-host-shadow:var(--exui-component-button-link-focus-shadow)]",
+} as const
 
 const buttonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center border bg-clip-padding whitespace-nowrap transition-all outline-none select-none active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0",
@@ -48,19 +71,27 @@ function Button({
   variant = "default",
   size = "default",
   asChild = false,
+  glass,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
-  }) {
+  } & GlassSurfaceProps) {
   const Comp = asChild ? Slot.Root : "button"
+  const danger = variant === "danger" || variant === "destructive"
 
   return (
     <Comp
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      data-exui-glass-interactive=""
+      data-exui-glass-tone={danger ? "danger" : undefined}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        glassClassName(glass),
+        glassFocusShadowByVariant[variant ?? "default"]
+      )}
       {...props}
     />
   )
@@ -71,21 +102,27 @@ function ActionButton({
   variant = "default",
   size = "default",
   asChild = false,
+  glass,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
-  }) {
+  } & GlassSurfaceProps) {
   const Comp = asChild ? Slot.Root : "button"
+  const danger = variant === "danger" || variant === "destructive"
 
   return (
     <Comp
       data-slot="action-button"
       data-variant={variant}
       data-size={size}
+      data-exui-glass-interactive=""
+      data-exui-glass-tone={danger ? "danger" : undefined}
       className={cn(
         buttonVariants({ variant, size }),
         "rounded-[var(--exui-component-button-action-radius)]",
+        glassClassName(glass),
+        glassFocusShadowByVariant[variant ?? "default"],
         className
       )}
       {...props}

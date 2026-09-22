@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@exre/exui-tokens/font.css";
 @import "@exre/exui-tokens/style.css";
+@import "./glass.css";
 
 @custom-variant dark (&:is(.dark *));
 

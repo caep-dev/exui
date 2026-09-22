@@ -49,6 +49,7 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
+  GlassSeed,
   Input,
   InputGroup,
   InputGroupAddon,
@@ -118,8 +119,6 @@ import {
   CheckIcon,
   ChevronRightIcon,
   ClipboardListIcon,
-  CommandIcon,
-  DownloadIcon,
   LayersIcon,
   MoonIcon,
   PanelRightOpenIcon,
@@ -129,15 +128,132 @@ import {
   SunIcon,
 } from "lucide-react"
 
-const sections = [
-  "Recipes",
-  "Foundation",
-  "Actions",
-  "Forms",
-  "Data",
-  "Overlays",
-  "Navigation",
-  "Messaging",
+import { GlassSample } from "./GlassSample"
+import "./Showcase.css"
+
+const catalogCategories = [
+  {
+    id: "overview",
+    label: "Overview",
+    description: "Browse every public Exre UI module in one place.",
+  },
+  {
+    id: "foundation",
+    label: "Foundation",
+    description: "Theme, direction, geometry, and shared visual building blocks.",
+  },
+  {
+    id: "actions",
+    label: "Actions",
+    description: "Buttons, toggles, and menus that start an interaction.",
+  },
+  {
+    id: "form-controls",
+    label: "Form controls",
+    description: "Inputs and choice controls for collecting structured data.",
+  },
+  {
+    id: "data-display",
+    label: "Data display",
+    description: "Content, status, conversation, and visualization surfaces.",
+  },
+  {
+    id: "feedback",
+    label: "Feedback",
+    description: "Progress, alerts, loading states, and notifications.",
+  },
+  {
+    id: "overlays",
+    label: "Overlays",
+    description: "Focused, contextual, and transient layers.",
+  },
+  {
+    id: "navigation-layout",
+    label: "Navigation & layout",
+    description: "Wayfinding, panes, and adaptable page structure.",
+  },
+  {
+    id: "quality-recipes",
+    label: "Quality recipes",
+    description: "Deterministic states used by visual regression checks.",
+  },
+] as const
+
+type CatalogCategoryId = (typeof catalogCategories)[number]["id"]
+
+interface CatalogItem {
+  category: Exclude<CatalogCategoryId, "overview" | "quality-recipes">
+  description: string
+  name: string
+}
+
+const catalogItems: CatalogItem[] = [
+  { category: "foundation", name: "ThemeProvider", description: "Coordinates the active brand theme." },
+  { category: "foundation", name: "useTheme", description: "Reads and updates the active theme." },
+  { category: "foundation", name: "GlassSeed", description: "Enables the optional glass enhancement once per document." },
+  { category: "foundation", name: "DirectionProvider", description: "Sets shared text direction for composed controls." },
+  { category: "foundation", name: "Aspect Ratio", description: "Preserves a declared media ratio." },
+  { category: "foundation", name: "Kbd", description: "Displays keyboard shortcuts consistently." },
+  { category: "foundation", name: "Label", description: "Labels form controls accessibly." },
+  { category: "foundation", name: "Separator", description: "Separates related content without adding hierarchy." },
+  { category: "foundation", name: "Scroll Area", description: "Adds styled overflow regions." },
+  { category: "foundation", name: "useMobile", description: "Reports the compact layout breakpoint." },
+  { category: "foundation", name: "cn", description: "Merges conditional class names." },
+  { category: "actions", name: "Button", description: "Starts a primary or secondary action." },
+  { category: "actions", name: "ActionButton", description: "Provides an action-oriented button treatment." },
+  { category: "actions", name: "Button Group", description: "Keeps adjacent actions visually connected." },
+  { category: "actions", name: "Toggle", description: "Switches a pressed state on or off." },
+  { category: "actions", name: "Toggle Group", description: "Coordinates a related set of toggles." },
+  { category: "actions", name: "Dropdown Menu", description: "Reveals a compact action menu." },
+  { category: "actions", name: "Context Menu", description: "Offers actions at the current pointer context." },
+  { category: "actions", name: "Menubar", description: "Organizes application-level commands." },
+  { category: "form-controls", name: "Calendar", description: "Selects dates in a visual calendar." },
+  { category: "form-controls", name: "Checkbox", description: "Collects independent boolean choices." },
+  { category: "form-controls", name: "Combobox", description: "Combines text search with option selection." },
+  { category: "form-controls", name: "Field", description: "Composes labels, descriptions, and validation states." },
+  { category: "form-controls", name: "Input", description: "Collects a single line of text." },
+  { category: "form-controls", name: "Input Group", description: "Adds actions or context around an input." },
+  { category: "form-controls", name: "Input OTP", description: "Captures one-time passcodes in discrete slots." },
+  { category: "form-controls", name: "Native Select", description: "Uses the browser's native option picker." },
+  { category: "form-controls", name: "Radio Group", description: "Collects one choice from a small set." },
+  { category: "form-controls", name: "Select", description: "Selects from a styled list of options." },
+  { category: "form-controls", name: "Slider", description: "Chooses a value from a continuous range." },
+  { category: "form-controls", name: "Switch", description: "Turns a setting on or off immediately." },
+  { category: "form-controls", name: "Textarea", description: "Collects multi-line text." },
+  { category: "data-display", name: "Accordion", description: "Expands and collapses grouped content." },
+  { category: "data-display", name: "Attachment", description: "Displays file metadata and attachment actions." },
+  { category: "data-display", name: "Avatar", description: "Represents a person or entity visually." },
+  { category: "data-display", name: "Badge", description: "Communicates compact status or metadata." },
+  { category: "data-display", name: "Bubble", description: "Displays message-like content and reactions." },
+  { category: "data-display", name: "Card", description: "Groups related content into a surface." },
+  { category: "data-display", name: "Carousel", description: "Paginates through related visual items." },
+  { category: "data-display", name: "Chart", description: "Styles Recharts data visualizations." },
+  { category: "data-display", name: "Empty", description: "Explains a collection with no content." },
+  { category: "data-display", name: "Item", description: "Presents a compact row of structured content." },
+  { category: "data-display", name: "Marker", description: "Highlights a location or notable item." },
+  { category: "data-display", name: "Message", description: "Composes conversation content and metadata." },
+  { category: "data-display", name: "Message Scroller", description: "Keeps long conversations scrollable." },
+  { category: "data-display", name: "Table", description: "Displays tabular information with shared styling." },
+  { category: "feedback", name: "Alert", description: "Communicates an important static message." },
+  { category: "feedback", name: "Progress", description: "Shows completion toward a known goal." },
+  { category: "feedback", name: "Skeleton", description: "Reserves space while content loads." },
+  { category: "feedback", name: "Spinner", description: "Signals indeterminate work in progress." },
+  { category: "feedback", name: "Toaster", description: "Publishes transient toast notifications." },
+  { category: "overlays", name: "Alert Dialog", description: "Confirms a consequential decision." },
+  { category: "overlays", name: "Command", description: "Searches and runs available commands." },
+  { category: "overlays", name: "Dialog", description: "Focuses attention on a modal task." },
+  { category: "overlays", name: "Drawer", description: "Opens contextual content from the viewport edge." },
+  { category: "overlays", name: "Hover Card", description: "Reveals rich context on hover or focus." },
+  { category: "overlays", name: "Popover", description: "Anchors contextual content to a trigger." },
+  { category: "overlays", name: "Sheet", description: "Presents a modal panel from an edge." },
+  { category: "overlays", name: "Tooltip", description: "Explains an unfamiliar control on hover or focus." },
+  { category: "navigation-layout", name: "Breadcrumb", description: "Shows the current place in a hierarchy." },
+  { category: "navigation-layout", name: "Collapsible", description: "Shows or hides optional content in place." },
+  { category: "navigation-layout", name: "Navigation Menu", description: "Organizes high-level destinations." },
+  { category: "navigation-layout", name: "Pagination", description: "Moves through pages of a collection." },
+  { category: "navigation-layout", name: "Resizable", description: "Lets users adjust adjacent panel sizes." },
+  { category: "navigation-layout", name: "Sidebar", description: "Builds responsive application navigation." },
+  { category: "navigation-layout", name: "Tabs", description: "Switches between peer views in place." },
 ]
 
 const invoices = [
@@ -148,6 +264,9 @@ const invoices = [
 
 function Showcase() {
   const [theme, setTheme] = React.useState<"light" | "dark">("light")
+  const [activeCategory, setActiveCategory] = React.useState<CatalogCategoryId>(readCatalogHash)
+  const [query, setQuery] = React.useState("")
+  const [showCompactNavigation, setShowCompactNavigation] = React.useState(false)
 
   React.useEffect(() => {
     const root = document.documentElement
@@ -155,8 +274,23 @@ function Showcase() {
     root.classList.add(theme)
   }, [theme])
 
+  React.useEffect(() => {
+    const syncCategory = () => setActiveCategory(readCatalogHash())
+    window.addEventListener("hashchange", syncCategory)
+    return () => window.removeEventListener("hashchange", syncCategory)
+  }, [])
+
+  const selectCategory = (category: CatalogCategoryId) => {
+    window.history.replaceState(null, "", `#${category}`)
+    setActiveCategory(category)
+    setShowCompactNavigation(false)
+  }
+
   return (
     <TooltipProvider>
+      {/* Mounted once for the whole application; the material still works
+          without it, just without the refraction. */}
+      <GlassSeed />
       <div className="min-h-svh bg-background text-foreground">
         <header className="sticky top-0 border-b bg-background/95 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3">
@@ -166,13 +300,21 @@ function Showcase() {
               </div>
               <div className="min-w-0">
                 <h1 className="truncate text-base font-semibold">Exre UI</h1>
-                <p className="truncate text-sm text-muted-foreground">
-                  Brand component preview
-                </p>
+                <p className="truncate text-sm text-muted-foreground">Component directory</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">Radix</Badge>
+            <div className="flex items-center gap-2 showcase-header-search">
+              <div className="relative flex-1 showcase-search-desktop">
+                <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  aria-label="Search components"
+                  className="showcase-search-input"
+                  data-testid="catalog-search-desktop"
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search components"
+                  value={query}
+                />
+              </div>
               <Button
                 aria-label="Toggle theme"
                 size="icon"
@@ -193,36 +335,198 @@ function Showcase() {
           </div>
         </header>
 
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-5 py-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-20 lg:self-start">
-            <nav className="flex gap-2 overflow-x-auto rounded-lg border bg-card p-2 lg:flex-col lg:overflow-visible">
-              {sections.map((section) => (
-                <a
-                  key={section}
-                  className="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-                  href={`#${section.toLowerCase()}`}
-                >
-                  {section}
-                </a>
-              ))}
-            </nav>
-          </aside>
+        <div className="mx-auto max-w-7xl px-5 py-6">
+          <div className="mb-4 flex gap-2 showcase-mobile-controls">
+            <Button
+              aria-expanded={showCompactNavigation}
+              onClick={() => setShowCompactNavigation((open) => !open)}
+              variant="outline"
+            >
+              <LayersIcon data-icon="inline-start" />
+              Browse categories
+            </Button>
+          </div>
+          <div className="relative mb-4 showcase-search-mobile">
+            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              aria-label="Search components"
+              className="showcase-search-input"
+              data-testid="catalog-search-mobile"
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search components"
+              value={query}
+            />
+          </div>
+          <div className="showcase-layout">
+            <aside className={`showcase-navigation ${showCompactNavigation ? "is-open" : ""}`}>
+              <CatalogNavigation activeCategory={activeCategory} onSelect={selectCategory} />
+            </aside>
 
-          <main className="flex min-w-0 flex-col gap-6">
-            <IntroPanel />
-            <ComponentRecipeContract />
-            <FoundationSection />
-            <ActionsSection />
-            <FormsSection />
-            <DataSection />
-            <OverlaysSection />
-            <NavigationSection />
-            <MessagingSection />
-          </main>
+            <main className="flex min-w-0 flex-col gap-6">
+              <CatalogContent activeCategory={activeCategory} onSelect={selectCategory} query={query} />
+            </main>
+          </div>
         </div>
       </div>
     </TooltipProvider>
   )
+}
+
+function readCatalogHash(): CatalogCategoryId {
+  const value = window.location.hash.slice(1)
+  return catalogCategories.some((category) => category.id === value)
+    ? (value as CatalogCategoryId)
+    : "overview"
+}
+
+function CatalogNavigation({
+  activeCategory,
+  onSelect,
+}: {
+  activeCategory: CatalogCategoryId
+  onSelect: (category: CatalogCategoryId) => void
+}) {
+  return (
+    <nav aria-label="Component categories" className="rounded-lg border bg-card p-2">
+      <p className="px-3 pb-2 pt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        Browse
+      </p>
+      <div className="grid gap-1">
+        {catalogCategories.map((category) => (
+          <Button
+            aria-pressed={activeCategory === category.id}
+            className="justify-start"
+            data-testid={`catalog-category-${category.id}`}
+            key={category.id}
+            onClick={() => onSelect(category.id)}
+            size="sm"
+            variant={activeCategory === category.id ? "secondary" : "ghost"}
+          >
+            {category.label}
+          </Button>
+        ))}
+      </div>
+    </nav>
+  )
+}
+
+function CatalogContent({
+  activeCategory,
+  onSelect,
+  query,
+}: {
+  activeCategory: CatalogCategoryId
+  onSelect: (category: CatalogCategoryId) => void
+  query: string
+}) {
+  const category = catalogCategories.find((entry) => entry.id === activeCategory)!
+  const normalizedQuery = query.trim().toLocaleLowerCase()
+  const items = catalogItems.filter(
+    (item) =>
+      (activeCategory === "overview" || item.category === activeCategory) &&
+      (normalizedQuery === "" ||
+        `${item.name} ${item.description}`.toLocaleLowerCase().includes(normalizedQuery))
+  )
+
+  if (activeCategory === "quality-recipes") {
+    return <ComponentRecipeContract />
+  }
+
+  return (
+    <>
+      {activeCategory === "overview" ? <IntroPanel componentCount={catalogItems.length} /> : null}
+      <section className="scroll-mt-24" data-testid="catalog-content">
+        <div className="mb-5 flex flex-col gap-2 showcase-catalog-heading">
+          <div>
+            <p className="text-sm font-medium text-primary">{activeCategory === "overview" ? "Public surface" : "Category"}</p>
+            <h2
+              className="text-2xl font-semibold tracking-normal"
+              data-testid={activeCategory === "overview" ? "catalog-heading" : "catalog-section-title"}
+            >
+              {activeCategory === "overview" ? "Component directory" : category.label}
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+              {category.description}
+            </p>
+          </div>
+          <Badge data-testid="catalog-result-count" variant="secondary">
+            {items.length} catalogue entries
+          </Badge>
+        </div>
+
+        {activeCategory === "overview" && normalizedQuery === "" ? (
+          <div className="mb-6 showcase-category-grid">
+            {catalogCategories
+              .filter((entry) => entry.id !== "overview" && entry.id !== "quality-recipes")
+              .map((entry) => (
+                <button
+                  className="rounded-lg border bg-card p-4 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  key={entry.id}
+                  onClick={() => onSelect(entry.id)}
+                  type="button"
+                >
+                  <p className="text-sm font-medium">{entry.label}</p>
+                  <p className="mt-1 text-sm leading-5 text-muted-foreground">{entry.description}</p>
+                  <p className="mt-3 text-xs font-medium text-primary">
+                    {catalogItems.filter((item) => item.category === entry.id).length} entries
+                  </p>
+                </button>
+              ))}
+          </div>
+        ) : null}
+
+        <div className="showcase-item-grid">
+          {items.map((item) => (
+            <article className="rounded-lg border bg-card p-4" key={item.name}>
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="text-sm font-medium">{item.name}</h3>
+                <Badge className="shrink-0" variant="outline">
+                  {catalogCategories.find((entry) => entry.id === item.category)?.label}
+                </Badge>
+              </div>
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">{item.description}</p>
+            </article>
+          ))}
+        </div>
+
+        {items.length === 0 ? (
+          <Empty className="border py-10">
+            <EmptyHeader>
+              <EmptyTitle>No matching public modules</EmptyTitle>
+              <EmptyDescription>Try a component name or a broader term.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : null}
+      </section>
+      <CategoryPreview category={activeCategory} />
+    </>
+  )
+}
+
+function CategoryPreview({ category }: { category: CatalogCategoryId }) {
+  switch (category) {
+    case "foundation":
+      return (
+        <>
+          <FoundationSection />
+          <GlassSection />
+        </>
+      )
+    case "actions":
+      return <ActionsSection />
+    case "form-controls":
+      return <FormsSection />
+    case "data-display":
+      return <DataSection />
+    case "feedback":
+      return <MessagingSection />
+    case "overlays":
+      return <OverlaysSection />
+    case "navigation-layout":
+      return <NavigationSection />
+    default:
+      return null
+  }
 }
 
 export function ComponentRecipeContract() {
@@ -429,10 +733,10 @@ export function ComponentRecipeContract() {
   )
 }
 
-function IntroPanel() {
+function IntroPanel({ componentCount }: { componentCount: number }) {
   return (
     <section className="rounded-lg border bg-card p-5">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="showcase-intro-grid">
         <div className="flex flex-col justify-between gap-6">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -450,16 +754,6 @@ function IntroPanel() {
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button>
-              <DownloadIcon data-icon="inline-start" />
-              Export build
-            </Button>
-            <Button variant="outline">
-              <CommandIcon data-icon="inline-start" />
-              Registry
-            </Button>
-          </div>
         </div>
 
         <div className="rounded-lg border bg-background p-4">
@@ -472,9 +766,9 @@ function IntroPanel() {
               <Badge variant="secondary">Ready</Badge>
             </div>
             <Separator />
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <Metric label="Components" value="60" />
-              <Metric label="Preset" value="Luma" />
+            <div className="showcase-metric-grid" data-testid="catalog-summary-metrics">
+              <Metric label="Catalogue entries" value={String(componentCount)} />
+              <Metric label="Surface" value="Public" />
               <Metric label="Base" value="Radix" />
             </div>
           </div>
@@ -524,6 +818,20 @@ function FoundationSection() {
             <Badge variant="destructive">Destructive</Badge>
           </div>
         </div>
+      </PreviewPanel>
+    </ShowcaseSection>
+  )
+}
+
+function GlassSection() {
+  return (
+    <ShowcaseSection
+      id="glass"
+      title="Glass"
+      description="One shared translucent material, with an optional refraction enhancement."
+    >
+      <PreviewPanel title="Material on the surfaces that opt in">
+        <GlassSample />
       </PreviewPanel>
     </ShowcaseSection>
   )

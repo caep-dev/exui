@@ -344,6 +344,9 @@ function classifyDeclaration(componentDirectory, declarationFile, referenceNames
   if (relative === "types/components/theme-provider.d.ts") {
     return { category: "Theme provider", family: null, reference: null }
   }
+  if (relative === "types/components/glass-seed.d.ts") {
+    return { category: "Glass material", family: null, reference: null }
+  }
   if (relative === "types/index.d.ts") {
     // Named re-exports in src/index.ts (for example the narrowed
     // theme-provider export) make the compiler emit export-specifier alias
@@ -465,7 +468,7 @@ function renderComponentInventory(inventory) {
     categories.set(entry.category, familyMap)
   }
 
-  const categoryOrder = ["Components", "Theme provider", "Hooks", "Utilities"]
+  const categoryOrder = ["Components", "Theme provider", "Glass material", "Hooks", "Utilities"]
   const lines = [
     generatedNotice,
     "",

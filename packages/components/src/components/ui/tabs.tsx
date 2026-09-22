@@ -5,6 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { Tabs as TabsPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { glassClassName, type GlassSurfaceProps } from "@/lib/glass"
 
 function Tabs({
   className,
@@ -43,14 +44,16 @@ const tabsListVariants = cva(
 function TabsList({
   className,
   variant = "default",
+  glass,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> &
-  VariantProps<typeof tabsListVariants>) {
+  VariantProps<typeof tabsListVariants> &
+  GlassSurfaceProps) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
       data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      className={cn(tabsListVariants({ variant }), glassClassName(glass), className)}
       {...props}
     />
   )
@@ -58,14 +61,17 @@ function TabsList({
 
 function TabsTrigger({
   className,
+  glass,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+}: React.ComponentProps<typeof TabsPrimitive.Trigger> & GlassSurfaceProps) {
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
+      data-exui-glass-interactive=""
       className={cn(
-        "relative inline-flex h-full flex-1 items-center justify-center gap-[var(--exui-component-tabs-trigger-gap)] rounded-[var(--exui-component-tabs-trigger-radius)] border [border-color:var(--exui-component-tabs-trigger-default-border)] [background:var(--exui-component-tabs-trigger-default-background)] px-[var(--exui-component-tabs-trigger-padding-inline)] py-[var(--exui-component-tabs-trigger-padding-block)] text-[length:var(--exui-component-tabs-trigger-font-size)] font-[number:var(--exui-component-tabs-trigger-font-weight)] whitespace-nowrap [color:var(--exui-component-tabs-trigger-default-foreground)] [box-shadow:var(--exui-component-tabs-trigger-default-shadow)] opacity-[var(--exui-component-tabs-trigger-default-opacity)] transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:[background:var(--exui-component-tabs-trigger-hover-background)] hover:[color:var(--exui-component-tabs-trigger-hover-foreground)] hover:[border-color:var(--exui-component-tabs-trigger-hover-border)] hover:[box-shadow:var(--exui-component-tabs-trigger-hover-shadow)] hover:opacity-[var(--exui-component-tabs-trigger-hover-opacity)] focus-visible:[background:var(--exui-component-tabs-trigger-focus-background)] focus-visible:[color:var(--exui-component-tabs-trigger-focus-foreground)] focus-visible:[border-color:var(--exui-component-tabs-trigger-focus-border)] focus-visible:[box-shadow:var(--exui-component-tabs-trigger-focus-shadow)] focus-visible:opacity-[var(--exui-component-tabs-trigger-focus-opacity)] disabled:pointer-events-none disabled:[background:var(--exui-component-tabs-trigger-disabled-background)] disabled:[color:var(--exui-component-tabs-trigger-disabled-foreground)] disabled:[border-color:var(--exui-component-tabs-trigger-disabled-border)] disabled:[box-shadow:var(--exui-component-tabs-trigger-disabled-shadow)] disabled:opacity-[var(--exui-component-tabs-trigger-disabled-opacity)] data-[state=active]:[background:var(--exui-component-tabs-trigger-selected-background)] data-[state=active]:[color:var(--exui-component-tabs-trigger-selected-foreground)] data-[state=active]:[border-color:var(--exui-component-tabs-trigger-selected-border)] data-[state=active]:[box-shadow:var(--exui-component-tabs-trigger-selected-shadow)] data-[state=active]:opacity-[var(--exui-component-tabs-trigger-selected-opacity)] group-data-[variant=line]/tabs-list:data-[state=active]:[background:var(--exui-component-tabs-line-trigger-selected-background)] group-data-[variant=primary]/tabs-list:data-[state=active]:[background:var(--exui-component-tabs-primary-selected-background)] group-data-[variant=primary]/tabs-list:data-[state=active]:[color:var(--exui-component-tabs-primary-selected-foreground)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative inline-flex h-full flex-1 items-center justify-center gap-[var(--exui-component-tabs-trigger-gap)] rounded-[var(--exui-component-tabs-trigger-radius)] border [border-color:var(--exui-component-tabs-trigger-default-border)] [background:var(--exui-component-tabs-trigger-default-background)] px-[var(--exui-component-tabs-trigger-padding-inline)] py-[var(--exui-component-tabs-trigger-padding-block)] text-[length:var(--exui-component-tabs-trigger-font-size)] font-[number:var(--exui-component-tabs-trigger-font-weight)] whitespace-nowrap [color:var(--exui-component-tabs-trigger-default-foreground)] [box-shadow:var(--exui-component-tabs-trigger-default-shadow)] opacity-[var(--exui-component-tabs-trigger-default-opacity)] transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:[background:var(--exui-component-tabs-trigger-hover-background)] hover:[color:var(--exui-component-tabs-trigger-hover-foreground)] hover:[border-color:var(--exui-component-tabs-trigger-hover-border)] hover:[box-shadow:var(--exui-component-tabs-trigger-hover-shadow)] hover:opacity-[var(--exui-component-tabs-trigger-hover-opacity)] focus-visible:[background:var(--exui-component-tabs-trigger-focus-background)] focus-visible:[color:var(--exui-component-tabs-trigger-focus-foreground)] focus-visible:[border-color:var(--exui-component-tabs-trigger-focus-border)] focus-visible:[box-shadow:var(--exui-component-tabs-trigger-focus-shadow)] focus-visible:[--_exui-glass-host-shadow:var(--exui-component-tabs-trigger-focus-shadow)] focus-visible:opacity-[var(--exui-component-tabs-trigger-focus-opacity)] disabled:pointer-events-none disabled:[background:var(--exui-component-tabs-trigger-disabled-background)] disabled:[color:var(--exui-component-tabs-trigger-disabled-foreground)] disabled:[border-color:var(--exui-component-tabs-trigger-disabled-border)] disabled:[box-shadow:var(--exui-component-tabs-trigger-disabled-shadow)] disabled:opacity-[var(--exui-component-tabs-trigger-disabled-opacity)] data-[state=active]:[background:var(--exui-component-tabs-trigger-selected-background)] data-[state=active]:[color:var(--exui-component-tabs-trigger-selected-foreground)] data-[state=active]:[border-color:var(--exui-component-tabs-trigger-selected-border)] data-[state=active]:[box-shadow:var(--exui-component-tabs-trigger-selected-shadow)] data-[state=active]:opacity-[var(--exui-component-tabs-trigger-selected-opacity)] group-data-[variant=line]/tabs-list:data-[state=active]:[background:var(--exui-component-tabs-line-trigger-selected-background)] group-data-[variant=primary]/tabs-list:data-[state=active]:[background:var(--exui-component-tabs-primary-selected-background)] group-data-[variant=primary]/tabs-list:data-[state=active]:[color:var(--exui-component-tabs-primary-selected-foreground)] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "after:absolute after:[background:var(--exui-component-tabs-indicator-background)] after:opacity-[var(--exui-component-tabs-default-indicator-opacity)] after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[var(--exui-component-tabs-indicator-offset)] group-data-horizontal/tabs:after:h-[var(--exui-component-tabs-indicator-thickness)] group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:right-[var(--exui-component-tabs-indicator-offset)] group-data-vertical/tabs:after:w-[var(--exui-component-tabs-indicator-thickness)] group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-[var(--exui-component-tabs-line-indicator-opacity)]",
+        glassClassName(glass),
         className
       )}
       {...props}

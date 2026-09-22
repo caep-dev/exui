@@ -12,8 +12,12 @@ import {
   collectLengthPolicyViolations,
   isContractLength,
 } from "./token-length-policy.mjs"
-import { collectColorContrastViolations } from "./color-contrast-policy.mjs"
+import {
+  BRAND_FILL_CONTRAST,
+  collectColorContrastViolations,
+} from "./color-contrast-policy.mjs"
 import { collectFoundationReferenceViolations } from "./foundation-reference-policy.mjs"
+import { collectGlassViolations } from "./glass-policy.mjs"
 import { componentRecipes, exuiTokens } from "../dist/index.js"
 
 const packageRoot = fileURLToPath(new URL("..", import.meta.url))
@@ -79,6 +83,15 @@ function validateFoundationReferences() {
       recipes: componentRecipes,
       variables: createCssVariables(exuiTokens, componentRecipes).light,
       variableByReference: foundationVariableByReference,
+    })
+  )
+}
+
+function validateGlassPolicy() {
+  failures.push(
+    ...collectGlassViolations({
+      contract: exuiTokens,
+      variables: createCssVariables(exuiTokens, componentRecipes).light,
     })
   )
 }
@@ -292,19 +305,36 @@ function parseColor(value) {
     alpha: functional[4] === undefined ? 1 : Number(functional[4]),
   }
 
-  if ([color.red, color.green, color.blue].some((channel) => channel > 255) || color.alpha > 1) {
+  if ([color.red, color.green, color.blue].some((channel) => channel > 255)) {
     return undefined
   }
 
   return color
 }
 
+/**
+ * Theme leaves that intentionally hold a non-colour.
+ *
+ * `glass.blur` is a length and `glass.saturation` a number; `glass-policy.mjs`
+ * judges both, because a colour parser cannot.
+ */
+const NON_COLOR_THEME_LEAVES = new Set(["glass.blur", "glass.saturation"])
+
+/** Shadow group values are lists of shadows, not colours. */
+function hasShadowSegment(path) {
+  return path.split(".").includes("shadow")
+}
+
 function validateColors(value, prefix = "themes") {
   for (const [name, child] of Object.entries(value)) {
     const childPath = `${prefix}.${name}`
+    const themeRelativePath = childPath.replace(/^themes\.[^.]+\./, "")
+
     if (child !== null && typeof child === "object") {
       validateColors(child, childPath)
-    } else if (!childPath.includes(".shadow.") && parseColor(String(child)) === undefined) {
+    } else if (!hasShadowSegment(childPath) &&
+      !NON_COLOR_THEME_LEAVES.has(themeRelativePath) &&
+      parseColor(String(child)) === undefined) {
       failures.push(`${childPath} is not a supported sRGB hex, rgb(), or rgba() color: ${child}`)
     }
   }
@@ -353,7 +383,13 @@ function requireContrast(themeName, label, foreground, background, minimum) {
 function validateContrast() {
   for (const [themeName, theme] of Object.entries(exuiTokens.themes)) {
     requireContrast(themeName, "defaultText", theme.text.primary, theme.surface.background, 4.5)
-    requireContrast(themeName, "primaryControl", theme.control.primaryForeground, theme.control.primary, 4.5)
+    requireContrast(
+      themeName,
+      "primaryControl",
+      theme.control.primaryForeground,
+      theme.control.primary,
+      BRAND_FILL_CONTRAST
+    )
     requireContrast(themeName, "dangerControl", theme.control.dangerForeground, theme.control.danger, 4.5)
     requireContrast(themeName, "focusRing", theme.control.focusRing, theme.surface.background, 3)
   }
@@ -409,6 +445,7 @@ validateRecipeContract()
 validateScalableLengthPolicy()
 validateColorContrastPolicy()
 validateFoundationReferences()
+validateGlassPolicy()
 validateColors(exuiTokens.themes)
 validateContrast()
 await validateGeneratedCss()

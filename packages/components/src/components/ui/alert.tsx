@@ -2,6 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { glassClassName, type GlassSurfaceProps } from "@/lib/glass"
 
 const alertVariants = cva(
   "group/alert relative grid w-full gap-0.5 rounded-2xl border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4",
@@ -22,13 +23,23 @@ const alertVariants = cva(
 function Alert({
   className,
   variant,
+  glass,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
+}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants> & GlassSurfaceProps) {
+  // The variant used to be visible only through the classes it produced, so the
+  // resolved value is published as an explicit semantic attribute. That is what
+  // lets a glass surface keep the danger material without guessing from a class
+  // name, and it stays on the element whether or not glass is enabled, so a
+  // caller can add `ex-glass` afterwards and still get the danger tone.
+  const resolvedVariant = variant ?? "default"
+
   return (
     <div
       data-slot="alert"
+      data-variant={resolvedVariant}
+      data-exui-glass-tone={resolvedVariant === "destructive" ? "danger" : undefined}
       role="alert"
-      className={cn(alertVariants({ variant }), className)}
+      className={cn(alertVariants({ variant }), glassClassName(glass), className)}
       {...props}
     />
   )

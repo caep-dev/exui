@@ -1,4 +1,47 @@
-import type { ExuiTokenContract, ThemeTokens } from "./types.js"
+import type { ExuiTokenContract, GlassDangerTokens, ThemeTokens } from "./types.js"
+
+/** Edge thickness of the glass material's inset highlight. */
+const glassEdgeWidth = "0.0625rem"
+
+/**
+ * Build the inset edge a glass surface draws on itself.
+ *
+ * Derived from the material's `border` so the edge colour and the border colour
+ * cannot drift apart. `scripts/glass-policy.mjs` re-derives the same string.
+ */
+function glassShadow(border: string): string {
+  return `inset 0 0 0 ${glassEdgeWidth} ${border}`
+}
+
+/**
+ * Compose a translucent colour from the theme's opaque danger colour.
+ *
+ * Glass danger states differ only by opacity, so the RGB channels must follow
+ * `control.danger` in every theme. Throwing on an unparseable base keeps a
+ * mistyped palette entry from silently shipping as a non-colour.
+ */
+function withAlpha(color: string, alpha: number): string {
+  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(color)
+  if (!hex) {
+    throw new Error(`Unsupported glass danger base colour: ${color}`)
+  }
+
+  const [red, green, blue] = hex.slice(1).map((channel) => Number.parseInt(channel, 16))
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`
+}
+
+/** Danger glass states: base colour plus the four interaction opacities. */
+function glassDanger(base: string, foreground: string): GlassDangerTokens {
+  return {
+    background: withAlpha(base, 0.9),
+    foreground,
+    border: base,
+    hoverBackground: withAlpha(base, 0.94),
+    activeBackground: withAlpha(base, 0.98),
+    selectedBackground: withAlpha(base, 0.98),
+    fallbackBackground: base,
+  }
+}
 
 const lightSyntax = {
   comment: "#008000",
@@ -72,7 +115,7 @@ const light: ThemeTokens = {
     inverse: "#ffffff",
   },
   control: {
-    primary: "#0070f3",
+    primary: "#0088ff",
     primaryForeground: "#ffffff",
     hover: "#0062d6",
     active: "#0059c4",
@@ -127,7 +170,7 @@ const light: ThemeTokens = {
   sidebar: {
     background: "#fafafa",
     foreground: "#0b0b0b",
-    primary: "#0070f3",
+    primary: "#0088ff",
     primaryForeground: "#ffffff",
     accent: "#f2f2f2",
     accentForeground: "#1a1a1a",
@@ -139,11 +182,24 @@ const light: ThemeTokens = {
     modal: "0 4px 8px rgba(0, 0, 0, 0.08), 0 30px 40px rgba(0, 0, 0, 0.08)",
     menu: "0 4px 8px rgba(0, 0, 0, 0.08), 0 30px 40px rgba(0, 0, 0, 0.08)",
   },
+  glass: {
+    background: "rgba(255, 255, 255, 0.72)",
+    foreground: "#0b0b0b",
+    border: "rgba(0, 0, 0, 0.12)",
+    shadow: glassShadow("rgba(0, 0, 0, 0.12)"),
+    hoverBackground: "rgba(255, 255, 255, 0.82)",
+    activeBackground: "rgba(235, 235, 235, 0.9)",
+    selectedBackground: "rgba(235, 235, 235, 0.9)",
+    fallbackBackground: "#ffffff",
+    blur: "4px",
+    saturation: 1.2,
+    danger: glassDanger("#e7000b", "#ffffff"),
+  },
 }
 
 const dark: ThemeTokens = {
   surface: {
-    background: "#0b0b0b",
+    background: "#0a0a0a",
     secondary: "#292929",
     tertiary: "#2e2e2e",
     accent: "#343434",
@@ -152,8 +208,8 @@ const dark: ThemeTokens = {
     cardForeground: "#fafafa",
     popover: "#1b1b1b",
     popoverForeground: "#fafafa",
-    modal: "#181c25",
-    menu: "#181c25",
+    modal: "#1b1b1b",
+    menu: "#1b1b1b",
     sidebar: "#1f1f1f",
     input: "rgba(255, 255, 255, 0.15)",
     overlay: "rgba(0, 0, 0, 0.5)",
@@ -167,7 +223,7 @@ const dark: ThemeTokens = {
     inverse: "#0b0b0b",
   },
   control: {
-    primary: "#0070f3",
+    primary: "#0088ff",
     primaryForeground: "#ffffff",
     hover: "#0062d6",
     active: "#0059c4",
@@ -222,7 +278,7 @@ const dark: ThemeTokens = {
   sidebar: {
     background: "#1f1f1f",
     foreground: "#fafafa",
-    primary: "#0070f3",
+    primary: "#0088ff",
     primaryForeground: "#ffffff",
     accent: "#2e2e2e",
     accentForeground: "#fafafa",
@@ -233,6 +289,19 @@ const dark: ThemeTokens = {
     card: "0 1px 2px rgba(0, 0, 0, 0.3)",
     modal: "0 0 0 1px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.3)",
     menu: "0 0 0 1px rgb(34, 40, 52), 0 8px 16px rgba(0, 0, 0, 0.3)",
+  },
+  glass: {
+    background: "rgba(24, 24, 24, 0.72)",
+    foreground: "#fafafa",
+    border: "rgba(255, 255, 255, 0.16)",
+    shadow: glassShadow("rgba(255, 255, 255, 0.16)"),
+    hoverBackground: "rgba(38, 38, 38, 0.82)",
+    activeBackground: "rgba(50, 50, 50, 0.9)",
+    selectedBackground: "rgba(50, 50, 50, 0.9)",
+    fallbackBackground: "#181818",
+    blur: "4px",
+    saturation: 1.2,
+    danger: glassDanger("#ff6467", "#0b0b0b"),
   },
 }
 
@@ -245,6 +314,19 @@ const pitchBlack: ThemeTokens = {
   editor: {
     ...dark.editor,
     codeBackground: "#111319",
+  },
+  glass: {
+    background: "rgba(0, 0, 0, 0.78)",
+    foreground: "#fafafa",
+    border: "rgba(255, 255, 255, 0.18)",
+    shadow: glassShadow("rgba(255, 255, 255, 0.18)"),
+    hoverBackground: "rgba(20, 20, 20, 0.86)",
+    activeBackground: "rgba(32, 32, 32, 0.92)",
+    selectedBackground: "rgba(32, 32, 32, 0.92)",
+    fallbackBackground: "#000000",
+    blur: "4px",
+    saturation: 1.2,
+    danger: glassDanger("#ff6467", "#0b0b0b"),
   },
 }
 
@@ -294,7 +376,7 @@ export const exuiTokens: ExuiTokenContract = {
     small: "0 1px 2px rgba(0, 0, 0, 0.05)",
     medium: "0 4px 8px rgba(0, 0, 0, 0.08)",
     large: "0 16px 40px rgba(0, 0, 0, 0.12)",
-    focus: "0 0 0 3px rgba(0, 112, 243, 0.25)",
+    focus: "0 0 0 3px rgba(0, 136, 255, 0.25)",
     invalid: "0 0 0 3px rgba(231, 0, 11, 0.25)",
   },
 }

@@ -5,6 +5,7 @@
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "pnpm --filter @exre/exui-tokens build && pnpm --filter @exre/exui build && pnpm --filter @exre/exui-showcase dev",
+    "watch": "node scripts/watch.mjs",
     "build": "pnpm --filter @exre/exui-tokens build && pnpm --filter @exre/exui build && pnpm --filter @exre/exui-showcase build",
     "typecheck": "pnpm --filter @exre/exui-tokens typecheck && pnpm --filter @exre/exui typecheck && pnpm --filter @exre/exui build:types && pnpm --filter @exre/exui-showcase typecheck",
     "lint": "oxlint scripts && pnpm --filter @exre/exui-tokens lint && pnpm --filter @exre/exui lint && pnpm --filter @exre/exui-showcase lint",

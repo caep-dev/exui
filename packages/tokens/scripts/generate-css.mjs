@@ -5,6 +5,32 @@ import path from "node:path"
 const packageRoot = fileURLToPath(new URL("..", import.meta.url))
 const outputPath = path.join(packageRoot, "src", "style.css")
 
+const glassVariablePrefix = "--exui-glass"
+
+/**
+ * Glass leaves that must be emitted as a reference to the Token they derive
+ * from. A literal copy renders identically, so the mistake would survive every
+ * screenshot and computed-style check: the glass surface would stay frozen
+ * while a consumer override of the source Token kept working everywhere else.
+ */
+const glassReferenceByLeaf = {
+  "foreground": "text.primary",
+  "danger.foreground": "control.dangerForeground",
+  "danger.border": "control.danger",
+  "danger.fallbackBackground": "control.danger",
+}
+
+/**
+ * Danger opacities, as the percentage `color-mix()` consumes. The base colour
+ * stays a reference so overriding `control.danger` still repaints the material.
+ */
+const glassDangerAlphaByLeaf = {
+  "danger.background": 90,
+  "danger.hoverBackground": 94,
+  "danger.activeBackground": 98,
+  "danger.selectedBackground": 98,
+}
+
 function addThemeVariables(variables, theme) {
   Object.assign(variables, {
     "--accent": theme.surface.accent,
@@ -43,6 +69,11 @@ function addThemeVariables(variables, theme) {
 
   for (const [groupName, group] of Object.entries(theme)) {
     if (groupName === "shadow") {
+      continue
+    }
+
+    if (groupName === "glass") {
+      addGlassVariables(variables, group)
       continue
     }
 
@@ -116,6 +147,68 @@ const semanticVariableByReference = {
   "shadow.card": "--exui-shadow-card",
   "shadow.modal": "--exui-shadow-modal",
   "shadow.menu": "--exui-shadow-menu",
+}
+
+/** Every leaf of the glass group, as dotted paths paired with their value. */
+function collectGlassLeaves(glass, prefix = "") {
+  const leaves = []
+
+  for (const [name, child] of Object.entries(glass)) {
+    const leafPath = prefix ? `${prefix}.${name}` : name
+
+    if (child !== null && typeof child === "object") {
+      leaves.push(...collectGlassLeaves(child, leafPath))
+    } else {
+      leaves.push([leafPath, child])
+    }
+  }
+
+  return leaves
+}
+
+/**
+ * Rewrite the material's inset edge so the border colour stays a reference.
+ *
+ * The thickness is read back from the Token value rather than repeated here, so
+ * changing the material's edge cannot leave the stylesheet behind.
+ */
+function resolveGlassShadow(value) {
+  const shape = /^inset 0 0 0 (\S+) .+$/.exec(String(value))
+  if (!shape) {
+    throw new Error(`Unsupported glass shadow: ${value}`)
+  }
+
+  return `inset 0 0 0 ${shape[1]} var(--exui-glass-border)`
+}
+
+function resolveGlassValue(leafPath, value) {
+  const reference = glassReferenceByLeaf[leafPath]
+  if (reference !== undefined) {
+    const variableName = semanticVariableByReference[reference]
+    if (variableName === undefined) {
+      throw new Error(`Unsupported glass semantic reference: ${reference}`)
+    }
+
+    return `var(${variableName})`
+  }
+
+  const alphaPercent = glassDangerAlphaByLeaf[leafPath]
+  if (alphaPercent !== undefined) {
+    return `color-mix(in srgb, var(${semanticVariableByReference["control.danger"]}) ${alphaPercent}%, transparent)`
+  }
+
+  if (leafPath === "shadow") {
+    return resolveGlassShadow(value)
+  }
+
+  return String(value)
+}
+
+function addGlassVariables(variables, glass) {
+  for (const [leafPath, value] of collectGlassLeaves(glass)) {
+    const suffix = leafPath.split(".").map(toKebabCase).join("-")
+    variables[`${glassVariablePrefix}-${suffix}`] = resolveGlassValue(leafPath, value)
+  }
 }
 
 /**

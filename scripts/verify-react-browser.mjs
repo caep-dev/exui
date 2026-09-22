@@ -57,6 +57,45 @@ async function verifyReactBrowser(consumerRoot) {
     await dialog.waitFor({ state: "hidden" })
     await page.waitForFunction(() => document.activeElement?.textContent === "Open")
 
+    // The packed tarball has to ship the material itself: the seed's filter, the
+    // class entry point on an element that is not an ExUI component, the prop
+    // entry point, and the danger material. Only computed styles are read here;
+    // this does not judge how the refraction renders.
+    const seedFilter = page.locator("[data-slot='glass-seed'] filter")
+    assert.equal(await seedFilter.count(), 1, "the packed seed must declare exactly one filter")
+    assert.equal(
+      await seedFilter.getAttribute("id"),
+      "exui-glass-distortion-v1",
+      "the packed seed must keep the documented filter id"
+    )
+
+    const classSurface = page.locator("[data-testid='glass-class-surface']")
+    const classSurfaceStyle = await classSurface.evaluate((element) => {
+      const style = getComputedStyle(element)
+      return { background: style.backgroundColor, backdrop: style.backdropFilter, borderRadius: style.borderRadius }
+    })
+    assert.match(classSurfaceStyle.backdrop, /blur\(/, "a plain element using the class must take the material")
+    assert.notEqual(classSurfaceStyle.background, "rgba(0, 0, 0, 0)", "the material must paint a background")
+    assert.equal(await page.evaluate(() => document.documentElement.style.getPropertyValue("--_exui-glass-reference")),
+      'url("#exui-glass-distortion-v1")',
+      "a mounted seed must publish the filter reference on the document root")
+    assert.match(classSurfaceStyle.backdrop, /url\(/, "a mounted seed must reach the material's chain")
+    assert.equal(
+      await classSurface.evaluate((element) => getComputedStyle(element).borderTopWidth),
+      "0px",
+      "the material's edge must not become a border width"
+    )
+
+    const dangerButton = page.getByRole("button", { name: "Delete", exact: true })
+    const dangerBackground = await dangerButton.evaluate((element) => getComputedStyle(element).backgroundColor)
+    const dangerChannels = (dangerBackground.match(/[\d.]+/g) ?? []).map(Number)
+    assert.ok(
+      dangerChannels[0] > dangerChannels[1] && dangerBackground.includes("0.9"),
+      `the danger surface must keep the danger material instead of the neutral one: ${dangerBackground}`
+    )
+
+    assert.equal(await page.locator("[glass]").count(), 0, "the glass prop must never reach the DOM as an attribute")
+
     // The packed stylesheet must follow the application root font size with no
     // extra consumer configuration, and it must not fight an application that
     // sets one of its own.
@@ -146,7 +185,7 @@ async function verifyReactBrowser(consumerRoot) {
     closeEnough(restored.value, 36, "the default Button height after restoring the root font size")
 
     assert.deepEqual(pageErrors, [], "packed consumer must not raise browser runtime errors")
-    console.log("Packed browser consumer passed: chart hover/legend, dialog portal, form submission, focus return, rem scaling")
+    console.log("Packed browser consumer passed: chart hover/legend, dialog portal, form submission, focus return, glass material, rem scaling")
   } finally {
     try {
       await browser?.close()
