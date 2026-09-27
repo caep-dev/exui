@@ -26,7 +26,9 @@ pnpm verify:pack
 
 Run shadcn from `packages/components` so generated source uses that package's `components.json` and `@/*` alias.
 
-`pnpm dev` builds tokens and components before starting the Showcase. Those library builds are not watched by this command; rebuild the affected package after editing library source. The Showcase consumes built public package entries.
+`pnpm dev` builds tokens and components before starting the Showcase. In a second terminal, run `pnpm watch` while editing library source. It performs an initial library build, watches the token and component source and script directories, and rebuilds components after token changes. It does not start the Showcase or watch package manifests and build configuration; restart or rebuild manually after those changes. The Showcase consumes built public package entries.
+
+The Showcase is a component catalog with name/use-case search, category navigation, and URL hash links. Use `Quality recipes` for the dedicated recipe previews; use the component categories for interactive examples.
 
 See [Testing](TESTING.md) for the full CI checks, visual-test prerequisites, and skill example validation. See [Contributing](CONTRIBUTING.md) for Changesets and DCO requirements.
 
@@ -38,9 +40,11 @@ Changesets version the single public package. The private Showcase and the priva
 
 ## Documentation
 
-- [React package usage](packages/components/README.md): installation, styles, sizing, and bundled chart APIs.
+- [React package usage](packages/components/README.md): installation, themes, Glass surfaces, sizing, and bundled chart APIs.
 - [Internal token workspace](packages/tokens/README.md): token builds, formats, and length policy.
 - [ExUI usage skill](skills/exui-usage/SKILL.md): component references, theme guidance, and consumer examples.
+- [Token customization](skills/exui-usage/references/token-customization.md): CSS overrides, theme scope, and foundation references.
+- [Fumadocs theme](skills/exui-usage/references/docs-theme.md): the optional `@exre/exui/docs/theme.css` stylesheet and its consumer prerequisites.
 
 `.docset.json` records the committed source snapshot reviewed for these documents and the additional contribution/testing guides. It advances only after the complete tracked scope has been reviewed and its documentation checks pass.
 

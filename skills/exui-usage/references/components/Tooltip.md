@@ -35,3 +35,4 @@ import "@exre/exui/style.css"
 - `TooltipTrigger` renders a button by default; pass `asChild` to attach the tooltip to your own control. The accessible description link to the trigger is handled by the primitive.
 - `TooltipContent` renders its own arrow and portals to the body. Use `side` and `align` (with `sideOffset`/`alignOffset`) for placement.
 - Tooltips describe or label their trigger on hover and focus; do not put interactive content or essential information in a tooltip alone.
+- `TooltipContent glass` enables the [Glass material](../glass.md). Its built-in arrow follows the glass background without a second refraction filter; keep the provider and trigger composition the same.

@@ -28,7 +28,7 @@ Import it once per docs surface, like any other stylesheet. It carries the ExUI 
 2. `fumadocs-ui/css/shadcn.css` — Fumadocs' colour sheet.
 3. `fumadocs-ui/css/preset.css` — Fumadocs' preset.
 
-Fumadocs maps its `--color-fd-*` names onto shadcn's short variables (`--background`, `--primary`, `--sidebar`) **without fallbacks**. Load the sheet in an app that does not already carry the ExUI Token sheet and every docs colour computes to an unset custom property: the page renders unstyled and reports no error. That silent failure is why this entry exists rather than asking consumers to import the sheets themselves.
+Fumadocs maps its `--color-fd-*` names onto shadcn's short variables (`--background`, `--primary`, `--sidebar`) **without fallbacks**. Loading Fumadocs' color sheet alone without those variables leaves its color references unset. ExUI's entry supplies the Token sheet first to satisfy that contract. To recolor the docs, override the short aliases as described in [Token customization](token-customization.md).
 
 The sheet ships unprocessed, exactly like Fumadocs' own `css/*` sheets, so your Tailwind build resolves the three imports. If `fumadocs-ui` is missing, the imports fail loudly instead of yielding an unthemed page.
 

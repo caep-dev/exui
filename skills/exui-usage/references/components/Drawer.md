@@ -54,3 +54,5 @@ export function FilterDrawer() {
 `DrawerContent` includes the portal, the overlay, and the drag handle; position the drawer with the `direction` prop on the root (`"bottom"` by default; also `"top"`, `"left"`, `"right"`). Open state can stay uncontrolled through the trigger or be controlled with `open`/`onOpenChange` on the root. `DrawerTitle` is required for accessibility; pair it with `DrawerDescription` when the drawer needs explanation.
 
 For advanced props, use the TypeScript types exposed by the package-root import.
+
+Use `DrawerContent glass` for the [Glass material](../glass.md). The rounded panel is painted by the content's `::before` layer; glass follows that layer while the content element keeps a transparent background. Set custom material variables on `DrawerContent`, and keep portal theme scope in mind.

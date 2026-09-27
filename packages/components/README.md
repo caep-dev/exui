@@ -47,7 +47,9 @@ export function App() {
     <>
       <GlassSeed />
       <Card glass>
-        <div className="ex-glass rounded-xl p-4">Any element, no component needed</div>
+        <div className="ex-glass" style={{ borderRadius: "0.75rem", padding: "1rem" }}>
+          Any element, no component needed
+        </div>
         <Button glass variant="danger">Delete</Button>
       </Card>
     </>
@@ -58,9 +60,11 @@ export function App() {
 - Mount one `GlassSeed` per document. It renders no children, is not a provider, and adds no layout box; the material works without it and simply loses the refraction. It is safe to server-render: the enhancement is applied after hydration once the browser has confirmed it accepts the shared filter, and withdrawn when the seed unmounts.
 - The `glass` prop and the `ex-glass` class produce the same material. `glass` defaults to `false` and is never forwarded to the DOM; `glass={false}` does not remove a class you wrote yourself. `ex-glass-foo` is a different class and does not enable the material.
 - The material never changes layout: no `display`, `position`, `z-index`, size, padding, gap, radius, or `overflow` change, no wrapper element, and no new border width. The visible edge is an inset shadow, never a border: it paints an inner hairline on every glass surface while the surface's own border colour — including its hover, focus, invalid, disabled, error, and checked transitions — is left completely untouched. A bordered surface shows both its border and the material's hairline, and a surface that shipped `border-transparent` gains a visible inner edge. Existing outer shadows and focus rings are composed with the material rather than replaced.
-- Every surface opts in on its own; the marker does not spread to descendants. `Card`, `Button`, and the other supported surfaces are listed in the usage reference.
+- Every surface opts in on its own; the marker does not spread to descendants. The [Glass reference](../../skills/exui-usage/references/glass.md) lists supported surfaces and composition rules. For example, `Select glass` affects its trigger; a glass popup requires the composed `SelectField` and `SelectContent glass` path. `DrawerContent` paints its rounded panel through `::before`, and a glass tooltip retints its arrow without adding a second refraction filter.
 - Restyle it with `--exui-glass-background`, `--exui-glass-foreground`, `--exui-glass-border`, `--exui-glass-shadow`, `--exui-glass-blur`, and `--exui-glass-saturation`, declared on the surface or any ancestor.
 - Where `backdrop-filter` is unavailable the surface falls back to an opaque themed background. A non-`none` `backdrop-filter` also makes the element a containing block for absolutely and fixed positioned descendants, so keep viewport-anchored content in a portal rather than inside a glass surface.
+
+The built-in blur stays `4px` at every root font size; the inset edge uses `0.0625rem` and scales. The stylesheet also adds a fixed-pixel white inset highlight. `CSS.supports` checks syntax acceptance only: the automated checks cover computed styles and lifecycle, not the rendered refraction effect.
 
 ### Customizing tokens
 
@@ -97,6 +101,8 @@ What the layers cover:
 - **`--density-*`** (with the `.density-compact` block) is published but unused: no component styling references it today, so overriding it changes nothing. Treat it as data for Token consumers, not as a density switch.
 - **Recipe variables** (`--exui-component-…`) are the component-internal layer. Overriding one is supported and precise — a few hundred of them cover the default, hover, focus, active and disabled state of every variant — but they are not the theming surface.
 
+These examples assume the theme class is on the document root. A subtree's own declarations override inherited values, and inherited recipe variables may already have resolved their references at the root. For local overrides and portal theming, follow the [Token customization guide](../../skills/exui-usage/references/token-customization.md).
+
 The library keeps no override layer of its own, so nothing has to be re-applied after an upgrade; an override that stops matching a Token name simply stops applying.
 
 ### Framework-neutral tokens
@@ -110,7 +116,7 @@ import "@exre/exui/tokens/style.css"
 
 `@exre/exui/tokens` publishes ESM and CommonJS entries. `@exre/exui/tokens/style.css` carries only token variables for the three themes, and `@exre/exui/tokens/font.css` loads the optional font assets.
 
-Adding to 0.4.0, `exuiTokens.themes.<theme>` gained a required `glass` group (`--exui-glass-*`), so a consumer that hand-writes a complete `ThemeTokens` object has to add it; copy the built-in theme's `glass` values as the starting point. Reading individual Tokens, spreading a built-in theme, and the CSS custom properties are unaffected. The glass material itself lives in the component stylesheet, so a token-only consumer gets the variables and none of the `.ex-glass` behaviour.
+The current source requires a `glass` group (`--exui-glass-*`) in each `ThemeTokens` object. When upgrading from a package without that group, copy a built-in theme's `glass` values as the starting point for a hand-written complete theme. Reading individual Tokens and spreading a built-in theme need no such change. The glass material itself lives in the component stylesheet, so a token-only consumer gets the variables and none of the `.ex-glass` behaviour. Check the installed package's types for availability; repository source can include changes awaiting release.
 
 ### Theming Fumadocs UI
 
@@ -149,7 +155,7 @@ html {
 
 ExUI never sets a root font size itself and declares no scale variable, so this stays an application decision. Keep the root at `16px` for the previous rendering; applications that already set a different root font size will see differently sized components after upgrading.
 
-The following stay fixed pixels on purpose and do **not** scale: hairline borders and dividers, focus rings, shadows, and the capsule (`9999px`) radius. Third-party geometry is outside this contract too — the internals of Sonner and Recharts keep their own fixed sizes, so do not expect toasts or chart axes to scale in lockstep. ExUI's own legend, tooltip, and icon content does scale.
+The following stay fixed pixels on purpose and do **not** scale: hairline borders and dividers, focus rings, foundation and theme drop shadows, the glass blur, and the capsule (`9999px`) radius. The glass inset edge is a separate rem-based effect. Third-party geometry is outside this contract too — the internals of Sonner and Recharts keep their own fixed sizes, so do not expect toasts or chart axes to scale in lockstep. ExUI's own legend, tooltip, and icon content does scale.
 
 Numeric positioning props such as `sideOffset` and `alignOffset` keep their upstream pixel contract and are never multiplied by the root font size.
 

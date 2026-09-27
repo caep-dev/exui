@@ -40,7 +40,7 @@ html {
 }
 ```
 
-Hairline borders and dividers, focus rings, shadows, the capsule radius, and third-party internals (Sonner toasts, Recharts axes and series) keep their own fixed sizes and do not scale. See [Token usage](token-usage.md) for the full list of fixed exceptions and for the `parseFloat(token)` caveat.
+Hairline borders and dividers, focus rings, foundation and theme drop shadows, the glass blur, the capsule radius, and third-party internals (Sonner toasts, Recharts axes and series) keep their own fixed sizes and do not scale. The glass inset edge uses rem. See [Token usage](token-usage.md) for the full list of fixed exceptions and for the `parseFloat(token)` caveat.
 
 ### Scale custom React content with the library
 
