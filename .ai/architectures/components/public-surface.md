@@ -1,6 +1,6 @@
 # 公共包的入口与构建边界
 
-最后更新：2026-09-18
+最后更新：2026-09-27
 
 ## 源码布局
 
@@ -19,7 +19,7 @@ packages/components/
     └── lib/utils.ts
 ```
 
-当前所有可复用组件都位于 `src/components/ui`，包括组合度较高的那些。术语表中 `控件组件`、`模式组件`、`布局组件` 描述的是分类意图，对应的目录尚未建立；新增组件时以其所属分类决定落点。
+基础可复用组件位于 `src/components/ui`。表单模式组件位于 `src/components/patterns`，同源 hooks 位于 `src/hooks`，状态与校验边界位于 `src/lib/forms`；详见 [表单结构](forms.md)。`controls`、`layouts` 目录尚未建立。
 
 ## 公开入口
 
@@ -44,6 +44,7 @@ React 与 React DOM 是**可选 peer**，范围 `>=19.0.0 <20`，`peerDependenci
 
 - `src/components/theme-provider.tsx` 以**显式命名导出**给出 `ThemeProvider` 与 `useTheme`，不使用 `export *`。
 - `src/components/ui/*` 与 `src/hooks/use-mobile`、`src/lib/utils` 以 `export *` 逐文件转发。
+- 表单组件、同源 hooks 和公开类型采用显式命名导出；私有 Context、协调器、绑定适配器与导航入口不从根公开。
 
 新增 shadcn/ui 组件时必须同时在这里补一行转发，否则组件不会被发布，而 Oxlint 的 `react/only-export-components` 规则会提示同时导出组件与非组件的文件。
 

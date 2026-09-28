@@ -44,6 +44,64 @@
   display: block;
 }
 
+.form-examples,
+.form-example,
+.form-example-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.form-example {
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background: var(--card);
+  overflow-wrap: anywhere;
+}
+
+.form-example header h3,
+.form-examples > header h2 {
+  font-weight: 600;
+}
+
+.form-example header p,
+.form-examples > header p {
+  color: var(--muted-foreground);
+  margin-top: .5rem;
+}
+
+.form-example-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  min-width: 0;
+}
+
+.form-example-row {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  min-width: 0;
+}
+
+.form-example-output {
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  border-radius: .75rem;
+  padding: .75rem;
+  background: var(--muted);
+  font-size: .875rem;
+}
+
+.form-example-dialog {
+  max-height: 85dvh;
+  overflow-y: auto;
+  min-width: 0;
+}
+
 @media (min-width: 40rem) {
   .showcase-header-search {
     min-width: 19rem;

@@ -129,6 +129,7 @@ import {
 } from "lucide-react"
 
 import { GlassSample } from "./GlassSample"
+import { FormExamples } from "./FormExamples"
 import "./Showcase.css"
 
 const catalogCategories = [
@@ -211,6 +212,10 @@ const catalogItems: CatalogItem[] = [
   { category: "form-controls", name: "Checkbox", description: "Collects independent boolean choices." },
   { category: "form-controls", name: "Combobox", description: "Combines text search with option selection." },
   { category: "form-controls", name: "Field", description: "Composes labels, descriptions, and validation states." },
+  { category: "form-controls", name: "ExForm", description: "Builds typed forms from a schema and field configuration." },
+  { category: "form-controls", name: "Form", description: "Connects a shared draft to validation and submission." },
+  { category: "form-controls", name: "FormItem", description: "Binds a typed field, label, help, and errors." },
+  { category: "form-controls", name: "FormList", description: "Adds, removes, and reorders object-array rows." },
   { category: "form-controls", name: "Input", description: "Collects a single line of text." },
   { category: "form-controls", name: "Input Group", description: "Adds actions or context around an input." },
   { category: "form-controls", name: "Input OTP", description: "Captures one-time passcodes in discrete slots." },
@@ -515,7 +520,7 @@ function CategoryPreview({ category }: { category: CatalogCategoryId }) {
     case "actions":
       return <ActionsSection />
     case "form-controls":
-      return <FormsSection />
+      return <><FormsSection /><FormExamples /></>
     case "data-display":
       return <DataSection />
     case "feedback":

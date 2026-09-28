@@ -324,6 +324,22 @@ function pascalCaseFileName(value) {
   return value.split("-").map((part) => `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`).join("")
 }
 
+// Public form declarations are an explicit set. Internal coordinators,
+// adapters and step controllers must never become approved export families.
+const publicFormDeclarations = new Set([
+  "types/components/patterns/ex-form.d.ts",
+  "types/components/patterns/form.d.ts",
+  "types/components/patterns/form-item.d.ts",
+  "types/components/patterns/form-list.d.ts",
+  "types/components/patterns/form-error-summary.d.ts",
+  "types/hooks/use-form.d.ts",
+  "types/hooks/use-form-context.d.ts",
+  "types/hooks/use-form-watch.d.ts",
+  "types/hooks/use-form-field-array.d.ts",
+  "types/lib/forms/types.d.ts",
+  "types/lib/forms/standard-schema.d.ts",
+])
+
 function classifyDeclaration(componentDirectory, declarationFile, referenceNames) {
   requireWithin(componentDirectory, declarationFile, "component declaration")
   const relative = path.relative(componentDirectory, declarationFile).split(path.sep).join("/")
@@ -331,6 +347,14 @@ function classifyDeclaration(componentDirectory, declarationFile, referenceNames
     // Vendored third-party declarations back re-exported symbols; the
     // re-exporting package declaration provides the approved group.
     return { category: "vendored", family: null, reference: null }
+  }
+  if (publicFormDeclarations.has(relative)) {
+    const referenceName = referenceNames.get(normalizedReferenceKey("Form"))
+    return {
+      category: "Forms",
+      family: "Form",
+      reference: referenceName ? `../components/${referenceName}.md` : null,
+    }
   }
   let match = /^types\/components\/ui\/(.+)\.d\.ts$/.exec(relative)
   if (match) {
@@ -363,7 +387,7 @@ function classifyDeclaration(componentDirectory, declarationFile, referenceNames
   if (match) {
     return { category: "Hooks", family: null, reference: null }
   }
-  match = /^types\/lib\/(.+)\.d\.ts$/.exec(relative)
+  match = /^types\/lib\/([^/]+)\.d\.ts$/.exec(relative)
   if (match) {
     return { category: "Utilities", family: null, reference: null }
   }
@@ -468,7 +492,7 @@ function renderComponentInventory(inventory) {
     categories.set(entry.category, familyMap)
   }
 
-  const categoryOrder = ["Components", "Theme provider", "Glass material", "Hooks", "Utilities"]
+  const categoryOrder = ["Components", "Forms", "Theme provider", "Glass material", "Hooks", "Utilities"]
   const lines = [
     generatedNotice,
     "",
@@ -830,6 +854,35 @@ async function runSelfTest() {
     // Positive: an index entry re-export whose target has an approved
     // declaration groups through the target (the current theme-provider
     // reality after the narrowed src/index.ts re-export).
+    const formReferences = new Map([[normalizedReferenceKey("Form"), "Form"]])
+    for (const declaration of publicFormDeclarations) {
+      assert.deepEqual(
+        resolveDeclarationGroup(fakePackageRoot,
+          [path.join(fakePackageRoot, declaration), path.join(fakePackageRoot, "types", "index.d.ts")],
+          formReferences, "PublicFormSymbol"),
+        { category: "Forms", family: "Form", reference: "../components/Form.md" },
+        `${declaration} must use the public Form reference`
+      )
+    }
+    for (const declaration of [
+      "types/components/patterns/form-controls.d.ts",
+      "types/components/patterns/form-controls/files.d.ts",
+      "types/components/patterns/form-steps.d.ts",
+      "types/components/patterns/private-pattern.d.ts",
+      "types/lib/forms/runtime.d.ts",
+      "types/lib/forms/context.d.ts",
+      "types/lib/forms/validation.d.ts",
+    ]) {
+      await expectRejection(
+        () => classifyDeclaration(fakePackageRoot, path.join(fakePackageRoot, declaration), formReferences),
+        "no approved group"
+      )
+    }
+    const renderedForms = renderComponentInventory([
+      { name: "ExForm", kind: "value", category: "Forms", family: "Form", reference: "../components/Form.md" },
+    ])
+    assert.ok(renderedForms.includes("## Forms") && renderedForms.includes("[Form](../components/Form.md)") && renderedForms.includes("`ExForm`"),
+      "the form group must appear in the rendered inventory")
     assert.deepEqual(
       resolveDeclarationGroup(
         fakePackageRoot,

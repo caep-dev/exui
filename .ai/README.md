@@ -1,6 +1,6 @@
 # ExUI 仓库知识库
 
-最后更新：2026-09-21
+最后更新：2026-09-27
 
 本目录记录 ExUI 仓库中**不能直接从源码读出来**的知识：系统边界与依赖方向、已被接受的技术决策及其理由、以及只有在真实运行或 CI 中才会暴露的约束。这些结论全部来自仓库证据（代码、配置、CI、变更记录与已归档的设计文档），不包含推测。
 
@@ -49,6 +49,8 @@
 决策记录引用格式为 `[[<模块>/<NN>-<kebab-title>]]`，不使用裸编号。编号在模块内从 `01` 开始，模块内不复用。
 
 ## 主要证据来源
+
+表单模块：结构见 [`architectures/components/forms.md`](architectures/components/forms.md)，异步任务与消费约束见 [`knowledge/components/forms-lifecycle.md`](knowledge/components/forms-lifecycle.md)。消费 API 用法继续由 `skills/exui-usage/references/components/Form.md` 维护；本目录不复制完整签名。
 
 - 工作区与构建：`package.json`、`pnpm-workspace.yaml`、`tsconfig.json`、各包的 `package.json` 与 `vite.config.ts`
 - 生成与校验：`packages/tokens/scripts/`（`generate-css.mjs`、`verify-cjs.mjs`、`validate-tokens.mjs`、`token-length-policy.mjs`、`color-contrast-policy.mjs`、`foundation-reference-policy.mjs`、`glass-policy.mjs`）、`scripts/package-contract.mjs`、`scripts/verify-packages.mjs`、`scripts/verify-react-browser.mjs`

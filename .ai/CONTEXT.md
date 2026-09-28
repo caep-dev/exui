@@ -1,10 +1,22 @@
 # Exre UI
 
-最后更新：2026-09-21
+最后更新：2026-09-27
 
 Exre UI 是 Exre 品牌界面的共享 React 组件库，由本仓库发布。它存在的意义是让其他 UI 应用依赖一个品牌自有的组件包，而不是各自复制组件代码。
 
 ## Language
+
+**输入草稿（Input Draft）**:
+用户正在编辑的 schema 输入值。控件与实例读写使用这个类型；成功解析后的输出只用于提交。
+_Avoid_: parsed form state、提交数据副本
+
+**校验范围（Validation Scope）**:
+按原输入路径声明的字段和额外依赖所形成的独立校验边界。局部通过不表示完整表单通过。
+_Avoid_: 自动 pick、部分整表校验
+
+**表单实例（Form Instance）**:
+由 ExUI 创建并供配置式、组合式及 hooks 共用的草稿操作入口。
+_Avoid_: 外部 RHF 实例、另一份字段 store
 
 **Exre UI（Exre UI）**:
 从本仓库发布的、品牌自有的组件库。

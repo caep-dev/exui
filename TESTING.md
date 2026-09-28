@@ -27,6 +27,12 @@ Run `pnpm release:verify` to check the release declaration, Changesets configura
 
 The packed browser gate also compares Button geometry at 16px and 32px root font sizes, checks its fixed border and capsule radius, and checks portal Dialog padding at the larger root size.
 
+ExForm adds two separate consumers with exactly Zod **3.25.28** and **4.6.5**, installed outside workspace overrides. `scripts/form-consumer-fixture.mjs` defines the same source for both. Each consumer compiles with strict TypeScript and `skipLibCheck: false`, builds production browser and SSR entries, and server-renders ExForm plus an empty file control with throwing `document`/`File` accessors. It checks that RHF, resolvers and Standard Schema packages are absent from the installed tree and that the consumer and package share React. The tokens-only npm and pnpm gates also reject RHF, Zod, resolvers and Standard Schema packages throughout the tree.
+
+The form type fixture proves exact Zod Input/Output inference (string draft to numeric output), typed watch tuples and complete list items. `@ts-expect-error` cases reject invalid paths/values, text controls on number models, unknown enum options and enum array options, wrong custom render values, scalar lists, readonly model arrays used by mutable controls/lists, external RHF lookalikes, and ExForm's conflicting form/schema/defaultValues props. Readonly custom render and `setValue` remain accepted. An unused directive fails the real compiler, so these assertions cannot silently widen.
+
+`scripts/verify-form-browser.mjs` serves each isolated production build in Chromium. Both Zod versions use a real async age refinement that awaits a microtask before deciding validity. The gate submits an invalid age, requires the schema message and `aria-invalid`, proves no callback occurred, then submits a valid age and requires a numeric parsed result, one callback, and an unchanged string draft. It fails on browser runtime errors. Existing chart, Dialog, native form, glass and scaling gates remain part of `verify:pack`.
+
 The browser assertions live in `scripts/verify-react-browser.mjs` and run as part
 of `pnpm verify:pack`. The controller reuses the Showcase's pinned Playwright
 dependency, while the browser serves only the isolated consumer's built files.
@@ -48,16 +54,18 @@ node skills/exui-usage/scripts/update.mjs --check
 node skills/exui-usage/scripts/verify-examples.mjs
 ```
 
-`verify-examples.mjs` packs the public `@exre/exui` tarball, installs an isolated consumer outside the workspace (the tarball plus `react`, `react-dom`, and `lucide-react` only), and asserts:
+`verify-examples.mjs` packs the public `@exre/exui` tarball, installs an isolated consumer outside the workspace (the tarball plus `react`, `react-dom`, `lucide-react`, and exactly `zod@3.25.28`), and asserts:
 
 - discovery: `examples/**/*.tsx` is collected recursively with no manual manifest; the directory contains only `.tsx` files and is never empty;
-- import allowlist: examples may import only `react`, the public `@exre/exui` entries (`@exre/exui`, `@exre/exui/style.css`, and the `tokens` subpaths), and `lucide-react` (the documented consumer-side icon dependency). Private package paths and implementation libraries are rejected by a static scan and would also fail module resolution because the fixture installs only the allowlisted dependencies;
+- import allowlist: examples may import only `react`, the public `@exre/exui` entries (`@exre/exui`, `@exre/exui/style.css`, and the `tokens` subpaths), `lucide-react` (the documented consumer-side icon dependency), and the root `zod` entry (consumer-owned schema implementation). Zod subpaths, private package paths, RHF/resolvers and other implementation libraries remain rejected by a static scan;
 - documentation links: every example is linked from at least one skill document, and no document links to a missing example file;
 - compilation: all examples compile in a single strict TypeScript pass (`skipLibCheck` disabled, Bundler resolution, `react-jsx`) against the packed tarball.
 
 `verify-examples.mjs --self-test` proves the gate rejects bad input on temporary copies: a forbidden import, an orphan example that no document links, a type-broken example (rejected by the real compiler with the diagnostic pointing at the broken file), and a dangling document link. The gate never writes inside the workspace. The updater `--check` validates directory coverage, relative links, and generated inventories across the skill documents without rewriting them; `--write` updates generated inventories only. These checks do not establish the factual accuracy of prose or compile Markdown code blocks. Review those against the public source and declarations separately.
 
 CI runs all three commands after the workspace build. The toast API surface in examples is the nine-method list (`success`, `error`, `warning`, `info`, `message`, `loading`, `promise`, `custom`, `dismiss`); `toast.custom` accepts an `(id) => ReactElement` render function.
+
+The example self-test also proves Zod imports compile in the isolated fixture while Sonner, RHF, resolvers, private ExUI paths and Zod subpaths remain forbidden. Zod 4 compatibility belongs to the independent pack fixture rather than a workspace override.
 
 ## Visual tests
 

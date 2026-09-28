@@ -1,6 +1,6 @@
 # 决策索引
 
-最后更新：2026-09-21
+最后更新：2026-09-27
 
 本目录记录已被仓库证据（代码、配置、CI 或变更记录）印证为**已落地**的技术决策。每条记录说明背景、被否的备选方案、理由、代价与重新审视条件；产生的结构本身写在 `../architectures/` 下，这里不重复。
 
@@ -15,6 +15,8 @@
 | [[tokens/03-foundation-references-in-emitted-css]] | 产物样式表把 foundation 引用生成为 CSS 变量引用 | 已接受 | 2026-09-18 |
 
 ## components
+
+表单模块沿用本模块既有打包边界；已落地的结构与状态所有权见 [表单结构](../architectures/components/forms.md)，生命周期约束见 [表单任务](../knowledge/components/forms-lifecycle.md)。设计阶段的 ADR 保留在 `.notes/ex-form/rfcs/`。
 
 | 编号 | 决策 | 状态 | 日期 |
 | --- | --- | --- | --- |
