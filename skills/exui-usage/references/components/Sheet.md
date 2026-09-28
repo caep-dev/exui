@@ -47,7 +47,7 @@ export function SettingsSheet() {
 }
 ```
 
-`SheetContent` accepts `side`: `"right"` (default), `"left"`, `"top"`, or `"bottom"`, and `showCloseButton` (default `true`) for the built-in close button in the corner. `SheetTitle` is required for accessibility; add `SheetDescription` when the sheet needs explanation. Escape and focus handling come from the underlying primitive.
+`SheetContent` accepts `side`: `"right"` (default), `"left"`, `"top"`, or `"bottom"`, and `showCloseButton` (default `true`) for the built-in close button in the corner. Pass `closeLabel` to localize that button's accessible name. `SheetTitle` is required for accessibility; add `SheetDescription` when the sheet needs explanation. Escape and focus handling come from the underlying primitive.
 
 For a bottom sheet with drag-to-dismiss, see [Drawer](Drawer.md).
 

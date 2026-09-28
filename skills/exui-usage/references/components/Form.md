@@ -42,6 +42,8 @@ Each step declares stable `id`, `fields`, `validationSchema`, and optional `vali
 
 `trigger()` runs complete validation; `trigger(names)` only applies selected paths and current root issues. `validateScope(scope)` uses explicit scope rules. Local success does not declare the full form valid, and `clearErrors` does not mark it valid. `FormErrorSummary` shows field and root issues; field links focus registered, connected controls.
 
+For localized display, `Form` and `ExForm` accept `formatIssue(message)` and `issueSeparator`. The formatter changes the rendered field errors and error summary only; `form.state.errors` retains the original schema or server message. This lets an application switch language without replacing the form instance or losing its draft. Pass a translated `title` to a composed `FormErrorSummary`. Configured `ExForm` also accepts `errorSummaryTitle`, `stepsAriaLabel`, `backLabel`, and `nextLabel`; its existing `submitLabel` and `resetLabel` cover the remaining footer buttons. Omitted labels retain their current defaults.
+
 ## Errors, submission and lifecycle
 
 `setError` writes manual errors. Inside `onSubmit(output, context)`, use `context.setFieldError`/`context.setFormError` for server errors and pass `context.signal` to work that supports abort. `form.submit()` resolves with `submitted`, `invalid`, `failed` or `cancelled`; thrown execution failures also reach `onSubmitError`. Repeated in-flight submits share the attempt. State snapshots are readonly and `form.state` updates the owning component.
@@ -49,5 +51,7 @@ Each step declares stable `id`, `fields`, `validationSchema`, and optional `vali
 `reset` clears draft state and cancels pending work; `cancelPending` cancels work while keeping the draft. Unmount cancels and disconnects the owner. `clearOnDestroy` optionally resets afterward. A Dialog that stays mounted when closed should call `reset` or `cancelPending` in its close handler. Cancellation prevents stale UI writes and signals cooperative abort; it cannot undo an already sent server operation.
 
 The `files` control keeps a memory-only `File[]`: choose, drop and paste append files, removal uses current position, and reset allows the same file to be selected again. File count, size and type rules belong in the schema; `accept` is a picker hint. For SSR, construct any schema that needs the `File` constructor only in the browser. The control itself can server-render an empty file list without browser globals.
+
+Its `controlProps` can set `buttonLabel`, `formatFileSize(bytes)` and `removeFileLabel(file)` to localize the picker, rendered size, and accessible remove action. The callbacks affect presentation only; file validation and stored `File[]` values stay unchanged.
 
 Layout uses `vertical`, `horizontal` or `inline`, container-based columns (1–4) and field `colSpan`. Use application CSS for surrounding page layout. Consult the installed public types for all props and [Field](Field.md) for the lower-level presentation primitives.

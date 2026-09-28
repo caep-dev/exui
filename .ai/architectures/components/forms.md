@@ -1,6 +1,6 @@
 # 表单结构与状态边界
 
-最后更新：2026-09-27
+最后更新：2026-09-28
 
 表单在唯一公开包根入口提供配置式 `ExForm`、组合式 `Form` / `FormItem` / `FormList` / `FormErrorSummary` 和同源 hooks。消费用法与属性说明见 [`Form` 参考](../../../skills/exui-usage/references/components/Form.md)。它们不创建新包或子入口；实现依赖的打包边界沿用 [[components/01-bundle-implementation-dependencies]]。
 
@@ -19,6 +19,8 @@
 `components/patterns/` 中的组件复用基础控件：`FormItem` 通过内部 `useController` 注册字段，再将 change/blur 经协调器处理；适配器将 id、aria、ref 和绑定事件送到实际控件。配置层递归生成普通字段和对象数组列表，不在配置遍历中调用 hook。
 
 `form-steps.ts` 只保存步骤配置和导航任务。scope 的字段及显式依赖决定验证投影，局部输出丢弃；最终提交仍验证完整 schema。受控切步由父组件确认，值与错误继续属于同一表单实例。焦点登记只包含标签、步骤与真实元素，不保存字段值。
+
+`Form` / `ExForm` 的可选 `formatIssue` 在字段错误和摘要渲染时转换消息，`issueSeparator` 控制摘要中多条消息的分隔符；协调器和公开 `form.state.errors` 保留 Schema / 服务端给出的原始消息。`ExForm` 的步骤、摘要和前后按钮文案，以及文件控件的大小/删除标签可由消费方传入；默认文案保持兼容。Showcase 用这一显示边界切换语言，同时保留表单草稿，具体状态来源见 [`showcase/consumption`](../showcase/consumption.md)。
 
 `form.css` 使用具名容器与有限列数；容器宽度决定网格及横向标签布局，Dialog 内的窄表单不依赖页面视口断点。Showcase 五类预览和行为测试只消费公开产物。跨工作区的构建顺序仍见 [`overview`](../overview.md)。
 

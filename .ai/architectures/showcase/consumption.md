@@ -1,6 +1,6 @@
 # Showcase 消费模型与视觉测试
 
-最后更新：2026-09-21
+最后更新：2026-09-28
 
 ## 应用
 
@@ -16,6 +16,12 @@
 `Showcase` 是单页开发者组件目录。它以语义分类（Foundation、Actions、Form controls、Data display、Feedback、Overlays、Navigation & layout）组织公开组件入口；Overview 同时列出全量目录卡片并支持按名称或用途搜索。分类选择写入 URL hash，浏览器前进、后退和直达链接都从 hash 恢复当前分类。
 
 分类页只渲染该类别的既有交互预览，避免把全部示例堆进长页；`Quality recipes` 是独立入口，承载 `ComponentRecipeContract` 的确定性视觉回归夹具。目录数据与选中状态在 `Showcase.tsx`，其响应式网格、桌面粘性侧栏、移动筛选面板和搜索框间距在同目录的 `Showcase.css`。后者是 Showcase 的本地 CSS，不依赖未编译进公共样式表的 Tailwind 工具类。
+
+## 语言切换
+
+`ShowcaseLanguageProvider` 只管理私有 Showcase 的英语与简体中文。首次读取浏览器 `navigator.language`（`zh` 前缀选中文，其余选英文）；手动选择写入 `localStorage`，后续访问优先使用该选择。切换时同步更新页面 `lang` 与标题，不改变分类 hash。`translations.ts` 以英文原文作为文案键；目录中的组件/API 名称保持英文，目录说明与两种语言的分类名称都能用于搜索。
+
+表单示例保留稳定的英文 Schema 和同一表单实例。公开组件的 `formatIssue` 只转换显示中的字段错误和摘要，不改写原始校验记录，因此切换语言时草稿及已出现的错误仍留在页面，并立即按当前语言显示。步骤、文件与关闭按钮的可配置文案见 [`components/forms`](../components/forms.md) 和公开组件参考文档。
 
 ## 视觉测试配置
 
@@ -40,6 +46,7 @@
 | `InteractiveCursor.vrt.test.tsx` | 交互元素的 `cursor` 取值与刻意保留的例外 | 否 |
 | `InputGroup.vrt.test.tsx` | 输入组在多个状态下的背景与边框叠加 | 否 |
 | `ShowcaseCatalog.vrt.test.tsx` | 目录分类与 hash、全量目录搜索、目录计数和指标布局 | 否 |
+| `ShowcaseLocale.vrt.test.tsx` | 浏览器默认语言、手动持久化、中文搜索、表单草稿与错误、内置按钮文案 | 否 |
 
 ### 公共夹具模式
 
