@@ -17,6 +17,8 @@
 
 分类页只渲染该类别的既有交互预览，避免把全部示例堆进长页；`Quality recipes` 是独立入口，承载 `ComponentRecipeContract` 的确定性视觉回归夹具。目录数据与选中状态在 `Showcase.tsx`，其响应式网格、桌面粘性侧栏、移动筛选面板和搜索框间距在同目录的 `Showcase.css`。后者是 Showcase 的本地 CSS，不依赖未编译进公共样式表的 Tailwind 工具类。
 
+Feedback 分类包含 `ExMessage` 的可操作预览。`ShowcaseContent` 挂载唯一的 `ExMessageContext`，预览通过公共 `ExMessage` 入口发出普通提示，并保存 loading 句柄以完成或关闭提示；预览卸载时关闭仍在加载的提示。目录与预览交互由 `ShowcaseCatalog.vrt.test.tsx` 在桌面和移动视口验证，消息控制器的边界见 [`components/ex-message`](../components/ex-message.md)。
+
 ## 语言切换
 
 `ShowcaseLanguageProvider` 只管理私有 Showcase 的英语与简体中文。首次读取浏览器 `navigator.language`（`zh` 前缀选中文，其余选英文）；手动选择写入 `localStorage`，后续访问优先使用该选择。切换时同步更新页面 `lang` 与标题，不改变分类 hash。`translations.ts` 以英文原文作为文案键；目录中的组件/API 名称保持英文，目录说明与两种语言的分类名称都能用于搜索。
@@ -45,8 +47,9 @@
 | `RemSizing.vrt.test.tsx` | 根字号矩阵下的可缩放几何，以及固定像素例外 | 否 |
 | `InteractiveCursor.vrt.test.tsx` | 交互元素的 `cursor` 取值与刻意保留的例外 | 否 |
 | `InputGroup.vrt.test.tsx` | 输入组在多个状态下的背景与边框叠加 | 否 |
-| `ShowcaseCatalog.vrt.test.tsx` | 目录分类与 hash、全量目录搜索、目录计数和指标布局 | 否 |
+| `ShowcaseCatalog.vrt.test.tsx` | 目录分类与 hash、全量目录搜索、指标布局及 Feedback 的全局消息预览 | 否 |
 | `ShowcaseLocale.vrt.test.tsx` | 浏览器默认语言、手动持久化、中文搜索、表单草稿与错误、内置按钮文案 | 否 |
+| `ExMessage.vrt.test.tsx` | 全局消息的容量、时限、加载句柄与宿主生命周期 | 否 |
 
 ### 公共夹具模式
 
