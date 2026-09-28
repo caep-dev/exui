@@ -1,6 +1,6 @@
 # 决策索引
 
-最后更新：2026-09-27
+最后更新：2026-09-28
 
 本目录记录已被仓库证据（代码、配置、CI 或变更记录）印证为**已落地**的技术决策。每条记录说明背景、被否的备选方案、理由、代价与重新审视条件；产生的结构本身写在 `../architectures/` 下，这里不重复。
 
@@ -25,6 +25,7 @@
 | [[components/03-docs-theme-subpath]] | Fumadocs UI 只提供主题子路径，不做组件包装 | 已接受 | 2026-09-18 |
 | [[components/04-glass-capability-gating]] | 增强资格用运行时语法检查，不维护浏览器能力表 | 已接受 | 2026-09-21 |
 | [[components/05-glass-edge-from-inset-shadow]] | 材质边缘由 inset shadow 提供，不接管 `border-color` | 已接受 | 2026-09-21 |
+| [[components/06-single-ex-message-host]] | 全局消息复用单个 Sonner 宿主 | 已接受 | 2026-09-28 |
 
 ## showcase
 

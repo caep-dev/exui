@@ -18,7 +18,7 @@ Check the consuming project's installed ExUI version, React version, stylesheet 
 | Build a validated form, object list or step flow | [Form](references/components/Form.md) | [Configured form](examples/form-configured.tsx) or [composed form](examples/form-composed.tsx) |
 | Build standalone field presentation or selection controls | [Field](references/components/Field.md) | Input and selection components; the matching example below |
 | Build navigation or an application shell                      | [Sidebar](references/components/Sidebar.md) or [NavigationMenu](references/components/NavigationMenu.md) | Navigation and layout components                                                                         |
-| Add notifications                                             | [Sonner / Toaster / toast](references/components/Sonner.md)                                              | [Notification example](examples/sonner-notifications.tsx)                                                |
+| Add notifications                                             | [Sonner / Toaster / toast / ExMessage](references/components/Sonner.md)                                  | [Managed notifications](examples/ex-message.tsx) or [raw Sonner calls](examples/sonner-notifications.tsx) |
 | Switch themes or integrate SSR                                | [Theme usage](references/theme-usage.md)                                                                 | [Theme example](examples/theme-provider-usage.tsx); read the SSR limitation before mounting the provider |
 | Customize colors, fonts, radii, or recipe variables | [Token customization](references/token-customization.md) | [Exact Token paths and CSS properties](references/generated/token-paths.md) |
 | Add a translucent glass surface                               | [Glass material](references/glass.md)                                                                    | [Glass example](examples/glass-surfaces.tsx); add one `GlassSeed` per document only for optional refraction |
@@ -81,6 +81,7 @@ These are complete TSX examples, not a standalone application. Follow React setu
 | [combobox-multiple.tsx](examples/combobox-multiple.tsx)           | Multiple selection, chips, anchored popup         | [Combobox](references/components/Combobox.md)               |
 | [command-palette.tsx](examples/command-palette.tsx)               | Command palette composition                       | [Command](references/components/Command.md)                 |
 | [dialog-usage.tsx](examples/dialog-usage.tsx)                     | Dialog composition and state                      | [Dialog](references/components/Dialog.md)                   |
+| [ex-message.tsx](examples/ex-message.tsx)                         | Managed global notifications and loading          | [Sonner](references/components/Sonner.md)                   |
 | [field-usage.tsx](examples/field-usage.tsx)                       | Form labels, validation, errors                   | [Field](references/components/Field.md)                     |
 | [form-configured.tsx](examples/form-configured.tsx) | Typed configuration, parsed output and stable step schemas | [Form](references/components/Form.md) |
 | [form-composed.tsx](examples/form-composed.tsx) | Shared context, watched draft and dynamic object list | [Form](references/components/Form.md) |

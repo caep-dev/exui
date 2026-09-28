@@ -61,6 +61,31 @@ See the [Form reference](../../skills/exui-usage/references/components/Form.md),
 
 In a browser application, wrap the app with the root `ThemeProvider` and use `useTheme()` to switch between `"light"`, `"dark"`, and `"system"`. The default is `"system"`, and choices are stored under the `"theme"` localStorage key. Mount `Toaster` and call `toast` from the same `@exre/exui` root for notifications that follow the provider.
 
+For a single application-wide notification policy, mount `<ExMessageContext />` once inside `ThemeProvider` and call `ExMessage` from any module. The host renders ExUI's existing `Toaster`; do not mount another one for these messages. The default is three active messages at the top right, with ordinary messages and completed loading messages shown for 3000 ms. `duration`, `placement`, and `maxCount` configure the host; `{ duration }` overrides an individual call. `ExMessage` exposes `info`, `warn`, `error`, `success`, `loading`, and `dismiss(id)`.
+
+```tsx
+import { ExMessage, ExMessageContext, ThemeProvider } from "@exre/exui"
+
+function App() {
+  return <ThemeProvider><ExMessageContext /><SaveButton /></ThemeProvider>
+}
+
+function SaveButton() {
+  async function save() {
+    const pending = ExMessage.loading("Saving")
+    try {
+      await Promise.resolve()
+      pending.onSuccess("Saved")
+    } catch {
+      pending.onError("Save failed")
+    }
+  }
+  return <button onClick={save}>Save</button>
+}
+```
+
+Loading stays visible until completion or `dismiss()`; pass `{ duration }` to `loading` for an automatic deadline. A deadline closes the message without reporting an error. New managed messages evict the oldest managed message when `maxCount` is reached. Direct `toast` calls remain supported and share the host's visual limit, but do not participate in managed eviction. `ExMessage` requires a mounted host and throws if called before mount or after unmount. `<ExMessageContext />` is a self-contained host, not a provider wrapping children.
+
 `ThemeProvider` reads localStorage during rendering and cannot render on a server. Mount it only in the browser after hydration when using an SSR framework; `"use client"` alone does not prevent prerendering. The `.pitch-black` token class is managed separately and is not a provider theme value.
 
 ### Glass material

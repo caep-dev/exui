@@ -1,6 +1,6 @@
 # 公共包的入口与构建边界
 
-最后更新：2026-09-27
+最后更新：2026-09-28
 
 ## 源码布局
 
@@ -45,6 +45,7 @@ React 与 React DOM 是**可选 peer**，范围 `>=19.0.0 <20`，`peerDependenci
 - `src/components/theme-provider.tsx` 以**显式命名导出**给出 `ThemeProvider` 与 `useTheme`，不使用 `export *`。
 - `src/components/ui/*` 与 `src/hooks/use-mobile`、`src/lib/utils` 以 `export *` 逐文件转发。
 - 表单组件、同源 hooks 和公开类型采用显式命名导出；私有 Context、协调器、绑定适配器与导航入口不从根公开。
+- 全局消息宿主、静态调用入口和公开类型采用显式命名导出；状态归属见 [`ex-message`](ex-message.md)。
 
 新增 shadcn/ui 组件时必须同时在这里补一行转发，否则组件不会被发布，而 Oxlint 的 `react/only-export-components` 规则会提示同时导出组件与非组件的文件。
 

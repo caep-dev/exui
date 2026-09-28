@@ -480,6 +480,12 @@ This inventory covers exports reachable from the public `@exre/exui` package roo
 
 ### [Sonner](../components/Sonner.md)
 
+- `ExMessage` — value
+- `ExMessageContext` — value
+- `ExMessageContextProps` — type
+- `ExMessageLoadingHandle` — type
+- `ExMessageOptions` — type
+- `ExMessagePlacement` — type
 - `toast` — value
 - `Toaster` — value
 

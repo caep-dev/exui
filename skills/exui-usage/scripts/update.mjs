@@ -371,6 +371,12 @@ function classifyDeclaration(componentDirectory, declarationFile, referenceNames
   if (relative === "types/components/glass-seed.d.ts") {
     return { category: "Glass material", family: null, reference: null }
   }
+  if (
+    relative === "types/components/ex-message-context.d.ts" ||
+    relative === "types/lib/ex-message-controller.d.ts"
+  ) {
+    return { category: "Components", family: "Sonner", reference: "../components/Sonner.md" }
+  }
   if (relative === "types/index.d.ts") {
     // Named re-exports in src/index.ts (for example the narrowed
     // theme-provider export) make the compiler emit export-specifier alias

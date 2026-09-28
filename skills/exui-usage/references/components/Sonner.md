@@ -11,6 +11,7 @@ import "@exre/exui/style.css"
 
 - `Toaster`
 - `toast`
+- `ExMessageContext` and `ExMessage` (managed application notifications)
 
 ## Usage
 
@@ -35,6 +36,14 @@ To update a notification in place, keep the id returned by `toast` and pass it b
 [完整示例：通知调用链](../../examples/sonner-notifications.tsx) covers triggering, updating, dismissing, and the theme priority in one runnable file.
 
 Do not install `sonner` yourself. A separately installed copy is a different instance whose toasts never reach the ExUI `Toaster`; the failure is silent. The same boundary applies to the other implementation libraries bundled into `@exre/exui` — see [React setup](../react-setup.md).
+
+## Managed notifications
+
+Mount one `<ExMessageContext />` beside the app tree, then call `ExMessage.info`, `warn`, `error`, `success`, or `loading` from any module. The host renders the same bundled Toaster and follows the surrounding `ThemeProvider` when present. It takes `duration` (3000 ms by default), `placement` (`"top-right"` by default), and `maxCount` (3 by default). It does not wrap children or provide a React context value.
+
+Ordinary methods return an ID that `ExMessage.dismiss(id)` closes. `loading` returns `onSuccess(content, options?)`, `onError(content, options?)`, and `dismiss()`; success or error updates the same notification. Loading stays visible until one of these methods is called unless its own `{ duration }` deadline is set. A deadline closes it without displaying an error. Per-message options contain only `{ duration }`. Late completion after dismissal, deadline, or capacity eviction does nothing.
+
+Only messages created through `ExMessage` count toward `maxCount`; when full, the oldest managed one closes. Existing direct `toast` calls remain supported but bypass that managed capacity. Mount one notification host per application and call `ExMessage` only after it mounts. See the [managed notification example](../../examples/ex-message.tsx).
 
 ## Theme
 
