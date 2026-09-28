@@ -33,7 +33,7 @@ export function Form<I extends FormValues, O>(props: FormProps<I, O>) {
 }
 
 export function FormShell<I extends FormValues, O>(props: FormProps<I, O> & { routing?: FormRouting<I> }) {
-  const { form, children, onSubmit, onInvalid, onSubmitError, submitErrorMessage, disabled = false,
+  const { form, children, onSubmit, onInvalid, onSubmitError, submitErrorMessage, formatIssue, issueSeparator, disabled = false,
     clearOnDestroy = false, layout = "vertical", columns, name, className, style, routing } = props
   const internal = getInternal(form)
   const state = React.useSyncExternalStore(internal.subscribe, internal.getSnapshot, internal.getServerSnapshot)
@@ -49,7 +49,7 @@ export function FormShell<I extends FormValues, O>(props: FormProps<I, O> & { ro
     }
   }, [internal, form])
   React.useEffect(() => { internal.updateOwner(owner.current, options) })
-  const context = React.useMemo(() => ({ form, disabled: disabled || state.isSubmitting, layout, columns }), [form, disabled, state.isSubmitting, layout, columns])
+  const context = React.useMemo(() => ({ form, disabled: disabled || state.isSubmitting, layout, columns, formatIssue, issueSeparator }), [form, disabled, state.isSubmitting, layout, columns, formatIssue, issueSeparator])
   const onDomSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     try {

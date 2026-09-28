@@ -28,7 +28,7 @@ function SchemaForm<S extends FormSchema>(props: ExFormSchemaProps<S>) {
 }
 
 function ConfiguredForm<I extends FormValues, O>(props: ExFormCommonProps<I, O> & { form: FormInstance<I, O> }) {
-  const { form, fields, steps = [], currentStep, onStepChange, footer, submitLabel = "提交", resetLabel, ...formProps } = props
+  const { form, fields, steps = [], currentStep, onStepChange, footer, submitLabel = "提交", resetLabel, backLabel = "上一步", nextLabel = "下一步", stepsAriaLabel = "表单步骤", errorSummaryTitle, ...formProps } = props
   const internal = getInternal(form)
   useRHFWatch({ control: internal.rhf.control })
   const state = React.useSyncExternalStore(internal.subscribe, internal.getSnapshot, internal.getServerSnapshot)
@@ -70,17 +70,17 @@ function ConfiguredForm<I extends FormValues, O>(props: ExFormCommonProps<I, O> 
     focusErrors: (errors: FormErrors<I>) => controller.focusErrors(errors),
     navigateToField: controller.navigateToField,
   }}>
-    {steps.length > 0 && <ol className="ex-form-steps" data-span="full" aria-label="表单步骤">{steps.map((entry, index) => <li key={entry.id}>
+    {steps.length > 0 && <ol className="ex-form-steps" data-span="full" aria-label={stepsAriaLabel}>{steps.map((entry, index) => <li key={entry.id}>
       <button type="button" aria-current={entry.id === actualStep ? "step" : undefined} disabled={uiDisabled}
         onClick={() => { void controller.goTo(entry.id).catch(errorHandler) }}>{index + 1}. {entry.title}</button>
     </li>)}</ol>}
-    <FormErrorSummary form={form} />
+    <FormErrorSummary form={form} title={errorSummaryTitle} />
     {step?.kind === "review" ? <div className="ex-form-review" data-span="full">{step.render(form.getValues())}</div> : visible.map((field) => <ConfiguredField key={field.name} form={form} configuration={field as unknown as RuntimeConfiguration} />)}
     <div className="ex-form-footer" data-span="full">
       {typeof footer === "function" ? footer(footerArgs) : footer !== undefined ? footer : <>
-        {steps.length > 0 && !controller.isFirst && <Button type="button" variant="outline" disabled={uiDisabled} onClick={controller.back}>上一步</Button>}
+        {steps.length > 0 && !controller.isFirst && <Button type="button" variant="outline" disabled={uiDisabled} onClick={controller.back}>{backLabel}</Button>}
         {resetLabel != null && <Button type="button" variant="outline" disabled={uiDisabled} onClick={() => form.reset()}>{resetLabel}</Button>}
-        {controller.isLast ? <Button type="submit" disabled={uiDisabled}>{submitLabel}</Button> : <Button type="button" disabled={uiDisabled || state.isValidating} onClick={() => { void controller.next().catch(errorHandler) }}>下一步</Button>}
+        {controller.isLast ? <Button type="submit" disabled={uiDisabled}>{submitLabel}</Button> : <Button type="button" disabled={uiDisabled || state.isValidating} onClick={() => { void controller.next().catch(errorHandler) }}>{nextLabel}</Button>}
       </>}
     </div>
   </FormShell></RetainStepFieldsContext.Provider>

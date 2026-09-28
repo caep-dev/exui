@@ -130,6 +130,9 @@ import {
 
 import { GlassSample } from "./GlassSample"
 import { FormExamples } from "./FormExamples"
+import { ShowcaseLanguageProvider } from "./ShowcaseLanguageProvider"
+import { useShowcaseLanguage } from "./language"
+import { translate, useT } from "./translations"
 import "./Showcase.css"
 
 const catalogCategories = [
@@ -268,6 +271,12 @@ const invoices = [
 ]
 
 function Showcase() {
+  return <ShowcaseLanguageProvider><ShowcaseContent /></ShowcaseLanguageProvider>
+}
+
+function ShowcaseContent() {
+  const { language, setLanguage } = useShowcaseLanguage()
+  const t = (english: string) => translate(language, english)
   const [theme, setTheme] = React.useState<"light" | "dark">("light")
   const [activeCategory, setActiveCategory] = React.useState<CatalogCategoryId>(readCatalogHash)
   const [query, setQuery] = React.useState("")
@@ -304,24 +313,24 @@ function Showcase() {
                 <LayersIcon aria-hidden="true" />
               </div>
               <div className="min-w-0">
-                <h1 className="truncate text-base font-semibold">Exre UI</h1>
-                <p className="truncate text-sm text-muted-foreground">Component directory</p>
+                <h1 className="truncate text-base font-semibold">{t("Exre UI")}</h1>
+                <p className="truncate text-sm text-muted-foreground">{t("Component directory")}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 showcase-header-search">
               <div className="relative flex-1 showcase-search-desktop">
                 <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  aria-label="Search components"
+                  aria-label={t("Search components")}
                   className="showcase-search-input"
                   data-testid="catalog-search-desktop"
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search components"
+                  placeholder={t("Search components")}
                   value={query}
                 />
               </div>
               <Button
-                aria-label="Toggle theme"
+                aria-label={t("Toggle theme")}
                 size="icon"
                 variant="outline"
                 onClick={() =>
@@ -336,6 +345,15 @@ function Showcase() {
                   <SunIcon data-icon="inline-start" />
                 )}
               </Button>
+              <Button
+                aria-label={language === "en" ? "Switch to Chinese" : "切换为英文"}
+                onClick={() => setLanguage(language === "en" ? "zh-CN" : "en")}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
+                {language === "en" ? "中文" : "EN"}
+              </Button>
             </div>
           </div>
         </header>
@@ -348,17 +366,17 @@ function Showcase() {
               variant="outline"
             >
               <LayersIcon data-icon="inline-start" />
-              Browse categories
+              {t("Browse categories")}
             </Button>
           </div>
           <div className="relative mb-4 showcase-search-mobile">
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              aria-label="Search components"
+              aria-label={t("Search components")}
               className="showcase-search-input"
               data-testid="catalog-search-mobile"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search components"
+              placeholder={t("Search components")}
               value={query}
             />
           </div>
@@ -391,10 +409,12 @@ function CatalogNavigation({
   activeCategory: CatalogCategoryId
   onSelect: (category: CatalogCategoryId) => void
 }) {
+  const { language } = useShowcaseLanguage()
+  const t = (english: string) => translate(language, english)
   return (
-    <nav aria-label="Component categories" className="rounded-lg border bg-card p-2">
+    <nav aria-label={t("Component categories")} className="rounded-lg border bg-card p-2">
       <p className="px-3 pb-2 pt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-        Browse
+        {t("Browse")}
       </p>
       <div className="grid gap-1">
         {catalogCategories.map((category) => (
@@ -407,7 +427,7 @@ function CatalogNavigation({
             size="sm"
             variant={activeCategory === category.id ? "secondary" : "ghost"}
           >
-            {category.label}
+            {t(category.label)}
           </Button>
         ))}
       </div>
@@ -424,13 +444,19 @@ function CatalogContent({
   onSelect: (category: CatalogCategoryId) => void
   query: string
 }) {
+  const { language } = useShowcaseLanguage()
+  const t = (english: string) => translate(language, english)
   const category = catalogCategories.find((entry) => entry.id === activeCategory)!
   const normalizedQuery = query.trim().toLocaleLowerCase()
+  const searchableText = (item: CatalogItem) => {
+    const label = catalogCategories.find((entry) => entry.id === item.category)?.label ?? ""
+    return `${item.name} ${item.description} ${t(item.description)} ${label} ${t(label)}`.toLocaleLowerCase()
+  }
   const items = catalogItems.filter(
     (item) =>
       (activeCategory === "overview" || item.category === activeCategory) &&
       (normalizedQuery === "" ||
-        `${item.name} ${item.description}`.toLocaleLowerCase().includes(normalizedQuery))
+        searchableText(item).includes(normalizedQuery))
   )
 
   if (activeCategory === "quality-recipes") {
@@ -443,19 +469,19 @@ function CatalogContent({
       <section className="scroll-mt-24" data-testid="catalog-content">
         <div className="mb-5 flex flex-col gap-2 showcase-catalog-heading">
           <div>
-            <p className="text-sm font-medium text-primary">{activeCategory === "overview" ? "Public surface" : "Category"}</p>
+            <p className="text-sm font-medium text-primary">{t(activeCategory === "overview" ? "Public surface" : "Category")}</p>
             <h2
               className="text-2xl font-semibold tracking-normal"
               data-testid={activeCategory === "overview" ? "catalog-heading" : "catalog-section-title"}
             >
-              {activeCategory === "overview" ? "Component directory" : category.label}
+              {t(activeCategory === "overview" ? "Component directory" : category.label)}
             </h2>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-              {category.description}
+              {t(category.description)}
             </p>
           </div>
           <Badge data-testid="catalog-result-count" variant="secondary">
-            {items.length} catalogue entries
+            {items.length} {t("catalogue entries")}
           </Badge>
         </div>
 
@@ -470,10 +496,10 @@ function CatalogContent({
                   onClick={() => onSelect(entry.id)}
                   type="button"
                 >
-                  <p className="text-sm font-medium">{entry.label}</p>
-                  <p className="mt-1 text-sm leading-5 text-muted-foreground">{entry.description}</p>
+                  <p className="text-sm font-medium">{t(entry.label)}</p>
+                  <p className="mt-1 text-sm leading-5 text-muted-foreground">{t(entry.description)}</p>
                   <p className="mt-3 text-xs font-medium text-primary">
-                    {catalogItems.filter((item) => item.category === entry.id).length} entries
+                    {catalogItems.filter((item) => item.category === entry.id).length} {t("entries")}
                   </p>
                 </button>
               ))}
@@ -486,10 +512,10 @@ function CatalogContent({
               <div className="flex items-start justify-between gap-3">
                 <h3 className="text-sm font-medium">{item.name}</h3>
                 <Badge className="shrink-0" variant="outline">
-                  {catalogCategories.find((entry) => entry.id === item.category)?.label}
+                  {t(catalogCategories.find((entry) => entry.id === item.category)?.label ?? "")}
                 </Badge>
               </div>
-              <p className="mt-2 text-sm leading-5 text-muted-foreground">{item.description}</p>
+              <p className="mt-2 text-sm leading-5 text-muted-foreground">{t(item.description)}</p>
             </article>
           ))}
         </div>
@@ -497,8 +523,8 @@ function CatalogContent({
         {items.length === 0 ? (
           <Empty className="border py-10">
             <EmptyHeader>
-              <EmptyTitle>No matching public modules</EmptyTitle>
-              <EmptyDescription>Try a component name or a broader term.</EmptyDescription>
+              <EmptyTitle>{t("No matching public modules")}</EmptyTitle>
+              <EmptyDescription>{t("Try a component name or a broader term.")}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : null}
@@ -535,61 +561,62 @@ function CategoryPreview({ category }: { category: CatalogCategoryId }) {
 }
 
 export function ComponentRecipeContract() {
+  const t = useT()
   const [menuOpen, setMenuOpen] = React.useState(false)
 
   return (
     <ShowcaseSection
       id="recipes"
-      title="Component recipe contract"
-      description="Deterministic reference states generated from the public component recipes."
+      title={t("Component recipe contract")}
+      description={t("Deterministic reference states generated from the public component recipes.")}
     >
       <div data-testid="recipe-contract" className="grid gap-4">
-        <PreviewPanel title="Button sizes and variants">
+        <PreviewPanel title={t("Button sizes and variants")}>
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2">
-              <Button data-testid="recipe-button-small" size="sm"><LayersIcon />Small</Button>
-              <Button data-testid="recipe-button-default"><LayersIcon />Default</Button>
-              <Button data-testid="recipe-button-large" size="lg"><LayersIcon />Large</Button>
-              <Button data-testid="recipe-button-icon" size="icon" aria-label="Icon recipe"><SettingsIcon /></Button>
+              <Button data-testid="recipe-button-small" size="sm"><LayersIcon />{t("Small")}</Button>
+              <Button data-testid="recipe-button-default"><LayersIcon />{t("Default")}</Button>
+              <Button data-testid="recipe-button-large" size="lg"><LayersIcon />{t("Large")}</Button>
+              <Button data-testid="recipe-button-icon" size="icon" aria-label={t("Icon recipe")}><SettingsIcon /></Button>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Button data-testid="recipe-primary">Primary</Button>
-              <Button data-testid="recipe-button-secondary" variant="secondary">Secondary</Button>
-              <Button data-testid="recipe-button-ghost" variant="ghost">Ghost</Button>
-              <Button data-testid="recipe-button-danger" variant="danger">Danger</Button>
-              <Button data-testid="recipe-button-disabled" disabled>Disabled</Button>
+              <Button data-testid="recipe-primary">{t("Primary")}</Button>
+              <Button data-testid="recipe-button-secondary" variant="secondary">{t("Secondary")}</Button>
+              <Button data-testid="recipe-button-ghost" variant="ghost">{t("Ghost")}</Button>
+              <Button data-testid="recipe-button-danger" variant="danger">{t("Danger")}</Button>
+              <Button data-testid="recipe-button-disabled" disabled>{t("Disabled")}</Button>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <ActionButton data-testid="recipe-action-button-default">Action</ActionButton>
-              <ActionButton data-testid="recipe-action-button-secondary" variant="secondary">Secondary action</ActionButton>
-              <ActionButton data-testid="recipe-action-button-danger" variant="danger">Danger action</ActionButton>
-              <ActionButton data-testid="recipe-action-button-small" size="sm">Small action</ActionButton>
-              <ActionButton data-testid="recipe-action-button-large" size="lg">Large action</ActionButton>
+              <ActionButton data-testid="recipe-action-button-default">{t("Action")}</ActionButton>
+              <ActionButton data-testid="recipe-action-button-secondary" variant="secondary">{t("Secondary action")}</ActionButton>
+              <ActionButton data-testid="recipe-action-button-danger" variant="danger">{t("Danger action")}</ActionButton>
+              <ActionButton data-testid="recipe-action-button-small" size="sm">{t("Small action")}</ActionButton>
+              <ActionButton data-testid="recipe-action-button-large" size="lg">{t("Large action")}</ActionButton>
             </div>
           </div>
         </PreviewPanel>
 
-        <PreviewPanel title="Form Control states">
+        <PreviewPanel title={t("Form Control states")}>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Input data-testid="recipe-input-default" aria-label="Default name" placeholder="Default" />
-            <Input data-testid="recipe-input-focus" aria-label="Focused name" defaultValue="Focused" />
-            <Input data-testid="recipe-input-invalid" aria-label="Invalid name" aria-invalid="true" defaultValue="Invalid" />
-            <Input data-testid="recipe-input-disabled" aria-label="Disabled name" disabled defaultValue="Disabled" />
+            <Input data-testid="recipe-input-default" aria-label={t("Default name")} placeholder={t("Default")} />
+            <Input data-testid="recipe-input-focus" aria-label={t("Focused name")} defaultValue={t("Focused")} />
+            <Input data-testid="recipe-input-invalid" aria-label={t("Invalid name")} aria-invalid="true" defaultValue={t("Invalid")} />
+            <Input data-testid="recipe-input-disabled" aria-label={t("Disabled name")} disabled defaultValue={t("Disabled")} />
             <SelectField>
-              <SelectTrigger data-testid="recipe-select-trigger" aria-label="Recipe select">
-                <SelectValue placeholder="Select an option" />
+              <SelectTrigger data-testid="recipe-select-trigger" aria-label={t("Recipe select")}>
+                <SelectValue placeholder={t("Select an option")} />
               </SelectTrigger>
               <SelectContent data-testid="recipe-select-content">
                 <SelectGroup>
-                  <SelectItem data-testid="recipe-select-first" value="first">First option</SelectItem>
-                  <SelectItem data-testid="recipe-select-second" value="second">Second option</SelectItem>
+                  <SelectItem data-testid="recipe-select-first" value="first">{t("First option")}</SelectItem>
+                  <SelectItem data-testid="recipe-select-second" value="second">{t("Second option")}</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </SelectField>
           </div>
         </PreviewPanel>
 
-        <PreviewPanel title="Sidebar Item states">
+        <PreviewPanel title={t("Sidebar Item states")}>
           <SidebarProvider className="min-h-0">
             <Sidebar collapsible="none" className="h-auto w-full">
               <SidebarContent className="p-2">
@@ -597,30 +624,28 @@ export function ComponentRecipeContract() {
                   <SidebarMenuItem>
                     <SidebarMenuButton data-testid="recipe-sidebar-default">
                       <LayersIcon />
-                      <span>Default destination</span>
+                      <span>{t("Default destination")}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton data-testid="recipe-sidebar-active" isActive>
                       <CheckIcon />
-                      <span>Active destination</span>
+                      <span>{t("Active destination")}</span>
                     </SidebarMenuButton>
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton data-testid="recipe-sidebar-nested" href="#recipes">
-                          Nested destination
-                        </SidebarMenuSubButton>
+                        <SidebarMenuSubButton data-testid="recipe-sidebar-nested" href="#recipes">{t("Nested destination")}</SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton data-testid="recipe-sidebar-disabled" disabled>
                       <SettingsIcon />
-                      <span>Disabled destination</span>
+                      <span>{t("Disabled destination")}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem className="group" data-collapsible="icon">
-                    <SidebarMenuButton data-testid="recipe-sidebar-icon-only" aria-label="Icon-only destination">
+                    <SidebarMenuButton data-testid="recipe-sidebar-icon-only" aria-label={t("Icon-only destination")}>
                       <SettingsIcon />
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -630,7 +655,7 @@ export function ComponentRecipeContract() {
           </SidebarProvider>
         </PreviewPanel>
 
-        <PreviewPanel title="Menu surface and items">
+        <PreviewPanel title={t("Menu surface and items")}>
           <div
             data-testid="recipe-menu-surface"
             className="grid max-w-sm"
@@ -643,30 +668,25 @@ export function ComponentRecipeContract() {
               boxShadow: "var(--exui-component-menu-surface-shadow)",
             }}
           >
-            <div className="rounded-[var(--exui-component-menu-item-radius)] px-[var(--exui-component-menu-item-padding-inline)] py-[var(--exui-component-menu-item-padding-block)]">
-              Standard item
-            </div>
+            <div className="rounded-[var(--exui-component-menu-item-radius)] px-[var(--exui-component-menu-item-padding-inline)] py-[var(--exui-component-menu-item-padding-block)]">{t("Standard item")}</div>
             <div className="flex items-center gap-[var(--exui-component-menu-item-gap)] rounded-[var(--exui-component-menu-item-radius)] px-[var(--exui-component-menu-item-padding-inline)] py-[var(--exui-component-menu-item-padding-block)]">
-              <CheckIcon className="size-4" /> Checked item
-            </div>
-            <div className="rounded-[var(--exui-component-menu-item-radius)] px-[var(--exui-component-menu-item-padding-inline)] py-[var(--exui-component-menu-item-padding-block)] [color:var(--exui-component-menu-item-destructive-foreground)]">
-              Destructive item
-            </div>
+              <CheckIcon className="size-4" />{t("Checked item")}</div>
+            <div className="rounded-[var(--exui-component-menu-item-radius)] px-[var(--exui-component-menu-item-padding-inline)] py-[var(--exui-component-menu-item-padding-block)] [color:var(--exui-component-menu-item-destructive-foreground)]">{t("Destructive item")}</div>
           </div>
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen} modal={false}>
             <DropdownMenuTrigger asChild>
-              <Button className="mt-3" variant="outline">Test real menu</Button>
+              <Button className="mt-3" variant="outline">{t("Test real menu")}</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent data-testid="recipe-menu-content" align="start">
-              <DropdownMenuItem data-testid="recipe-menu-item">Standard item</DropdownMenuItem>
-              <DropdownMenuCheckboxItem data-testid="recipe-menu-checked" checked>Checked item</DropdownMenuCheckboxItem>
-              <DropdownMenuItem data-testid="recipe-menu-destructive" variant="destructive">Destructive item</DropdownMenuItem>
-              <DropdownMenuItem data-testid="recipe-menu-disabled" disabled>Disabled item</DropdownMenuItem>
+              <DropdownMenuItem data-testid="recipe-menu-item">{t("Standard item")}</DropdownMenuItem>
+              <DropdownMenuCheckboxItem data-testid="recipe-menu-checked" checked>{t("Checked item")}</DropdownMenuCheckboxItem>
+              <DropdownMenuItem data-testid="recipe-menu-destructive" variant="destructive">{t("Destructive item")}</DropdownMenuItem>
+              <DropdownMenuItem data-testid="recipe-menu-disabled" disabled>{t("Disabled item")}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </PreviewPanel>
 
-        <PreviewPanel title="Dialog surface">
+        <PreviewPanel title={t("Dialog surface")}>
           <Dialog>
           <div
             data-testid="recipe-dialog-surface"
@@ -682,53 +702,47 @@ export function ComponentRecipeContract() {
             }}
           >
             <DialogHeader>
-              <DialogTitle>Recipe preview</DialogTitle>
-              <DialogDescription>
-                A deterministic dialog surface using the public contract.
-              </DialogDescription>
+              <DialogTitle>{t("Recipe preview")}</DialogTitle>
+              <DialogDescription>{t("A deterministic dialog surface using the public contract.")}</DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button variant="outline">Cancel</Button>
-              <Button>Confirm</Button>
+              <Button variant="outline">{t("Cancel")}</Button>
+              <Button>{t("Confirm")}</Button>
             </DialogFooter>
           </div>
             <DialogTrigger asChild>
-              <Button data-testid="recipe-dialog-trigger" className="mt-3" variant="outline">
-                Test real dialog
-              </Button>
+              <Button data-testid="recipe-dialog-trigger" className="mt-3" variant="outline">{t("Test real dialog")}</Button>
             </DialogTrigger>
-            <DialogContent data-testid="recipe-dialog-content">
+            <DialogContent data-testid="recipe-dialog-content" closeLabel={t("Close")}>
               <DialogHeader>
-                <DialogTitle data-testid="recipe-dialog-title">Recipe contract dialog</DialogTitle>
-                <DialogDescription data-testid="recipe-dialog-description">
-                  This dialog verifies the real portal and focus behavior.
-                </DialogDescription>
+                <DialogTitle data-testid="recipe-dialog-title">{t("Recipe contract dialog")}</DialogTitle>
+                <DialogDescription data-testid="recipe-dialog-description">{t("This dialog verifies the real portal and focus behavior.")}</DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button>Confirm</Button>
+                <Button>{t("Confirm")}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </PreviewPanel>
 
-        <PreviewPanel title="Tabs variants">
+        <PreviewPanel title={t("Tabs variants")}>
           <div data-testid="recipe-tabs" className="grid gap-4">
             <Tabs defaultValue="overview">
               <TabsList data-testid="recipe-tabs-default-list">
-                <TabsTrigger data-testid="recipe-tab-default-overview" value="overview">Overview</TabsTrigger>
-                <TabsTrigger data-testid="recipe-tab-default-details" value="details">Details</TabsTrigger>
+                <TabsTrigger data-testid="recipe-tab-default-overview" value="overview">{t("Overview")}</TabsTrigger>
+                <TabsTrigger data-testid="recipe-tab-default-details" value="details">{t("Details")}</TabsTrigger>
               </TabsList>
             </Tabs>
             <Tabs defaultValue="overview">
               <TabsList data-testid="recipe-tabs-line-list" variant="line">
-                <TabsTrigger data-testid="recipe-tab-line-overview" value="overview">Overview</TabsTrigger>
-                <TabsTrigger data-testid="recipe-tab-line-details" value="details">Details</TabsTrigger>
+                <TabsTrigger data-testid="recipe-tab-line-overview" value="overview">{t("Overview")}</TabsTrigger>
+                <TabsTrigger data-testid="recipe-tab-line-details" value="details">{t("Details")}</TabsTrigger>
               </TabsList>
             </Tabs>
             <Tabs defaultValue="overview">
               <TabsList data-testid="recipe-tabs-primary-list" variant="primary">
-                <TabsTrigger data-testid="recipe-tab-primary-overview" value="overview">Overview</TabsTrigger>
-                <TabsTrigger data-testid="recipe-tab-primary-details" value="details">Details</TabsTrigger>
+                <TabsTrigger data-testid="recipe-tab-primary-overview" value="overview">{t("Overview")}</TabsTrigger>
+                <TabsTrigger data-testid="recipe-tab-primary-details" value="details">{t("Details")}</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -739,24 +753,20 @@ export function ComponentRecipeContract() {
 }
 
 function IntroPanel({ componentCount }: { componentCount: number }) {
+  const t = useT()
   return (
     <section className="rounded-lg border bg-card p-5">
       <div className="showcase-intro-grid">
         <div className="flex flex-col justify-between gap-6">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge>Preview</Badge>
-              <Badge variant="outline">Tailwind v4</Badge>
-              <Badge variant="secondary">shadcn/ui</Badge>
+              <Badge>{t("Preview")}</Badge>
+              <Badge variant="outline">{t("Tailwind v4")}</Badge>
+              <Badge variant="secondary">{t("shadcn/ui")}</Badge>
             </div>
             <div className="flex flex-col gap-2">
-              <h2 className="text-3xl font-semibold tracking-normal">
-                Exre component system
-              </h2>
-              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                A local preview surface for the core controls, data displays,
-                overlays, navigation, and messaging primitives in this package.
-              </p>
+              <h2 className="text-3xl font-semibold tracking-normal">{t("Exre component system")}</h2>
+              <p className="max-w-2xl text-sm leading-6 text-muted-foreground">{t("A local preview surface for the core controls, data displays, overlays, navigation, and messaging primitives in this package.")}</p>
             </div>
           </div>
         </div>
@@ -765,16 +775,16 @@ function IntroPanel({ componentCount }: { componentCount: number }) {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-medium">Package status</p>
-                <p className="text-sm text-muted-foreground">@exre/exui</p>
+                <p className="text-sm font-medium">{t("Package status")}</p>
+                <p className="text-sm text-muted-foreground">{t("@exre/exui")}</p>
               </div>
-              <Badge variant="secondary">Ready</Badge>
+              <Badge variant="secondary">{t("Ready")}</Badge>
             </div>
             <Separator />
             <div className="showcase-metric-grid" data-testid="catalog-summary-metrics">
-              <Metric label="Catalogue entries" value={String(componentCount)} />
-              <Metric label="Surface" value="Public" />
-              <Metric label="Base" value="Radix" />
+              <Metric label={t("Catalogue entries")} value={String(componentCount)} />
+              <Metric label={t("Surface")} value={t("Public")} />
+              <Metric label={t("Base")} value="Radix" />
             </div>
           </div>
         </div>
@@ -793,34 +803,33 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 function FoundationSection() {
+  const t = useT()
   return (
     <ShowcaseSection
       id="foundation"
-      title="Foundation"
-      description="Tokens, surfaces, status colors, and spacing rhythm."
+      title={t("Foundation")}
+      description={t("Tokens, surfaces, status colors, and spacing rhythm.")}
     >
-      <PreviewPanel title="Color tokens">
+      <PreviewPanel title={t("Color tokens")}>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <TokenSwatch label="Primary" className="bg-primary" />
-          <TokenSwatch label="Secondary" className="bg-secondary" />
-          <TokenSwatch label="Muted" className="bg-muted" />
-          <TokenSwatch label="Accent" className="bg-accent" />
+          <TokenSwatch label={t("Primary")} className="bg-primary" />
+          <TokenSwatch label={t("Secondary")} className="bg-secondary" />
+          <TokenSwatch label={t("Muted")} className="bg-muted" />
+          <TokenSwatch label={t("Accent")} className="bg-accent" />
         </div>
       </PreviewPanel>
 
-      <PreviewPanel title="Type and badges">
+      <PreviewPanel title={t("Type and badges")}>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <p className="text-2xl font-semibold">Operational clarity</p>
-            <p className="text-sm leading-6 text-muted-foreground">
-              Compact hierarchy, quiet surfaces, and strong interactive states.
-            </p>
+            <p className="text-2xl font-semibold">{t("Operational clarity")}</p>
+            <p className="text-sm leading-6 text-muted-foreground">{t("Compact hierarchy, quiet surfaces, and strong interactive states.")}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Badge>Default</Badge>
-            <Badge variant="secondary">Secondary</Badge>
-            <Badge variant="outline">Outline</Badge>
-            <Badge variant="destructive">Destructive</Badge>
+            <Badge>{t("Default")}</Badge>
+            <Badge variant="secondary">{t("Secondary")}</Badge>
+            <Badge variant="outline">{t("Outline")}</Badge>
+            <Badge variant="destructive">{t("Destructive")}</Badge>
           </div>
         </div>
       </PreviewPanel>
@@ -829,13 +838,14 @@ function FoundationSection() {
 }
 
 function GlassSection() {
+  const t = useT()
   return (
     <ShowcaseSection
       id="glass"
-      title="Glass"
-      description="One shared translucent material, with an optional refraction enhancement."
+      title={t("Glass")}
+      description={t("One shared translucent material, with an optional refraction enhancement.")}
     >
-      <PreviewPanel title="Material on the surfaces that opt in">
+      <PreviewPanel title={t("Material on the surfaces that opt in")}>
         <GlassSample />
       </PreviewPanel>
     </ShowcaseSection>
@@ -843,56 +853,49 @@ function GlassSection() {
 }
 
 function ActionsSection() {
+  const t = useT()
   return (
     <ShowcaseSection
       id="actions"
-      title="Actions"
-      description="Buttons, grouped commands, and binary controls."
+      title={t("Actions")}
+      description={t("Buttons, grouped commands, and binary controls.")}
     >
-      <PreviewPanel title="Buttons">
+      <PreviewPanel title={t("Buttons")}>
         <div className="flex flex-wrap gap-2">
           <Button>
-            <CheckIcon data-icon="inline-start" />
-            Save
-          </Button>
-          <Button variant="secondary">Secondary</Button>
-          <Button variant="outline">Outline</Button>
-          <Button variant="danger">Danger</Button>
-          <Button variant="ghost">Ghost</Button>
+            <CheckIcon data-icon="inline-start" />{t("Save")}</Button>
+          <Button variant="secondary">{t("Secondary")}</Button>
+          <Button variant="outline">{t("Outline")}</Button>
+          <Button variant="danger">{t("Danger")}</Button>
+          <Button variant="ghost">{t("Ghost")}</Button>
           <Button disabled>
-            <BellIcon data-icon="inline-start" />
-            Disabled
-          </Button>
+            <BellIcon data-icon="inline-start" />{t("Disabled")}</Button>
         </div>
       </PreviewPanel>
 
-      <PreviewPanel title="Action button">
+      <PreviewPanel title={t("Action button")}>
         <div className="flex flex-wrap gap-2">
-          <ActionButton>Action</ActionButton>
-          <ActionButton variant="secondary">Secondary action</ActionButton>
-          <ActionButton variant="danger">Danger action</ActionButton>
+          <ActionButton>{t("Action")}</ActionButton>
+          <ActionButton variant="secondary">{t("Secondary action")}</ActionButton>
+          <ActionButton variant="danger">{t("Danger action")}</ActionButton>
         </div>
       </PreviewPanel>
 
-      <PreviewPanel title="Command groups">
+      <PreviewPanel title={t("Command groups")}>
         <div className="flex flex-col gap-4">
           <ButtonGroup>
             <Button variant="outline">
-              <ClipboardListIcon data-icon="inline-start" />
-              Review
-            </Button>
-            <Button variant="outline">Assign</Button>
-            <Button variant="outline">Archive</Button>
+              <ClipboardListIcon data-icon="inline-start" />{t("Review")}</Button>
+            <Button variant="outline">{t("Assign")}</Button>
+            <Button variant="outline">{t("Archive")}</Button>
           </ButtonGroup>
           <div className="flex flex-wrap items-center gap-3">
             <ButtonGroup>
-              <ButtonGroupText>Mode</ButtonGroupText>
-              <Toggle aria-label="Toggle review mode" pressed>
-                Review
-              </Toggle>
+              <ButtonGroupText>{t("Mode")}</ButtonGroupText>
+              <Toggle aria-label={t("Toggle review mode")} pressed>{t("Review")}</Toggle>
             </ButtonGroup>
             <Switch id="action-switch" defaultChecked />
-            <FieldLabel htmlFor="action-switch">Enabled</FieldLabel>
+            <FieldLabel htmlFor="action-switch">{t("Enabled")}</FieldLabel>
           </div>
         </div>
       </PreviewPanel>
@@ -901,66 +904,63 @@ function ActionsSection() {
 }
 
 function FormsSection() {
+  const t = useT()
   return (
     <ShowcaseSection
       id="forms"
-      title="Forms"
-      description="Fields, inputs, option controls, and composed input groups."
+      title={t("Forms")}
+      description={t("Fields, inputs, option controls, and composed input groups.")}
     >
-      <PreviewPanel title="Profile form">
+      <PreviewPanel title={t("Profile form")}>
         <FieldSet>
-          <FieldLegend>Workspace profile</FieldLegend>
-          <FieldDescription>
-            Core form controls using field composition.
-          </FieldDescription>
+          <FieldLegend>{t("Workspace profile")}</FieldLegend>
+          <FieldDescription>{t("Core form controls using field composition.")}</FieldDescription>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="workspace-name">Workspace name</FieldLabel>
-              <Input id="workspace-name" placeholder="Exre Design" />
+              <FieldLabel htmlFor="workspace-name">{t("Workspace name")}</FieldLabel>
+              <Input id="workspace-name" placeholder={t("Exre Design")} />
             </Field>
             <Field>
-              <FieldLabel htmlFor="workspace-type">Workspace type</FieldLabel>
+              <FieldLabel htmlFor="workspace-type">{t("Workspace type")}</FieldLabel>
               <Select
                 defaultValue="product"
                 options={[
-                  { label: "Product", value: "product" },
-                  { label: "Platform", value: "platform" },
-                  { label: "Internal tools", value: "internal" },
+                  { label: t("Product"), value: "product" },
+                  { label: t("Platform"), value: "platform" },
+                  { label: t("Internal tools"), value: "internal" },
                 ]}
-                placeholder="Select type"
+                placeholder={t("Select type")}
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor="workspace-notes">Notes</FieldLabel>
+              <FieldLabel htmlFor="workspace-notes">{t("Notes")}</FieldLabel>
               <Textarea
                 id="workspace-notes"
-                placeholder="Describe the intended UI surface."
+                placeholder={t("Describe the intended UI surface.")}
               />
             </Field>
           </FieldGroup>
         </FieldSet>
       </PreviewPanel>
 
-      <PreviewPanel title="Preferences">
+      <PreviewPanel title={t("Preferences")}>
         <FieldGroup>
           <Field orientation="horizontal">
             <Checkbox id="compact-nav" defaultChecked />
             <FieldContent>
-              <FieldLabel htmlFor="compact-nav">Compact navigation</FieldLabel>
-              <FieldDescription>
-                Keep repeated workflows dense and scannable.
-              </FieldDescription>
+              <FieldLabel htmlFor="compact-nav">{t("Compact navigation")}</FieldLabel>
+              <FieldDescription>{t("Keep repeated workflows dense and scannable.")}</FieldDescription>
             </FieldContent>
           </Field>
           <Field>
-            <FieldLabel>Density</FieldLabel>
+            <FieldLabel>{t("Density")}</FieldLabel>
             <Slider defaultValue={[64]} max={100} step={1} />
           </Field>
           <InputGroup>
             <InputGroupAddon>
               <SearchIcon aria-hidden="true" />
             </InputGroupAddon>
-            <InputGroupInput placeholder="Search components" />
+            <InputGroupInput placeholder={t("Search components")} />
             <InputGroupAddon align="inline-end">
               <InputGroupButton>
                 <SendIcon data-icon="inline-start" />
@@ -974,13 +974,14 @@ function FormsSection() {
 }
 
 function DataSection() {
+  const t = useT()
   return (
     <ShowcaseSection
       id="data"
-      title="Data"
-      description="Cards, tables, progress, and loading states."
+      title={t("Data")}
+      description={t("Cards, tables, progress, and loading states.")}
     >
-      <PreviewPanel title="Summary cards">
+      <PreviewPanel title={t("Summary cards")}>
         <div className="grid gap-3 md:grid-cols-3">
           {[
             ["Adoption", "82%", "Core surfaces"],
@@ -989,8 +990,8 @@ function DataSection() {
           ].map(([title, value, description]) => (
             <Card key={title}>
               <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
+                <CardTitle>{t(title)}</CardTitle>
+                <CardDescription>{t(description)}</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-semibold">{value}</p>
@@ -1003,24 +1004,24 @@ function DataSection() {
         </div>
       </PreviewPanel>
 
-      <PreviewPanel title="Table">
+      <PreviewPanel title={t("Table")}>
         <div className="overflow-hidden rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Owner</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>{t("ID")}</TableHead>
+                <TableHead>{t("Owner")}</TableHead>
+                <TableHead>{t("Status")}</TableHead>
+                <TableHead className="text-right">{t("Amount")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {invoices.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-medium">{invoice.id}</TableCell>
-                  <TableCell>{invoice.owner}</TableCell>
+                  <TableCell>{t(invoice.owner)}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{invoice.status}</Badge>
+                    <Badge variant="secondary">{t(invoice.status)}</Badge>
                   </TableCell>
                   <TableCell className="text-right">{invoice.amount}</TableCell>
                 </TableRow>
@@ -1030,7 +1031,7 @@ function DataSection() {
         </div>
       </PreviewPanel>
 
-      <PreviewPanel title="Loading state">
+      <PreviewPanel title={t("Loading state")}>
         <div className="flex flex-col gap-3">
           <Skeleton className="h-5 w-2/5" />
           <Skeleton className="h-20 w-full" />
@@ -1042,29 +1043,27 @@ function DataSection() {
 }
 
 function OverlaysSection() {
+  const t = useT()
   return (
     <ShowcaseSection
       id="overlays"
-      title="Overlays"
-      description="Dialogs, sheets, popovers, and tooltips."
+      title={t("Overlays")}
+      description={t("Dialogs, sheets, popovers, and tooltips.")}
     >
-      <PreviewPanel title="Modal and sheet">
+      <PreviewPanel title={t("Modal and sheet")}>
         <div className="flex flex-wrap gap-2">
           <Dialog>
             <DialogTrigger asChild>
-              <Button>Open dialog</Button>
+              <Button>{t("Open dialog")}</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent closeLabel={t("Close")}>
               <DialogHeader>
-                <DialogTitle>Publish component update</DialogTitle>
-                <DialogDescription>
-                  Review the package entry and generated stylesheet before
-                  publishing.
-                </DialogDescription>
+                <DialogTitle>{t("Publish component update")}</DialogTitle>
+                <DialogDescription>{t("Review the package entry and generated stylesheet before publishing.")}</DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button variant="outline">Cancel</Button>
-                <Button>Publish</Button>
+                <Button variant="outline">{t("Cancel")}</Button>
+                <Button>{t("Publish")}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -1072,44 +1071,38 @@ function OverlaysSection() {
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline">
-                <PanelRightOpenIcon data-icon="inline-start" />
-                Open sheet
-              </Button>
+                <PanelRightOpenIcon data-icon="inline-start" />{t("Open sheet")}</Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent closeLabel={t("Close")}>
               <SheetHeader>
-                <SheetTitle>Component review</SheetTitle>
-                <SheetDescription>
-                  Inspect interaction states without leaving the preview route.
-                </SheetDescription>
+                <SheetTitle>{t("Component review")}</SheetTitle>
+                <SheetDescription>{t("Inspect interaction states without leaving the preview route.")}</SheetDescription>
               </SheetHeader>
             </SheetContent>
           </Sheet>
         </div>
       </PreviewPanel>
 
-      <PreviewPanel title="Inline overlays">
+      <PreviewPanel title={t("Inline overlays")}>
         <div className="flex flex-wrap items-center gap-2">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">Open popover</Button>
+              <Button variant="outline">{t("Open popover")}</Button>
             </PopoverTrigger>
             <PopoverContent>
               <div className="flex flex-col gap-2">
-                <p className="text-sm font-medium">Preset</p>
-                <p className="text-sm text-muted-foreground">
-                  Luma, olive base, sky chart tokens, Outfit font.
-                </p>
+                <p className="text-sm font-medium">{t("Preset")}</p>
+                <p className="text-sm text-muted-foreground">{t("Luma, olive base, sky chart tokens, Outfit font.")}</p>
               </div>
             </PopoverContent>
           </Popover>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="icon" variant="secondary" aria-label="Settings">
+              <Button size="icon" variant="secondary" aria-label={t("Settings")}>
                 <SettingsIcon data-icon="inline-start" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Settings</TooltipContent>
+            <TooltipContent>{t("Settings")}</TooltipContent>
           </Tooltip>
         </div>
       </PreviewPanel>
@@ -1118,56 +1111,52 @@ function OverlaysSection() {
 }
 
 function NavigationSection() {
+  const { language } = useShowcaseLanguage()
+  const t = useT()
   return (
     <ShowcaseSection
       id="navigation"
-      title="Navigation"
-      description="Tabs, breadcrumbs, and pagination patterns."
+      title={t("Navigation")}
+      description={t("Tabs, breadcrumbs, and pagination patterns.")}
     >
-      <PreviewPanel title="Tabs">
+      <PreviewPanel title={t("Tabs")}>
         <Tabs defaultValue="overview">
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="tokens">Tokens</TabsTrigger>
-            <TabsTrigger value="exports">Exports</TabsTrigger>
+            <TabsTrigger value="overview">{t("Overview")}</TabsTrigger>
+            <TabsTrigger value="tokens">{t("Tokens")}</TabsTrigger>
+            <TabsTrigger value="exports">{t("Exports")}</TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
-            <p className="text-sm text-muted-foreground">
-              Core components are rendered from local source files.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("Core components are rendered from local source files.")}</p>
           </TabsContent>
           <TabsContent value="tokens">
-            <p className="text-sm text-muted-foreground">
-              CSS variables are sourced from the active shadcn preset.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("CSS variables are sourced from the active shadcn preset.")}</p>
           </TabsContent>
           <TabsContent value="exports">
-            <p className="text-sm text-muted-foreground">
-              The package entry remains separate from this preview route.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("The package entry remains separate from this preview route.")}</p>
           </TabsContent>
         </Tabs>
       </PreviewPanel>
 
-      <PreviewPanel title="Route controls">
+      <PreviewPanel title={t("Route controls")}>
         <div className="flex flex-col gap-5">
-          <Breadcrumb>
+          <Breadcrumb aria-label={t("Breadcrumb")}>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="#">Library</BreadcrumbLink>
+                <BreadcrumbLink href="#">{t("Library")}</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator>
                 <ChevronRightIcon />
               </BreadcrumbSeparator>
               <BreadcrumbItem>
-                <BreadcrumbPage>Showcase</BreadcrumbPage>
+                <BreadcrumbPage>{t("Showcase")}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <Pagination>
+          <Pagination aria-label={t("Pagination")}>
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" />
+                <PaginationPrevious href="#" text={t("Previous")} aria-label={t("Go to previous page")} />
               </PaginationItem>
               <PaginationItem>
                 <PaginationLink href="#" isActive>
@@ -1178,7 +1167,7 @@ function NavigationSection() {
                 <PaginationLink href="#">2</PaginationLink>
               </PaginationItem>
               <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext href="#" text={language === "zh-CN" ? "下一页" : "Next"} aria-label={t("Go to next page")} />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
@@ -1189,60 +1178,54 @@ function NavigationSection() {
 }
 
 function MessagingSection() {
+  const t = useT()
   return (
     <ShowcaseSection
       id="messaging"
-      title="Messaging"
-      description="Alerts, empty states, and conversation primitives."
+      title={t("Messaging")}
+      description={t("Alerts, empty states, and conversation primitives.")}
     >
-      <PreviewPanel title="Feedback">
+      <PreviewPanel title={t("Feedback")}>
         <div className="flex flex-col gap-4">
           <Alert>
             <BellIcon />
-            <AlertTitle>Build ready</AlertTitle>
-            <AlertDescription>
-              The local preview is using the same source components as the
-              package build.
-            </AlertDescription>
+            <AlertTitle>{t("Build ready")}</AlertTitle>
+            <AlertDescription>{t("The local preview is using the same source components as the package build.")}</AlertDescription>
           </Alert>
           <Empty>
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <ClipboardListIcon />
               </EmptyMedia>
-              <EmptyTitle>No review items</EmptyTitle>
-              <EmptyDescription>
-                Component states are ready for visual QA.
-              </EmptyDescription>
+              <EmptyTitle>{t("No review items")}</EmptyTitle>
+              <EmptyDescription>{t("Component states are ready for visual QA.")}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <Button variant="outline">Create item</Button>
+              <Button variant="outline">{t("Create item")}</Button>
             </EmptyContent>
           </Empty>
         </div>
       </PreviewPanel>
 
-      <PreviewPanel title="Conversation">
+      <PreviewPanel title={t("Conversation")}>
         <MessageGroup>
           <Message>
-            <MessageAvatar>EX</MessageAvatar>
+            <MessageAvatar>{t("EX")}</MessageAvatar>
             <MessageContent>
-              <MessageHeader>Exre UI</MessageHeader>
+              <MessageHeader>{t("Exre UI")}</MessageHeader>
               <BubbleGroup>
                 <Bubble variant="secondary">
-                  <BubbleContent>
-                    Core components are now visible in one preview surface.
-                  </BubbleContent>
+                  <BubbleContent>{t("Core components are now visible in one preview surface.")}</BubbleContent>
                 </Bubble>
               </BubbleGroup>
-              <MessageFooter>Just now</MessageFooter>
+              <MessageFooter>{t("Just now")}</MessageFooter>
             </MessageContent>
           </Message>
           <Message align="end">
             <MessageContent>
               <BubbleGroup>
                 <Bubble align="end">
-                  <BubbleContent>Ship the showcase.</BubbleContent>
+                  <BubbleContent>{t("Ship the showcase.")}</BubbleContent>
                 </Bubble>
               </BubbleGroup>
             </MessageContent>
@@ -1282,11 +1265,12 @@ function PreviewPanel({
   title: string
   children: React.ReactNode
 }) {
+  const t = useT()
   return (
     <div className="rounded-lg border bg-card p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h3 className="text-sm font-medium">{title}</h3>
-        <Badge variant="outline">Core</Badge>
+        <Badge variant="outline">{t("Core")}</Badge>
       </div>
       {children}
     </div>

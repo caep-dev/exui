@@ -12,13 +12,15 @@ export function FormErrorSummary<I extends FormValues, O>({ form, className, tit
   const state = React.useSyncExternalStore(internal.subscribe, internal.getSnapshot, internal.getServerSnapshot)
   const fields = (Object.entries(state.errors.fields) as [string, FormErrorNode | undefined][]).filter((entry): entry is [string, FormErrorNode] => Boolean(entry[1]?.issues.length))
   const roots = Object.entries(state.errors.root).filter(([, node]) => node.issues.length)
+  const message = (source: string) => context.formatIssue?.(source) ?? source
+  const separator = context.issueSeparator ?? "；"
   if (!fields.length && !roots.length) return null
   return <div role="alert" className={cn("ex-form-summary", className)} data-span="full">
     <p className="ex-form-summary-title">{title}</p>
     <ul>{fields.map(([name, node]) => <li key={name}>
       <button type="button" onClick={() => internal.navigateToField(name as FormPath<I>)} className="ex-form-summary-link">
-        {internal.getFieldMetadata(name)?.label ?? name}: {[...new Set(node!.issues.map((issue) => issue.message))].join("；")}
+        {internal.getFieldMetadata(name)?.label ?? name}: {[...new Set(node!.issues.map((issue) => message(issue.message)))].join(separator)}
       </button>
-    </li>)}{roots.map(([key, node]) => <li key={`root:${key}`}>{[...new Set(node.issues.map((issue) => issue.message))].join("；")}</li>)}</ul>
+    </li>)}{roots.map(([key, node]) => <li key={`root:${key}`}>{[...new Set(node.issues.map((issue) => message(issue.message)))].join(separator)}</li>)}</ul>
   </div>
 }

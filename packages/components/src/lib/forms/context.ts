@@ -49,6 +49,8 @@ export interface FormContextValue {
   disabled?: boolean
   layout?: FormLayout
   columns?: FormColumns
+  formatIssue?: (message: string) => string
+  issueSeparator?: string
 }
 export const FormContext = createContext<FormContextValue | null>(null)
 const internals = new WeakMap<object, unknown>()

@@ -1,5 +1,7 @@
 import * as React from "react"
 import { z } from "zod"
+import { useShowcaseLanguage } from "./language"
+import { useIssueSeparator, useT } from "./translations"
 import {
   Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
   DialogTrigger, ExForm, Form, FormErrorSummary, FormItem, FormList, Input, useForm,
@@ -37,6 +39,8 @@ const attachmentSchema = z.object({
       "Use PNG, JPEG, or plain text files."),
 })
 
+const schemas = { profileSchema, preferencesSchema, teamSchema, contactSchema, confirmationSchema, applicationSchema, attachmentSchema }
+
 function Example({ title, description, children }: {
   title: string; description: string; children: React.ReactNode
 }) {
@@ -47,116 +51,139 @@ function Example({ title, description, children }: {
 }
 
 function ConfiguredProfile() {
+  const t = useT()
+  const issueSeparator = useIssueSeparator()
   const [output, setOutput] = React.useState<string>("")
-  return <Example title="Configured profile" description="One schema binds the fields. Age stays text while editing and becomes a number on submit.">
-    <ExForm schema={profileSchema} defaultValues={{ name: "", email: "", age: "" }}
+  return <Example title={t("Configured profile")} description={t("One schema binds the fields. Age stays text while editing and becomes a number on submit.")}>
+    <ExForm schema={schemas.profileSchema} defaultValues={{ name: "", email: "", age: "" }}
       fields={[
-        { name: "name", label: "Name", control: "text", required: true },
-        { name: "email", label: "Email", control: "email", required: true },
-        { name: "age", label: "Age", control: "number", description: "Whole years", required: true },
-      ]} columns={{ base: 1, md: 2 }} resetLabel="Reset" submitLabel="Save profile"
+        { name: "name", label: t("Name"), control: "text", required: true },
+        { name: "email", label: t("Email"), control: "email", required: true },
+        { name: "age", label: t("Age"), control: "number", description: t("Whole years"), required: true },
+      ]} columns={{ base: 1, md: 2 }} resetLabel={t("Reset")} submitLabel={t("Save profile")}
+      errorSummaryTitle={t("Please check the following issues")} formatIssue={t}
+      issueSeparator={issueSeparator}
       onSubmit={(values) => { setOutput(JSON.stringify(values, null, 2)) }} />
     {output && <pre className="form-example-output" aria-live="polite">{output}</pre>}
   </Example>
 }
 
 function ComposedPreferences() {
-  const form = useForm({ schema: preferencesSchema,
+  const t = useT()
+  const issueSeparator = useIssueSeparator()
+  const form = useForm({ schema: schemas.preferencesSchema,
     defaultValues: { workspace: "Exre Design", role: "member", notifications: true }, mode: "onBlur" })
   const [saved, setSaved] = React.useState(false)
-  return <Example title="Composed preferences" description="Custom rendering uses the same typed field, errors, and focus target as built-in controls.">
-    <Form form={form} layout="horizontal" onSubmit={() => { setSaved(true) }}>
-      <FormErrorSummary form={form} />
-      <FormItem form={form} name="workspace" label="Workspace" description="This field uses a custom Input render."
+  return <Example title={t("Composed preferences")} description={t("Custom rendering uses the same typed field, errors, and focus target as built-in controls.")}>
+    <Form form={form} layout="horizontal" formatIssue={t} issueSeparator={issueSeparator} onSubmit={() => { setSaved(true) }}>
+      <FormErrorSummary form={form} title={t("Please check the following issues")} />
+      <FormItem form={form} name="workspace" label={t("Workspace")} description={t("This field uses a custom Input render.")}
         render={({ field, state, accessibility }) => <Input {...accessibility} ref={field.ref}
           value={field.value} onChange={(event) => field.onChange(event.target.value)}
           onBlur={field.onBlur} disabled={state.disabled} />} />
-      <FormItem form={form} name="role" label="Role" control="select" controlProps={{ options: [
-        { value: "member", label: "Member" }, { value: "admin", label: "Administrator" },
+      <FormItem form={form} name="role" label={t("Role")} control="select" controlProps={{ options: [
+        { value: "member", label: t("Member") }, { value: "admin", label: t("Administrator") },
       ] }} />
-      <FormItem form={form} name="notifications" label="Email notifications" control="checkbox" />
+      <FormItem form={form} name="notifications" label={t("Email notifications")} control="checkbox" />
       <div className="form-example-actions">
-        <Button type="submit" disabled={form.state.isSubmitting}>Save preferences</Button>
-        <Button type="button" variant="secondary" onClick={() => form.setFocus("workspace")}>Focus workspace</Button>
-        <Button type="button" variant="ghost" onClick={() => { form.reset(); setSaved(false) }}>Reset</Button>
+        <Button type="submit" disabled={form.state.isSubmitting}>{t("Save preferences")}</Button>
+        <Button type="button" variant="secondary" onClick={() => form.setFocus("workspace")}>{t("Focus workspace")}</Button>
+        <Button type="button" variant="ghost" onClick={() => { form.reset(); setSaved(false) }}>{t("Reset")}</Button>
       </div>
     </Form>
-    {saved && <p role="status">Preferences saved locally.</p>}
+    {saved && <p role="status">{t("Preferences saved locally.")}</p>}
   </Example>
 }
 
 function TeamList() {
-  const form = useForm({ schema: teamSchema,
+  const t = useT()
+  const issueSeparator = useIssueSeparator()
+  const form = useForm({ schema: schemas.teamSchema,
     defaultValues: { hasTeam: false, teamName: "", members: [{ name: "" }] } })
   const [saved, setSaved] = React.useState<string>("")
-  return <Example title="Dependencies and member list" description="A conditional team name preserves its draft. Member rows support adding, moving, and removing.">
-    <Form form={form} onSubmit={(values) => { setSaved(JSON.stringify(values, null, 2)) }}>
-      <FormErrorSummary form={form} />
-      <FormItem form={form} name="hasTeam" label="Enable team mode" control="switch" />
-      <FormItem form={form} name="teamName" label="Team name" control="text" dependencies={["hasTeam"]}
+  return <Example title={t("Dependencies and member list")} description={t("A conditional team name preserves its draft. Member rows support adding, moving, and removing.")}>
+    <Form form={form} formatIssue={t} issueSeparator={issueSeparator} onSubmit={(values) => { setSaved(JSON.stringify(values, null, 2)) }}>
+      <FormErrorSummary form={form} title={t("Please check the following issues")} />
+      <FormItem form={form} name="hasTeam" label={t("Enable team mode")} control="switch" />
+      <FormItem form={form} name="teamName" label={t("Team name")} control="text" dependencies={["hasTeam"]}
         visibleWhen={(values) => values.hasTeam} />
-      <FormList form={form} name="members" label="Members" defaultItem={{ name: "" }}
+      <FormList form={form} name="members" label={t("Members")} defaultItem={{ name: "" }}
         render={({ items, append, remove, move }) => <div className="form-example-list">
           {items.map(({ key, index }) => <div key={key} className="form-example-row">
-            <FormItem form={form} name={`members.${index}.name`} label={`Member ${index + 1}`} control="text" />
+            <FormItem form={form} name={`members.${index}.name`} label={`${t("Member")} ${index + 1}`} control="text" />
             <div className="form-example-actions">
               <Button type="button" variant="secondary" disabled={index === 0 || form.state.isSubmitting}
-                onClick={() => move(index, index - 1)}>Move up</Button>
+                onClick={() => move(index, index - 1)}>{t("Move up")}</Button>
               <Button type="button" variant="ghost" disabled={form.state.isSubmitting}
-                onClick={() => remove(index)}>Remove</Button>
+                onClick={() => remove(index)}>{t("Remove")}</Button>
             </div>
           </div>)}
           <Button type="button" variant="secondary" disabled={form.state.isSubmitting}
-            onClick={() => append({ name: "" })}>Add member</Button>
+            onClick={() => append({ name: "" })}>{t("Add member")}</Button>
         </div>} />
-      <Button type="submit" disabled={form.state.isSubmitting}>Save team</Button>
+      <Button type="submit" disabled={form.state.isSubmitting}>{t("Save team")}</Button>
     </Form>
     {saved && <pre className="form-example-output" aria-live="polite">{saved}</pre>}
   </Example>
 }
 
 function ApplicationDialog() {
+  const { language } = useShowcaseLanguage()
+  const t = useT()
+  const issueSeparator = useIssueSeparator()
   const [open, setOpen] = React.useState(false)
   const [saved, setSaved] = React.useState(false)
-  const form = useForm({ schema: applicationSchema, defaultValues: { email: "", accepted: false } })
-  return <Example title="Application steps in a Dialog" description="The contact step checks only contact details. Closing resets the draft; the last step checks the full schema.">
+  const form = useForm({ schema: schemas.applicationSchema, defaultValues: { email: "", accepted: false } })
+  return <Example title={t("Application steps in a Dialog")} description={t("The contact step checks only contact details. Closing resets the draft; the last step checks the full schema.")}>
     <Dialog open={open} onOpenChange={(next) => {
       if (!next) form.reset()
       setOpen(next)
     }}>
-      <DialogTrigger asChild><Button type="button">Open application</Button></DialogTrigger>
-      <DialogContent className="form-example-dialog">
-        <DialogHeader><DialogTitle>Local application preview</DialogTitle>
-          <DialogDescription>No application is sent. Use Back to revisit the contact draft.</DialogDescription></DialogHeader>
+      <DialogTrigger asChild><Button type="button">{t("Open application")}</Button></DialogTrigger>
+      <DialogContent className="form-example-dialog" closeLabel={t("Close")}>
+        <DialogHeader><DialogTitle>{t("Local application preview")}</DialogTitle>
+          <DialogDescription>{t("No application is sent. Use Back to revisit the contact draft.")}</DialogDescription></DialogHeader>
         <ExForm form={form} clearOnDestroy fields={[
-          { name: "email", label: "Contact email", control: "email" },
-          { name: "accepted", label: "I understand this is a local preview", control: "checkbox" },
+          { name: "email", label: t("Contact email"), control: "email" },
+          { name: "accepted", label: t("I understand this is a local preview"), control: "checkbox" },
         ]} steps={[
-          { id: "contact", title: "Contact", fields: ["email"], validationSchema: contactSchema },
-          { id: "confirm", title: "Confirm", fields: ["accepted"], validationSchema: confirmationSchema },
-          { id: "review", title: "Review", kind: "review", render: (values) =>
-            <p>Contact: {values.email}. Notice: {values.accepted ? "confirmed" : "not confirmed"}.</p> },
-        ]} submitLabel="Confirm preview" onSubmit={() => { setSaved(true); setOpen(false); form.reset() }} />
+          { id: "contact", title: t("Contact"), fields: ["email"], validationSchema: schemas.contactSchema },
+          { id: "confirm", title: t("Confirm"), fields: ["accepted"], validationSchema: schemas.confirmationSchema },
+          { id: "review", title: t("Review"), kind: "review", render: (values) =>
+            <p>{t("Contact: ")}{values.email}{t(". Notice: ")}{t(values.accepted ? "confirmed" : "not confirmed")}{language === "zh-CN" ? "。" : "."}</p> },
+        ]} submitLabel={t("Confirm preview")} backLabel={t("Back")} nextLabel={t("Next")}
+        stepsAriaLabel={t("Form steps")} errorSummaryTitle={t("Please check the following issues")}
+        formatIssue={t} issueSeparator={issueSeparator}
+        onSubmit={() => { setSaved(true); setOpen(false); form.reset() }} />
       </DialogContent>
     </Dialog>
-    {saved && <p role="status">Application preview confirmed locally.</p>}
+    {saved && <p role="status">{t("Application preview confirmed locally.")}</p>}
   </Example>
 }
 
 function FilesAndAsync() {
+  const { language } = useShowcaseLanguage()
+  const t = useT()
+  const issueSeparator = useIssueSeparator()
   const [failNext, setFailNext] = React.useState(true)
   const [saved, setSaved] = React.useState<string>("")
-  return <Example title="Local files and async submission" description="Choose, drop, or paste 1–5 PNG, JPEG, or text files, at most 2 MiB each. Files stay in memory and are never uploaded.">
+  return <Example title={t("Local files and async submission")} description={t("Choose, drop, or paste 1–5 PNG, JPEG, or text files, at most 2 MiB each. Files stay in memory and are never uploaded.")}>
     <div className="form-example-actions"><Button type="button" variant="secondary"
       aria-pressed={failNext} onClick={() => setFailNext((value) => !value)}>
-      {failNext ? "Next submit simulates a failure" : "Next submit succeeds"}
+      {t(failNext ? "Next submit simulates a failure" : "Next submit succeeds")}
     </Button></div>
-    <ExForm schema={attachmentSchema} defaultValues={{ title: "", attachments: [] }} fields={[
-      { name: "title", label: "Report title", control: "text" },
-      { name: "attachments", label: "Attachments", control: "files", controlProps: {
+    <ExForm schema={schemas.attachmentSchema} defaultValues={{ title: "", attachments: [] }} fields={[
+      { name: "title", label: t("Report title"), control: "text" },
+      { name: "attachments", label: t("Attachments"), control: "files", controlProps: {
         accept: "image/png,image/jpeg,text/plain",
+        buttonLabel: t("Choose files"),
+        formatFileSize: (bytes: number) => `${new Intl.NumberFormat(language).format(bytes)} ${t("bytes")}`,
+        removeFileLabel: (file: File) => `${t("Remove")} ${file.name}`,
       } },
-    ]} resetLabel="Clear files" submitLabel="Save local report" onSubmit={async (values, context) => {
+    ]} resetLabel={t("Clear files")} submitLabel={t("Save local report")}
+    errorSummaryTitle={t("Please check the following issues")} formatIssue={t}
+    issueSeparator={issueSeparator}
+    onSubmit={async (values, context) => {
       await new Promise<void>((resolve) => {
         const timer = setTimeout(() => { context.signal.removeEventListener("abort", cancel); resolve() }, 650)
         function cancel() { clearTimeout(timer); resolve() }
@@ -166,7 +193,7 @@ function FilesAndAsync() {
       if (failNext) {
         context.setFormError("Simulated save failure. Your draft and files are preserved; switch to success and retry.")
       } else {
-        setSaved(`${values.title}: ${values.attachments.length} local file(s).`)
+        setSaved(`${values.title}: ${values.attachments.length} ${t("local file(s).")}`)
       }
     }} />
     {saved && <p role="status">{saved}</p>}
@@ -174,9 +201,10 @@ function FilesAndAsync() {
 }
 
 export function FormExamples() {
+  const t = useT()
   return <section className="form-examples" aria-labelledby="form-examples-heading">
-    <header><h2 id="form-examples-heading">Complete forms</h2>
-      <p>Configured and composed forms share one schema and one draft.</p></header>
+    <header><h2 id="form-examples-heading">{t("Complete forms")}</h2>
+      <p>{t("Configured and composed forms share one schema and one draft.")}</p></header>
     <ConfiguredProfile /><ComposedPreferences /><TeamList /><ApplicationDialog /><FilesAndAsync />
   </section>
 }

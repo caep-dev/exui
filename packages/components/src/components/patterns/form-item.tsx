@@ -74,7 +74,7 @@ export function FormItem<I extends FormValues, O, P extends FormPath<I>>(props: 
   if (!visible) return null
   return <BoundFormItem<I, O, P> configuration={props} isDisabled={Boolean(isDisabled)} id={id} labelId={labelId} container={container} target={target}
     describedBy={[description != null && descriptionId, ownIssues.length > 0 && errorId].filter(Boolean).join(" ") || undefined}
-    fieldState={fieldState} ownIssues={ownIssues} layout={context.layout} />
+    fieldState={fieldState} ownIssues={ownIssues} layout={context.layout} formatIssue={context.formatIssue} />
 }
 
 interface BoundProps {
@@ -83,10 +83,11 @@ interface BoundProps {
   fieldState: FormFieldState
   ownIssues: readonly FormIssue[]
   layout?: string
+  formatIssue?: (message: string) => string
 }
 
 function BoundFormItem<I extends FormValues, O, P extends FormPath<I>>(props: { configuration: FormItemProps<I, O, P>; isDisabled: boolean } & BoundProps) {
-  const { id, labelId, describedBy, container, target, isDisabled: disabled, fieldState, ownIssues, layout } = props
+  const { id, labelId, describedBy, container, target, isDisabled: disabled, fieldState, ownIssues, layout, formatIssue } = props
   const { form, name, label, description, required, noStyle, className, colSpan = 1 } = props.configuration
   const internal = getInternal(form)
   const { field } = useController({ control: internal.rhf.control, name, shouldUnregister: false })
@@ -107,7 +108,7 @@ function BoundFormItem<I extends FormValues, O, P extends FormPath<I>>(props: { 
     {label != null && <FieldLabel id={labelId} htmlFor={id} className="ex-form-label">{label}{required && <span aria-hidden="true">*</span>}</FieldLabel>}
     <FieldContent className="ex-form-content">{control}
       {description != null && <FieldDescription id={`${id}-description`}>{description}</FieldDescription>}
-      <FieldError id={`${id}-error`} errors={ownIssues.map((issue) => ({ message: issue.message }))} />
+      <FieldError id={`${id}-error`} errors={ownIssues.map((issue) => ({ message: formatIssue?.(issue.message) ?? issue.message }))} />
     </FieldContent>
   </Field>
 }
