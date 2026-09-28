@@ -27,7 +27,7 @@ afterEach(() => {
 describe("Showcase catalog", () => {
   it("reports the full catalogue entry count from the rendered inventory", async () => {
     await expect.element(page.getByTestId("catalog-result-count")).toHaveTextContent(
-      "70 catalogue entries"
+      "71 catalogue entries"
     )
   })
 
@@ -57,5 +57,32 @@ describe("Showcase catalog", () => {
 
     await expect.element(page.getByText("Dialog", { exact: true })).toBeVisible()
     await expect.element(page.getByText("Button", { exact: true })).not.toBeInTheDocument()
+  })
+
+  it("shows the managed notification demo in Feedback", async () => {
+    if (window.innerWidth < 640) {
+      await page.getByRole("button", { name: "Browse categories" }).click()
+    }
+    await page.getByTestId("catalog-category-feedback").click()
+
+    await expect.element(page.getByTestId("ex-message-demo")).toBeVisible()
+    await page.getByRole("button", { name: "Show success message" }).click()
+    await expect.element(page.getByText("Changes saved", { exact: true })).toBeVisible()
+  })
+
+  it("completes and dismisses a loading notification from the demo", async () => {
+    if (window.innerWidth < 640) {
+      await page.getByRole("button", { name: "Browse categories" }).click()
+    }
+    await page.getByTestId("catalog-category-feedback").click()
+
+    await page.getByRole("button", { name: "Start loading message" }).click()
+    await expect.element(page.getByText("Saving changes", { exact: true })).toBeVisible()
+    await page.getByRole("button", { name: "Complete loading message" }).click()
+    await expect.element(page.getByText("Changes saved", { exact: true })).toBeVisible()
+
+    await page.getByRole("button", { name: "Start loading message" }).click()
+    await page.getByRole("button", { name: "Dismiss loading message" }).click()
+    await expect.element(page.getByText("Saving changes", { exact: true })).not.toBeInTheDocument()
   })
 })

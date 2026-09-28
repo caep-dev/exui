@@ -42,6 +42,8 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
+  ExMessage,
+  ExMessageContext,
   Field,
   FieldContent,
   FieldDescription,
@@ -113,6 +115,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  type ExMessageLoadingHandle,
 } from "@exre/exui"
 import {
   BellIcon,
@@ -247,6 +250,7 @@ const catalogItems: CatalogItem[] = [
   { category: "feedback", name: "Skeleton", description: "Reserves space while content loads." },
   { category: "feedback", name: "Spinner", description: "Signals indeterminate work in progress." },
   { category: "feedback", name: "Toaster", description: "Publishes transient toast notifications." },
+  { category: "feedback", name: "ExMessage", description: "Manages application-wide notifications and loading results." },
   { category: "overlays", name: "Alert Dialog", description: "Confirms a consequential decision." },
   { category: "overlays", name: "Command", description: "Searches and runs available commands." },
   { category: "overlays", name: "Dialog", description: "Focuses attention on a modal task." },
@@ -305,6 +309,7 @@ function ShowcaseContent() {
       {/* Mounted once for the whole application; the material still works
           without it, just without the refraction. */}
       <GlassSeed />
+      <ExMessageContext />
       <div className="min-h-svh bg-background text-foreground">
         <header className="sticky top-0 border-b bg-background/95 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3">
@@ -1179,6 +1184,32 @@ function NavigationSection() {
 
 function MessagingSection() {
   const t = useT()
+  const pending = React.useRef<ExMessageLoadingHandle | null>(null)
+  const [hasPending, setHasPending] = React.useState(false)
+
+  React.useEffect(() => () => {
+    pending.current?.dismiss()
+    pending.current = null
+  }, [])
+
+  const startLoading = () => {
+    pending.current?.dismiss()
+    pending.current = ExMessage.loading(t("Saving changes"))
+    setHasPending(true)
+  }
+
+  const completeLoading = () => {
+    pending.current?.onSuccess(t("Changes saved"))
+    pending.current = null
+    setHasPending(false)
+  }
+
+  const dismissLoading = () => {
+    pending.current?.dismiss()
+    pending.current = null
+    setHasPending(false)
+  }
+
   return (
     <ShowcaseSection
       id="messaging"
@@ -1204,6 +1235,25 @@ function MessagingSection() {
               <Button variant="outline">{t("Create item")}</Button>
             </EmptyContent>
           </Empty>
+        </div>
+      </PreviewPanel>
+
+      <PreviewPanel title="ExMessage">
+        <div className="flex flex-col gap-3" data-testid="ex-message-demo">
+          <p className="text-sm text-muted-foreground">
+            {t("Try global notifications and complete a loading message using its handle.")}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => ExMessage.info(t("New information"))} variant="outline">{t("Show info message")}</Button>
+            <Button onClick={() => ExMessage.warn(t("Review this warning"))} variant="outline">{t("Show warning message")}</Button>
+            <Button onClick={() => ExMessage.error(t("Something went wrong"))} variant="outline">{t("Show error message")}</Button>
+            <Button onClick={() => ExMessage.success(t("Changes saved"))} variant="outline">{t("Show success message")}</Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={startLoading}>{t("Start loading message")}</Button>
+            <Button disabled={!hasPending} onClick={completeLoading} variant="secondary">{t("Complete loading message")}</Button>
+            <Button disabled={!hasPending} onClick={dismissLoading} variant="outline">{t("Dismiss loading message")}</Button>
+          </div>
         </div>
       </PreviewPanel>
 
