@@ -29,6 +29,61 @@ afterEach(() => {
 })
 
 describe("ExMessage public notifications", () => {
+  it("renders themed Lucide toast icons with filled status shapes", async () => {
+    const rootElement = document.documentElement
+    const originalClasses = rootElement.className
+    const cases = [
+      { kind: "info", publish: toast.info, token: "--primary", icon: "lucide-info" },
+      { kind: "warning", publish: toast.warning, token: "--exui-feedback-warning", icon: "lucide-circle-alert" },
+      { kind: "error", publish: toast.error, token: "--exui-feedback-danger", icon: "lucide-ban" },
+      { kind: "success", publish: toast.success, token: "--exui-feedback-success", icon: "lucide-circle-check" },
+      { kind: "loading", publish: toast.loading, token: "--primary", icon: "lucide-loader-circle" },
+    ] as const
+
+    try {
+      for (const theme of ["light", "dark", "pitch-black"] as const) {
+        rootElement.classList.remove("light", "dark", "pitch-black")
+        rootElement.classList.add(theme)
+
+        for (const { kind, publish, token, icon: iconClass } of cases) {
+          const label = `${theme} ${kind} icon`
+          const id = publish(label)
+          try {
+            await expect.poll(() => [...document.querySelectorAll<HTMLElement>("[data-sonner-toast]")]
+              .find((item) => item.textContent?.includes(label))?.querySelector("svg") ?? null).not.toBeNull()
+
+            const icon = [...document.querySelectorAll<HTMLElement>("[data-sonner-toast]")]
+              .find((item) => item.textContent?.includes(label))!.querySelector("svg")!
+            const sample = document.createElement("span")
+            sample.style.color = `var(${token})`
+            document.body.append(sample)
+            try {
+              expect(getComputedStyle(icon).color).toBe(getComputedStyle(sample).color)
+              expect(icon.classList.contains("lucide")).toBe(true)
+              expect(icon.classList.contains(iconClass)).toBe(true)
+              const shapes = [...icon.querySelectorAll<SVGElement>("path, circle, rect, polygon")]
+              const body = shapes[0]
+              if (kind === "loading") {
+                expect(getComputedStyle(body).fill).toBe("none")
+                expect(getComputedStyle(body).stroke).toBe(getComputedStyle(icon).color)
+                expect(getComputedStyle(body).strokeWidth).toBe("4px")
+              } else {
+                expect(getComputedStyle(body).fill).toBe(getComputedStyle(icon).color)
+                expect(getComputedStyle(body).stroke).toBe("none")
+              }
+            } finally {
+              sample.remove()
+            }
+          } finally {
+            toast.dismiss(id)
+          }
+        }
+      }
+    } finally {
+      rootElement.className = originalClasses
+    }
+  })
+
   it("renders an imperative info message in the mounted host", async () => {
     ExMessage.info("Profile saved")
 

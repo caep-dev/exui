@@ -1,5 +1,5 @@
 import { Toaster as Sonner, toast, type ToasterProps } from "sonner"
-import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { Ban, CircleAlert, CircleCheck, Info, LoaderCircle } from "lucide-react"
 import { useOptionalTheme } from "../theme-provider"
 
 // Theme resolution: an explicit `theme` prop wins, then the surrounding
@@ -17,19 +17,40 @@ const Toaster = ({ theme: explicitTheme, ...props }: ToasterProps) => {
       className="toaster group"
       icons={{
         success: (
-          <CircleCheckIcon className="size-4" />
+          <CircleCheck
+            aria-hidden="true"
+            className="size-4 fill-current [&>circle]:stroke-none"
+            style={{ color: "var(--exui-feedback-success)", stroke: "var(--exui-feedback-success-foreground)" }}
+          />
         ),
         info: (
-          <InfoIcon className="size-4" />
+          <Info
+            aria-hidden="true"
+            className="size-4 fill-current [&>circle]:stroke-none"
+            style={{ color: "var(--primary)", stroke: "var(--primary-foreground)" }}
+          />
         ),
         warning: (
-          <TriangleAlertIcon className="size-4" />
+          <CircleAlert
+            aria-hidden="true"
+            className="size-4 fill-current [&>circle]:stroke-none"
+            style={{ color: "var(--exui-feedback-warning)", stroke: "var(--exui-feedback-warning-foreground)" }}
+          />
         ),
         error: (
-          <OctagonXIcon className="size-4" />
+          <Ban
+            aria-hidden="true"
+            className="size-4 fill-current [&>circle]:stroke-none"
+            style={{ color: "var(--exui-feedback-danger)", stroke: "var(--exui-feedback-danger-foreground)" }}
+          />
         ),
         loading: (
-          <Loader2Icon className="size-4 animate-spin" />
+          <LoaderCircle
+            aria-hidden="true"
+            className="size-4 animate-spin"
+            strokeWidth={4}
+            style={{ color: "var(--primary)" }}
+          />
         ),
       }}
       style={
