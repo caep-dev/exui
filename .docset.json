@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "reviewedCommit": "d0d843024ebca5af13a8f96afb038e670cc1f147",
-  "updatedAt": "2026-09-22",
+  "reviewedCommit": "4620f39a4d73da3e7abfb75c0b51e0f7b515ff5e",
+  "updatedAt": "2026-09-28",
   "surfaces": [
     "**/README*.md",
     "CONTRIBUTING.md",

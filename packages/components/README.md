@@ -86,6 +86,8 @@ function SaveButton() {
 
 Loading stays visible until completion or `dismiss()`; pass `{ duration }` to `loading` for an automatic deadline. A deadline closes the message without reporting an error. New managed messages evict the oldest managed message when `maxCount` is reached. Direct `toast` calls remain supported and share the host's visual limit, but do not participate in managed eviction. `ExMessage` requires a mounted host and throws if called before mount or after unmount. `<ExMessageContext />` is a self-contained host, not a provider wrapping children.
 
+The shared `Toaster` uses Lucide status icons for success, info, warning, error, and loading. Their colors follow the theme's feedback and primary CSS variables, so token overrides also change the icons. A direct `<Toaster />` accepts Sonner's `icons` prop when an application needs different icons.
+
 `ThemeProvider` reads localStorage during rendering and cannot render on a server. Mount it only in the browser after hydration when using an SSR framework; `"use client"` alone does not prevent prerendering. The `.pitch-black` token class is managed separately and is not a provider theme value.
 
 ### Glass material

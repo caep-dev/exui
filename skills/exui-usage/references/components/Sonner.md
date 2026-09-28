@@ -56,3 +56,5 @@ The `Toaster` resolves its theme in this order:
 Provider switches and OS color scheme changes are followed live. See [Theme usage](../theme-usage.md).
 
 `ToasterProps` is Sonner's own: `position`, `duration`, `richColors`, `closeButton`, `toastOptions`, and the other props pass straight through to the underlying `Toaster`.
+
+By default, the shared `Toaster` renders Lucide icons for success, info, warning, error, and loading. The icons use the theme's `--exui-feedback-*` and `--primary` colors, including their foreground values where applicable. Override those CSS variables to change their colors with the rest of the theme. A direct `<Toaster />` also accepts Sonner's `icons` prop to replace the defaults; `<ExMessageContext />` uses the shared defaults.
