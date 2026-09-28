@@ -601,7 +601,7 @@ async function verifyReactConsumer(tarballPath) {
   const application = `
 import "@exre/exui/style.css"
 import { useState } from "react"
-import { Button, Card, CardContent, GlassSeed, ThemeProvider, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, Field, Input, Label, Recharts, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartConfig, useIsMobile } from "@exre/exui"
+import { Button, Card, CardContent, ExMessage, ExMessageContext, GlassSeed, ThemeProvider, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, Field, Input, Label, Recharts, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartConfig, useIsMobile } from "@exre/exui"
 
 const { BarChart, Bar, XAxis } = Recharts
 const chartData = [
@@ -617,6 +617,8 @@ export function App() {
   const [submittedEmail, setSubmittedEmail] = useState("")
   return (
     <ThemeProvider>
+      <ExMessageContext />
+      <Button onClick={() => ExMessage.success("Packed message ready")}>Notify</Button>
       <GlassSeed />
       <Dialog>
         <DialogTrigger asChild>
