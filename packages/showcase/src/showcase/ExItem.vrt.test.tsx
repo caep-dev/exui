@@ -20,6 +20,76 @@ beforeEach(() => {
 afterEach(() => root.unmount())
 
 describe("ExItem public presentation contract", () => {
+  it("caps and aligns horizontal content, then fills the width after wrapping", async () => {
+    host.style.width = "48rem"
+    root.render(<ExItem title="Sized" layout="horizontal" contentMaxWidth="16rem" contentAlign="right"><Input /></ExItem>)
+    const input = page.getByRole("textbox", { name: "Sized" })
+    await expect.element(input).toBeVisible()
+    const rect = () => input.element().getBoundingClientRect()
+    const item = host.querySelector<HTMLElement>(".ex-item")!
+    expect(rect().width).toBeCloseTo(256, 0)
+    expect(rect().right).toBeCloseTo(item.getBoundingClientRect().right, 0)
+    host.style.width = "22rem"
+    expect(rect().width).toBeCloseTo(196, 0)
+    host.style.width = "20rem"
+    expect(rect().width).toBeCloseTo(320, 0)
+    expect(rect().left).toBeCloseTo(item.getBoundingClientRect().left, 0)
+    host.style.width = "10rem"
+    expect(rect().width).toBeCloseTo(160, 0)
+    expect(host.scrollWidth).toBeLessThanOrEqual(host.clientWidth + 1)
+  })
+
+  it("inherits Form content defaults and allows independent item overrides", async () => {
+    function ComposedSizing() {
+      const form = useForm({ schema, defaultValues: { name: "", note: "" } })
+      return <Form form={form} onSubmit={() => {}} layout="horizontal" contentMaxWidth={256} contentAlign="right">
+        <ExItem title="Inherited"><Input /></ExItem>
+        <FormItem form={form} name="name" label="Left" control="text" contentAlign="left" />
+        <FormItem form={form} name="note" label="Narrow" control="text" contentMaxWidth="8rem" />
+      </Form>
+    }
+    host.style.width = "48rem"
+    root.render(<ComposedSizing />)
+    await expect.element(page.getByRole("textbox", { name: "Narrow" })).toBeVisible()
+    const rect = (name: string) => page.getByRole("textbox", { name, exact: true }).element().getBoundingClientRect()
+    expect(rect("Inherited").width).toBeCloseTo(256, 0)
+    expect(rect("Left").width).toBeCloseTo(256, 0)
+    expect(rect("Left").left).toBeCloseTo(host.getBoundingClientRect().left + 156, 0)
+    expect(rect("Narrow").width).toBeCloseTo(128, 0)
+    expect(rect("Narrow").right).toBeCloseTo(rect("Inherited").right, 0)
+  })
+
+  it("supports ExForm defaults, field overrides, and unconstrained vertical content", async () => {
+    host.style.width = "48rem"
+    root.render(<ExForm schema={schema} defaultValues={{ name: "", note: "" }} layout="horizontal"
+      contentMaxWidth="16rem" contentAlign="right" fields={[
+        { name: "name", label: "Configured", control: "text", contentMaxWidth: "8rem", contentAlign: "left" },
+        { name: "note", label: "Vertical", control: "text", layout: "vertical" },
+      ]} onSubmit={() => {}}><ExItem title="Default"><Input /></ExItem></ExForm>)
+    await expect.element(page.getByRole("textbox", { name: "Configured" })).toBeVisible()
+    expect(page.getByRole("textbox", { name: "Configured" }).element().getBoundingClientRect().width).toBeCloseTo(128, 0)
+    expect(page.getByRole("textbox", { name: "Default" }).element().getBoundingClientRect().width).toBeCloseTo(256, 0)
+    expect(page.getByRole("textbox", { name: "Vertical" }).element().getBoundingClientRect().width).toBeCloseTo(768, 0)
+  })
+
+  it("can remove an inherited limit and keeps errors within the aligned content", async () => {
+    host.style.width = "48rem"
+    root.render(<ExForm schema={schema} defaultValues={{ name: "", note: "" }} layout="horizontal"
+      contentMaxWidth="16rem" contentAlign="right" fields={[
+        { name: "name", label: "Required", control: "text" },
+        { name: "note", label: "Full", control: "text", contentMaxWidth: "none" },
+      ]} onSubmit={() => {}} />)
+    const input = page.getByRole("textbox", { name: "Required" })
+    await expect.element(input).toBeVisible()
+    expect(page.getByRole("textbox", { name: "Full" }).element().getBoundingClientRect().width).toBeCloseTo(612, 0)
+    await page.getByRole("button", { name: "提交" }).click()
+    await expect.element(input).toHaveAttribute("aria-invalid", "true")
+    const error = document.getElementById(`${input.element().id}-error`)!
+    expect(error.getBoundingClientRect().left).toBeCloseTo(input.element().getBoundingClientRect().left, 0)
+    expect(error.getBoundingClientRect().width).toBeCloseTo(256, 0)
+    expect(host.querySelector("[contentmaxwidth], [contentalign]")).toBeNull()
+  })
+
   it("labels a single direct Input and appends its description without replacing existing references", async () => {
     root.render(<ExItem title="Nickname" desc="Visible to others"><Input aria-describedby="existing-help" /></ExItem>)
     const input = page.getByRole("textbox", { name: "Nickname" })

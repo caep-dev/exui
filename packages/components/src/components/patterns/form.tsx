@@ -35,7 +35,7 @@ export function Form<I extends FormValues, O>(props: FormProps<I, O>) {
 
 export function FormShell<I extends FormValues, O>(props: FormProps<I, O> & { routing?: FormRouting<I> }) {
   const { form, children, onSubmit, onInvalid, onSubmitError, submitErrorMessage, formatIssue, issueSeparator, disabled = false,
-    clearOnDestroy = false, layout = "vertical", columns, name, className, style, routing } = props
+    clearOnDestroy = false, layout = "vertical", contentMaxWidth, contentAlign, columns, name, className, style, routing } = props
   const internal = getInternal(form)
   const state = React.useSyncExternalStore(internal.subscribe, internal.getSnapshot, internal.getServerSnapshot)
   const owner = React.useRef({})
@@ -58,7 +58,7 @@ export function FormShell<I extends FormValues, O>(props: FormProps<I, O> & { ro
     } catch (error) { onSubmitError?.(error) }
   }
   return <FormContext.Provider value={{ ...context, form: form as unknown as FormInstance<FormValues, unknown> }}>
-    <ExItemLayoutProvider layout={layout === "vertical" ? "vertical" : "horizontal"}>
+    <ExItemLayoutProvider layout={layout === "vertical" ? "vertical" : "horizontal"} contentMaxWidth={contentMaxWidth} contentAlign={contentAlign}>
     <form noValidate name={name} className={cn("ex-form", className)} style={style} onSubmit={onDomSubmit}
       onReset={(event) => { event.preventDefault(); form.reset() }} aria-busy={state.isSubmitting || state.isValidating}>
       <div className="ex-form-container">

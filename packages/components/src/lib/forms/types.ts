@@ -5,7 +5,7 @@ import type { Input } from "@/components/ui/input"
 import type { Textarea } from "@/components/ui/textarea"
 import type { Checkbox } from "@/components/ui/checkbox"
 import type { Switch } from "@/components/ui/switch"
-import type { ExItemLayout } from "@/components/patterns/ex-item"
+import type { ExItemLayout, ExItemProps } from "@/components/patterns/ex-item"
 
 export type FormValues = Record<string, unknown>
 export type FormSchema = StandardSchemaV1<FormValues, unknown>
@@ -88,7 +88,7 @@ export interface FormRenderArguments<I extends FormValues, P extends FormPath<I>
   state: FormFieldState & { readonly disabled: boolean }
   accessibility: { id: string; name: P; "aria-invalid": boolean; "aria-describedby"?: string; "aria-required"?: boolean }
 }
-export interface FormFieldBase<I extends FormValues, P extends FormPath<I>> {
+export interface FormFieldBase<I extends FormValues, P extends FormPath<I>> extends Pick<ExItemProps, "contentMaxWidth" | "contentAlign"> {
   name: P; label?: React.ReactNode; description?: React.ReactNode; required?: boolean; disabled?: boolean
   dependencies?: readonly FormPath<I>[]; visibleWhen?: (snapshot: FormSnapshot<I>) => boolean; disabledWhen?: (snapshot: FormSnapshot<I>) => boolean
   preserve?: boolean; validationScope?: FormValidationScope<I>; colSpan?: FormColumnCount | "full"; layout?: ExItemLayout; className?: string; noStyle?: boolean
@@ -124,7 +124,7 @@ export type FormOrdinaryFieldConfig<I extends FormValues> = { [P in FormPath<I>]
 export type FormListConfig<I extends FormValues> = { [P in FormObjectArrayPath<I>]: { kind: "list"; name: P; defaultItem: NoInfer<FormArrayItem<I, P>>; itemFields: readonly FormFieldConfig<FormArrayItem<I, P>>[]; label?: React.ReactNode; description?: React.ReactNode; className?: string; colSpan?: FormColumnCount | "full" } & FormLayoutOptions }[FormObjectArrayPath<I>]
 export type FormFieldConfig<I extends FormValues> = FormOrdinaryFieldConfig<I> | FormListConfig<I>
 export type FormListProps<I extends FormValues, O, P extends FormObjectArrayPath<I>> = { form: FormInstance<I, O>; name: P; defaultItem: NoInfer<FormArrayItem<I, P>>; render: (array: FormFieldArray<NoInfer<I>, P>) => React.ReactNode; label?: React.ReactNode; description?: React.ReactNode; className?: string; colSpan?: FormColumnCount | "full" } & FormLayoutOptions
-export interface FormProps<I extends FormValues, O> extends FormLayoutOptions {
+export interface FormProps<I extends FormValues, O> extends FormLayoutOptions, Pick<ExItemProps, "contentMaxWidth" | "contentAlign"> {
   form: FormInstance<I, O>; onSubmit: FormSubmitHandler<NoInfer<I>, NoInfer<O>>; children: React.ReactNode
   name?: string; disabled?: boolean; clearOnDestroy?: boolean; onInvalid?: (errors: FormErrors<NoInfer<I>>) => void; onSubmitError?: (error: unknown) => void; submitErrorMessage?: string; formatIssue?: (message: string) => string; issueSeparator?: string; className?: string; style?: React.CSSProperties
   onReset?: never; noValidate?: never

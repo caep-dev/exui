@@ -46,8 +46,8 @@ const attachmentSchema = z.object({
     .refine((files) => files.every((file) => ["image/png", "image/jpeg", "text/plain"].includes(file.type)),
       "Use PNG, JPEG, or plain text files."),
 })
-
 const itemLayoutSchema = z.object({ handle: z.string() })
+const contentSizingSchema = z.object({ inherited: z.string(), overridden: z.string(), full: z.string() })
 
 const schemas = { profileSchema, controlGallerySchema, preferencesSchema, teamSchema, contactSchema, confirmationSchema, applicationSchema, attachmentSchema }
 const today = new Date()
@@ -96,6 +96,35 @@ function ItemLayoutPreview() {
         <FormItem form={form} name="handle" label={t("Form handle")} description={t("This field overrides the form layout.")}
           control="text" layout="vertical" />
       </Form>
+    </div>
+  </Example>
+}
+
+function ContentSizingPreview() {
+  const t = useT()
+  const [align, setAlign] = React.useState<"left" | "right">("right")
+  const [width, setWidth] = React.useState("18rem")
+  const [narrow, setNarrow] = React.useState(false)
+  const form = useForm({ schema: contentSizingSchema, defaultValues: { inherited: "", overridden: "", full: "" } })
+  return <Example title={t("Content width and alignment")} description={t("Change the form defaults; individual fields can override them. Narrow rows return to full width.")}>
+    <div className="form-example-actions">
+      <Button type="button" variant="outline" aria-pressed={align === "left"} onClick={() => setAlign("left")}>{t("Align content left")}</Button>
+      <Button type="button" variant="outline" aria-pressed={align === "right"} onClick={() => setAlign("right")}>{t("Align content right")}</Button>
+      <Button type="button" variant="outline" aria-pressed={width === "12rem"} onClick={() => setWidth("12rem")}>12rem</Button>
+      <Button type="button" variant="outline" aria-pressed={width === "18rem"} onClick={() => setWidth("18rem")}>18rem</Button>
+      <Button type="button" variant="outline" aria-pressed={narrow} onClick={() => setNarrow(value => !value)}>{t("Narrow preview")}</Button>
+    </div>
+    <div style={{ display: "grid", gap: "1.5rem", width: narrow ? "20rem" : "100%", maxWidth: "100%" }}>
+      <Form form={form} onSubmit={() => {}} layout="horizontal" contentMaxWidth={width} contentAlign={align}>
+        <ExItem title={t("Shared defaults")} desc={t("An independent item inherits the form settings.")}><Input /></ExItem>
+        <FormItem form={form} name="inherited" label={t("Inherited content")} control="text" />
+        <FormItem form={form} name="overridden" label={t("Local override")} description={t("Always left aligned, up to 10rem in a horizontal row.")}
+          control="text" contentMaxWidth="10rem" contentAlign="left" />
+        <FormItem form={form} name="full" label={t("Unlimited content")} control="text" contentMaxWidth="none" />
+      </Form>
+      <ExForm schema={itemLayoutSchema} defaultValues={{ handle: "" }} layout="horizontal" contentMaxWidth={width} contentAlign={align}
+        fields={[{ name: "handle", label: t("Configured content"), description: t("The configured form uses the same defaults."), control: "text" }]}
+        footer={null} onSubmit={() => {}} />
     </div>
   </Example>
 }
@@ -279,6 +308,6 @@ export function FormExamples() {
   return <section className="form-examples" aria-labelledby="form-examples-heading">
     <header><h2 id="form-examples-heading">{t("Complete forms")}</h2>
       <p>{t("Configured and composed forms share one schema and one draft.")}</p></header>
-    <ConfiguredProfile /><ItemLayoutPreview /><ControlGallery /><ComposedPreferences /><TeamList /><ApplicationDialog /><FilesAndAsync />
+    <ConfiguredProfile /><ItemLayoutPreview /><ContentSizingPreview /><ControlGallery /><ComposedPreferences /><TeamList /><ApplicationDialog /><FilesAndAsync />
   </section>
 }

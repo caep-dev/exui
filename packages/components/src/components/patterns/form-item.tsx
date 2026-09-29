@@ -90,7 +90,7 @@ interface BoundProps {
 
 function BoundFormItem<I extends FormValues, O, P extends FormPath<I>>(props: { configuration: FormItemProps<I, O, P>; isDisabled: boolean } & BoundProps) {
   const { id, labelId, describedBy, container, target, isDisabled: disabled, fieldState, ownIssues, formatIssue } = props
-  const { form, name, label, description, required, noStyle, className, colSpan = 1, layout } = props.configuration
+  const { form, name, label, description, required, noStyle, className, colSpan = 1, layout, contentMaxWidth, contentAlign } = props.configuration
   const internal = getInternal(form)
   const { field } = useController({ control: internal.rhf.control, name, shouldUnregister: false })
   const accessibility = { id, name, "aria-invalid": ownIssues.length > 0, "aria-describedby": describedBy, "aria-required": required }
@@ -106,6 +106,7 @@ function BoundFormItem<I extends FormValues, O, P extends FormPath<I>>(props: { 
     binding={{ ...binding, onChange: (next: unknown) => binding.onChange(next as FormPathValue<I, P>), disabled: Boolean(disabled), accessibility, labelId }} />
   if (noStyle) return <>{control}</>
   return <ExItem ref={container} className={cn("ex-form-item", className)} span={colSpan} layout={layout}
+    contentMaxWidth={contentMaxWidth} contentAlign={contentAlign}
     title={label != null ? <>{label}{required && <span aria-hidden="true">*</span>}</> : undefined}
     desc={description} controlId={id} data-invalid={ownIssues.length > 0} data-disabled={disabled}>
     <>{control}

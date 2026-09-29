@@ -26,7 +26,18 @@
 .ex-form-grid[data-layout="inline"] > [data-span="4"], .ex-form-row-grid[data-layout="inline"] > [data-span="4"] { --ex-form-span: 4; }
 .ex-form-grid[data-layout="inline"] > [data-span="full"], .ex-form-row-grid[data-layout="inline"] > [data-span="full"] { flex-basis: 100%; }
 .ex-item, .ex-item-content, .ex-form-item, .ex-form-content { min-width: 0; max-width: 100%; }
-.ex-item { gap: .5rem; }
+.ex-item { container: ex-item / inline-size; gap: .5rem; }
+.ex-item-content, .ex-item-body { width: 100%; min-width: 0; max-width: 100%; }
+.ex-item-body { display: flex; flex-direction: column; gap: inherit; }
+/* Keep the outer flex slot unchanged so content limits never change wrapping. */
+@container ex-item (min-width: 21.75rem) {
+  .ex-item-content[data-item-layout="horizontal"] > .ex-item-body {
+    max-width: var(--ex-item-content-max-width, 100%);
+    margin-left: 0;
+    margin-right: auto;
+  }
+  .ex-item-content[data-item-layout="horizontal"][data-content-align="right"] > .ex-item-body { margin-left: auto; margin-right: 0; }
+}
 .ex-item-heading { display: flex; flex-direction: column; gap: .25rem; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .ex-item-title, .ex-item-description, .ex-item [data-slot="field-error"] { overflow-wrap: anywhere; }
 .ex-item-title { flex-wrap: wrap; }
