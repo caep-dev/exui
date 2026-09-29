@@ -34,6 +34,17 @@ Nested objects use original paths, such as `profile.email`. Dynamic object rows 
 
 Built-in controls are `text`, `email`, `password`, `number`, `date`, `textarea`, `select`, `radio-group`, `checkbox`, `switch`, `checkbox-group`, `multi-select`, `select-or-input` and `files`. Enum options retain the path's literal values. Multiple selection needs a writable string array; `FormList` needs a writable object array and complete `defaultItem` values. Readonly model arrays use typed custom `render` and `setValue` instead. `required` marks the label and accessibility; validation rules come from the schema.
 
+`FormItem` places `description` directly below its label, above the control. Only validation errors appear below the control. Invalid fields keep the label's normal text color; the control and error display their invalid styles. The control's `aria-describedby` still references its description and any current error.
+
+`date` opens an ExUI Calendar in a Popover. Its draft and default value are `YYYY-MM-DD` strings, so `defaultValues` chooses the initial date and `reset` restores it. Set inclusive calendar limits with `controlProps.min` and `controlProps.max` (also `YYYY-MM-DD`). When today falls within those limits, the popup shows a compact Today action beside the year selector; `controlProps.todayLabel` localizes it. `controlProps.placeholder` localizes an empty trigger. The limits prevent selection in the calendar; validate them again in the schema if existing defaults, programmatic writes, or server data must also be rejected.
+
+```tsx
+<ExForm schema={schema} defaultValues={{ birthDate: "2000-01-15" }} onSubmit={save} fields={[
+  { name: "birthDate", label: "Birth date", control: "date",
+    controlProps: { min: "1900-01-01", max: "2026-09-29", todayLabel: "Today" } },
+]} />
+```
+
 Custom `render` receives `{ field, state, accessibility }`. `field.value` is a readonly snapshot, `field.onChange(next)` accepts the path's Input value, and `field.onBlur`/`field.ref` attach to the real focusable element. Spread `accessibility` onto that element and render labels and issues when using `noStyle`. Do not replace bindings through `controlProps`.
 
 ## Steps and validation scopes
@@ -42,7 +53,9 @@ Each step declares stable `id`, `fields`, `validationSchema`, and optional `vali
 
 `trigger()` runs complete validation; `trigger(names)` only applies selected paths and current root issues. `validateScope(scope)` uses explicit scope rules. Local success does not declare the full form valid, and `clearErrors` does not mark it valid. `FormErrorSummary` shows field and root issues; field links focus registered, connected controls.
 
-For localized display, `Form` and `ExForm` accept `formatIssue(message)` and `issueSeparator`. The formatter changes the rendered field errors and error summary only; `form.state.errors` retains the original schema or server message. This lets an application switch language without replacing the form instance or losing its draft. Pass a translated `title` to a composed `FormErrorSummary`. Configured `ExForm` also accepts `errorSummaryTitle`, `stepsAriaLabel`, `backLabel`, and `nextLabel`; its existing `submitLabel` and `resetLabel` cover the remaining footer buttons. Omitted labels retain their current defaults.
+`ExForm` does not insert `FormErrorSummary`. Add it as a child when a summary is wanted: `<ExForm ...><FormErrorSummary title="Please check the following issues" /></ExForm>`. Inside `Form`, the same component can omit `form`; passing the matching `form` explicitly remains supported. It must be inside a form and does not accept an external `errors` prop.
+
+For localized display, `Form` and `ExForm` accept `formatIssue(message)` and `issueSeparator`. The formatter changes the rendered field errors and error summary only; `form.state.errors` retains the original schema or server message. This lets an application switch language without replacing the form instance or losing its draft. Pass a translated `title` to `FormErrorSummary`. Configured `ExForm` also accepts `stepsAriaLabel`, `backLabel`, and `nextLabel`; its existing `submitLabel` and `resetLabel` cover the remaining footer buttons. Omitted labels retain their current defaults.
 
 ## Errors, submission and lifecycle
 
@@ -55,6 +68,20 @@ The `files` control keeps a memory-only `File[]`: choose, drop and paste append 
 Its `controlProps` can set `buttonLabel`, `formatFileSize(bytes)` and `removeFileLabel(file)` to localize the picker, rendered size, and accessible remove action. The callbacks affect presentation only; file validation and stored `File[]` values stay unchanged.
 
 ## Item presentation and layout
+
+`Form` and `ExForm` accept `contentMaxWidth` and `contentAlign="left" | "right"` as item defaults. `ExItem`, `FormItem`, and ordinary configured fields can override either value independently. The limit applies to the whole content area (including validation errors), not the heading or input text alignment. Use a CSS maximum width such as `"24rem"` or a number in CSS pixels; `"none"` removes an inherited limit. Without a limit, content fills the available space and alignment has no visible effect. Vertical items and horizontal items that wrap below 21.75rem fill the available width regardless of these settings.
+
+```tsx
+<ExForm
+  schema={schema}
+  defaultValues={{ name: "" }}
+  layout="horizontal"
+  contentMaxWidth="24rem"
+  contentAlign="right"
+  fields={[{ name: "name", label: "Name", control: "text", contentMaxWidth: "18rem", contentAlign: "left" }]}
+  onSubmit={save}
+/>
+```
 
 `ExItem` presents `title`, `desc`, and `children` without a form instance or field registration. It accepts `layout="vertical" | "horizontal"`, `span={1 | 2 | 3 | 4 | "full"}`, ordinary `div` attributes, `className`, and `style`. A standalone item defaults to vertical. Inside `Form` or `ExForm`, it inherits the form layout: `vertical` stays vertical, while `horizontal` and `inline` make items horizontal by default. An explicit item `layout` wins. `inline` is only an outer form layout. Horizontal items wrap their title and control at the item's own width, including narrow grid columns and Dialogs. `span` uses the existing form grid or inline width rules; a standalone item declares a CSS Grid span but does not create its parent grid.
 

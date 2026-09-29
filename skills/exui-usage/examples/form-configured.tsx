@@ -1,7 +1,7 @@
 import "@exre/exui/style.css"
 import { useState } from "react"
 import { z } from "zod"
-import { ExForm } from "@exre/exui"
+import { ExForm, FormErrorSummary } from "@exre/exui"
 
 // Keep the initializing schema stable across renders.
 const emailStepSchema = z.object({
@@ -36,7 +36,9 @@ export default function ConfiguredForm() {
           // output.age is number; the form's input draft remains string.
           setSaved(`${output.email}: ${output.age} years old (${output.role})`)
         }}
-      />
+      >
+        <FormErrorSummary title="Please check the following issues" />
+      </ExForm>
       <output aria-live="polite">{saved}</output>
     </section>
   )

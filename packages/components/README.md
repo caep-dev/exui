@@ -38,7 +38,7 @@ npm add zod
 
 ```tsx
 import { z } from "zod"
-import { ExForm } from "@exre/exui"
+import { ExForm, FormErrorSummary } from "@exre/exui"
 
 const schema = z.object({
   age: z.string().min(1).regex(/^\d+$/).transform(Number),
@@ -47,7 +47,9 @@ const schema = z.object({
 export function AgeForm() {
   return <ExForm schema={schema} defaultValues={{ age: "" }}
     fields={[{ name: "age", label: "Age", control: "number" }]}
-    onSubmit={(output) => { console.log(output.age) }} />
+    onSubmit={(output) => { console.log(output.age) }}>
+    <FormErrorSummary />
+  </ExForm>
 }
 ```
 
@@ -55,7 +57,9 @@ Controls and form methods follow schema Input (`age` is a string); submission re
 
 `ExForm` takes either `schema`/`defaultValues` or an existing `form`. Steps require explicit stable scope schemas at the original input paths; final submission always checks the full schema. `reset` cancels pending work and establishes a new baseline; `cancelPending` preserves the draft. Close handlers for a Dialog that remains mounted should call one of those methods. Submission cancellation signals cooperative abort and cannot undo server operations already sent.
 
-`ExItem` is a standalone presentation container for a title, description, and control. It also works directly inside `Form` or `ExForm` without registering a field. A single direct ExUI `Input` receives a stable ID and description association automatically; wrapped, custom, or multiple controls use `controlId` plus the same ID on the focusable control. `FormItem` and configured fields keep `label`, `description`, and `colSpan`, and can set `layout="vertical"` or `layout="horizontal"` to override the form default. Horizontal items wrap by their own available width.
+`ExForm` does not add an error summary automatically. Place `FormErrorSummary` inside `ExForm` when you want one; it reads the nearest form instance and navigates to its fields. The summary also works inside a composed `Form`. Outside a form, it has no form state to display.
+
+`ExItem` is a standalone presentation container for a title, description, and control. It also works directly inside `Form` or `ExForm` without registering a field. A single direct ExUI `Input` receives a stable ID and description association automatically; wrapped, custom, or multiple controls use `controlId` plus the same ID on the focusable control. `FormItem` and configured fields keep `label`, `description`, and `colSpan`, and can set `layout="vertical"` or `layout="horizontal"` to override the form default. Horizontal items wrap by their own available width. `Form` and `ExForm` can set `contentMaxWidth` (CSS width or pixels as a number) and `contentAlign="left" | "right"` defaults; `ExItem`, `FormItem`, and configured fields can override each independently. The limit includes validation errors. Use `contentMaxWidth="none"` to remove an inherited limit. Vertical and narrow wrapped items fill the available width.
 
 See the [Form reference](../../skills/exui-usage/references/components/Form.md), [item layout example](../../skills/exui-usage/examples/form-item-layout.tsx), [complete configured example](../../skills/exui-usage/examples/form-configured.tsx) and [complete composed example](../../skills/exui-usage/examples/form-composed.tsx). The consumer gates install Zod 3.25.28 and 4.6.5 independently, compile with `skipLibCheck` disabled, server-render without `document`/`File` access, and test parsed ExForm submission in Chromium.
 
