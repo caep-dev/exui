@@ -109,10 +109,10 @@ export const componentRecipes: ComponentRecipes = {
       background: semantic("surface.input"), foreground: semantic("text.primary"), border: semantic("border.input"),
       placeholder: semantic("text.placeholder"), shadow: noShadow,
     },
-    hover: state(semantic("surface.input"), semantic("text.primary")),
-    focus: state(semantic("surface.input"), semantic("text.primary"), transparent, foundation("shadows.focus")),
+    hover: state(semantic("surface.input"), semantic("text.primary"), semantic("border.input")),
+    focus: state(semantic("surface.input"), semantic("text.primary"), semantic("border.focused"), foundation("shadows.focus")),
     disabled: state(semantic("surface.input"), semantic("text.secondary"), semantic("border.input"), noShadow, 0.5),
-    invalid: state(semantic("surface.input"), semantic("text.primary"), transparent, foundation("shadows.invalid")),
+    invalid: state(semantic("surface.input"), semantic("text.primary"), semantic("control.invalid"), foundation("shadows.invalid")),
   },
   sidebarItem: {
     default: {

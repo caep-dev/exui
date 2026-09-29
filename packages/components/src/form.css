@@ -55,6 +55,18 @@
 .ex-form-select { width: 100%; min-width: 0; max-width: 100%; }
 .ex-form-select [data-slot="select-value"] { overflow-wrap: anywhere; white-space: normal; }
 .ex-form-date-trigger { width: 100%; min-width: 0; justify-content: space-between; text-align: start; }
+.ex-form-date-trigger, .ex-form-files > button {
+  --exui-component-button-outline-default-border: var(--exui-component-form-control-base-border);
+  --exui-component-button-outline-hover-border: var(--exui-component-form-control-hover-border);
+  --exui-component-button-outline-active-border: var(--exui-component-form-control-hover-border);
+  --exui-component-button-outline-focus-border: var(--exui-component-form-control-focus-border);
+  --exui-component-button-outline-disabled-border: var(--exui-component-form-control-disabled-border);
+  --exui-component-button-outline-default-background: var(--exui-component-form-control-base-background);
+  --exui-component-button-outline-hover-background: var(--exui-component-form-control-hover-background);
+  --exui-component-button-outline-active-background: var(--exui-component-form-control-hover-background);
+  --exui-component-button-outline-focus-background: var(--exui-component-form-control-focus-background);
+  --exui-component-button-outline-disabled-background: var(--exui-component-form-control-disabled-background);
+}
 .ex-form-date-trigger > span { overflow: hidden; text-overflow: ellipsis; }
 .ex-form-date-placeholder { color: var(--muted-foreground); }
 .ex-form-date-popover { width: auto; padding: 0; }
@@ -71,7 +83,8 @@
 .ex-form-date-popover .rdp-nav button { pointer-events: auto; }
 .ex-form-choice { display: flex; align-items: center; gap: .625rem; min-width: 0; overflow-wrap: anywhere; }
 .ex-form-choices { display: flex; flex-direction: column; gap: .75rem; }
-.ex-form-multiselect { min-width: 0; max-width: 100%; }
+.ex-form-multiselect { min-width: 0; max-width: 100%; background-color: var(--exui-component-form-control-base-background); }
+.ex-form-multiselect:not(:focus-within):not(:has([aria-invalid="true"])) { border-color: var(--exui-component-form-control-base-border); }
 .ex-form-multiselect [data-slot="combobox-chip"] { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .ex-form-multiselect [data-slot="combobox-chip-input"] { width: 0; min-width: min(4rem, 100%); }
 .ex-form-files { display: flex; flex-direction: column; gap: .75rem; min-width: 0; }

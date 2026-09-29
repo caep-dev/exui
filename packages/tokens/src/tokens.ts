@@ -103,7 +103,7 @@ const light: ThemeTokens = {
     modal: "#ffffff",
     menu: "#ffffff",
     sidebar: "#fafafa",
-    input: "#e6e6e6",
+    input: "#f5f5f5",
     overlay: "rgba(0, 0, 0, 0.3)",
   },
   text: {
@@ -133,7 +133,7 @@ const light: ThemeTokens = {
   border: {
     default: "#e6e6e6",
     strong: "#a9a9a9",
-    input: "#e6e6e6",
+    input: "#d8d8d8",
     focused: "#006dcc",
     divider: "#dae1e9",
   },
@@ -211,7 +211,7 @@ const dark: ThemeTokens = {
     modal: "#1b1b1b",
     menu: "#1b1b1b",
     sidebar: "#1f1f1f",
-    input: "rgba(255, 255, 255, 0.15)",
+    input: "rgba(255, 255, 255, 0.06)",
     overlay: "rgba(0, 0, 0, 0.5)",
   },
   text: {
@@ -241,7 +241,7 @@ const dark: ThemeTokens = {
   border: {
     default: "rgba(255, 255, 255, 0.1)",
     strong: "#7e7e7e",
-    input: "rgba(255, 255, 255, 0.15)",
+    input: "rgba(255, 255, 255, 0.20)",
     focused: "#62b0ff",
     divider: "#2f3336",
   },
