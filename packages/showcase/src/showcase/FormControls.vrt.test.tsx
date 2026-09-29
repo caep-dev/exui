@@ -72,9 +72,26 @@ describe("Form public control adapters", () => {
     const element = trigger.element() as HTMLElement
     const labels = document.querySelectorAll("label")
     expect(Array.from(labels).some(label => label.htmlFor === element.id && label.textContent?.includes("Role"))).toBe(true)
+    const item = element.closest<HTMLElement>('[data-slot="field"]')!
+    const heading = item.querySelector<HTMLElement>(".ex-item-heading")!
+    const description = item.querySelector<HTMLElement>('[data-slot="field-description"]')!
+    const content = item.querySelector<HTMLElement>('[data-slot="field-content"]')!
+    const label = heading.querySelector<HTMLElement>('[data-slot="field-label"]')!
+    expect(label.textContent).toContain("Role")
+    expect(description.parentElement).toBe(heading)
+    expect(heading.nextElementSibling).toBe(content)
+    expect(content.contains(description)).toBe(false)
+    expect(description.getBoundingClientRect().top).toBeGreaterThanOrEqual(label.getBoundingClientRect().bottom - 1)
+    expect(content.getBoundingClientRect().top).toBeGreaterThanOrEqual(description.getBoundingClientRect().bottom - 1)
+    expect(content.querySelector('[data-slot="field-error"]')).toBeNull()
+    const titleColor = getComputedStyle(label).color
     expect(element.getAttribute("aria-describedby")?.split(" ").map(id => document.getElementById(id)?.textContent).join(" ")).toContain("Choose permission")
     form.setError("role", { message: "Permission unavailable" })
     await expect.element(trigger).toHaveAttribute("aria-invalid", "true")
+    const error = content.querySelector<HTMLElement>('[data-slot="field-error"]')!
+    expect(error.textContent).toBe("Permission unavailable")
+    expect(getComputedStyle(label).color).toBe(titleColor)
+    expect(getComputedStyle(error).color).not.toBe(titleColor)
     form.setFocus("role")
     await expect.poll(() => document.activeElement).toBe(element)
     await page.getByRole("textbox", { name: "Name", exact: true }).click()

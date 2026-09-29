@@ -39,7 +39,7 @@ export function App() {
   </main>
 }
 `,
-    "types.tsx": `import { ExForm, Form, FormItem, FormList, useForm, useWatch, useFieldArray } from "@exre/exui"
+    "types.tsx": `import { ExForm, ExItem, Form, FormItem, FormList, Input, useForm, useWatch, useFieldArray } from "@exre/exui"
 import type { FormInput, FormOutput, FormInstance, StandardSchemaV1 } from "@exre/exui"
 import type { z } from "zod"
 import { schema, defaults } from "./schema"
@@ -89,6 +89,9 @@ export function TypeContracts() {
   const readonlyForm = useForm({ schema: readonlySchema, defaultValues: { tags: [], contacts: [] } })
   readonlyForm.setValue("tags", ["a"] as const)
   return <>
+    <ExItem title="Standalone" layout="horizontal" span="full"><Input /></ExItem>
+    {/* @ts-expect-error inline is an outer Form layout, not an Item layout. */}
+    <ExItem layout="inline"><Input /></ExItem>
     <Form form={form} onSubmit={(parsed) => {
       const parsedAge: number = parsed.age
       // @ts-expect-error the submit handler receives Output, not Input.
@@ -96,6 +99,9 @@ export function TypeContracts() {
       void parsedAge; void inputAge
     }}>
       <FormItem form={form} name="age" control="number" />
+      <FormItem form={form} name="age" control="number" layout="horizontal" />
+      {/* @ts-expect-error FormItem uses the same two Item layouts. */}
+      <FormItem form={form} name="age" control="number" layout="inline" />
       <FormItem form={form} name="role" control="select" controlProps={{ options: [{ value: "admin", label: "Admin" }] }} />
       <FormItem form={form} name="tags" control="multi-select" controlProps={{ options: [{ value: "a", label: "A" }] }} />
       {/* @ts-expect-error invalid field paths cannot widen inference. */}
@@ -147,7 +153,7 @@ export function TypeContracts() {
 }
 `,
     "server.tsx": `import { renderToString } from "react-dom/server"
-import { ExForm, Form, FormItem, useForm } from "@exre/exui"
+import { ExForm, ExItem, Form, FormItem, Input, useForm } from "@exre/exui"
 import type { StandardSchemaV1 } from "@exre/exui"
 import { schema, defaults } from "./schema"
 
@@ -160,8 +166,9 @@ function EmptyFiles() {
   return <Form form={form} onSubmit={() => {}}><FormItem form={form} name="files" label="Attachments" control="files" /></Form>
 }
 export function render() {
-  return renderToString(<><ExForm schema={schema} defaultValues={defaults}
-    fields={[{ name: "age", label: "SSR Age", control: "number" }]} onSubmit={() => {}} /><EmptyFiles /></>)
+  return renderToString(<><ExItem title="Standalone SSR" desc="Stable description"><Input /></ExItem>
+    <ExForm schema={schema} defaultValues={defaults}
+      fields={[{ name: "age", label: "SSR Age", control: "number", layout: "vertical" }]} onSubmit={() => {}} /><EmptyFiles /></>)
 }
 `,
     "smoke.mjs": `import assert from "node:assert/strict"
@@ -179,6 +186,8 @@ for (const name of ["document", "File"]) {
 }
 const html = render()
 assert.match(html, /SSR Age/, "ExForm must render the schema control on the server")
+assert.match(html, /Standalone SSR/, "ExItem must render without a Form on the server")
+assert.match(html, /Stable description/, "ExItem must render its description on the server")
 assert.match(html, /Attachments/, "empty file controls must render without a File constructor")
 assert.match(html, /type="number"/, "SSR must include the bound numeric-string input")
 const require = createRequire(import.meta.url)

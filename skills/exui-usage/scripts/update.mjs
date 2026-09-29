@@ -327,6 +327,7 @@ function pascalCaseFileName(value) {
 // Public form declarations are an explicit set. Internal coordinators,
 // adapters and step controllers must never become approved export families.
 const publicFormDeclarations = new Set([
+  "types/components/patterns/ex-item.d.ts",
   "types/components/patterns/ex-form.d.ts",
   "types/components/patterns/form.d.ts",
   "types/components/patterns/form-item.d.ts",

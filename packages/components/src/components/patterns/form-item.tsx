@@ -2,12 +2,13 @@
 
 import * as React from "react"
 import { useController, useWatch as useRHFWatch } from "react-hook-form"
-import { Field, FieldContent, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
+import { FieldError } from "@/components/ui/field"
 import { FormContext, getInternal } from "@/lib/forms/context"
 import type { FormFieldState, FormIssue, FormItemProps, FormPath, FormPathValue, FormRenderArguments, FormValues } from "@/lib/forms/types"
 import { cn } from "@/lib/utils"
 import { equalValue, normalizePaths, snapshot as immutableSnapshot } from "@/lib/forms/paths"
 import { FormControl } from "./form-controls"
+import { ExItem } from "./ex-item"
 import { RetainStepFieldsContext } from "./form"
 
 export function FormItem<I extends FormValues, O, P extends FormPath<I>>(props: FormItemProps<I, O, P>) {
@@ -25,7 +26,9 @@ export function FormItem<I extends FormValues, O, P extends FormPath<I>>(props: 
   const id = `${React.useId()}-${encodeURIComponent(name)}`
   const labelId = label != null ? `${id}-label` : undefined
   const errorId = `${id}-error`
-  const descriptionId = `${id}-description`
+  const descriptionId = description !== null && description !== undefined && description !== false && description !== ""
+    ? `${id}-description`
+    : undefined
   const container = React.useRef<HTMLDivElement | null>(null)
   const target = React.useRef<HTMLElement | null>(null)
   const fieldState = form.getFieldState(name)
@@ -73,8 +76,8 @@ export function FormItem<I extends FormValues, O, P extends FormPath<I>>(props: 
   }, [dependencyValues, internal, name, stableScope, dependencies.length])
   if (!visible) return null
   return <BoundFormItem<I, O, P> configuration={props} isDisabled={Boolean(isDisabled)} id={id} labelId={labelId} container={container} target={target}
-    describedBy={[description != null && descriptionId, ownIssues.length > 0 && errorId].filter(Boolean).join(" ") || undefined}
-    fieldState={fieldState} ownIssues={ownIssues} layout={context.layout} formatIssue={context.formatIssue} />
+    describedBy={[descriptionId, ownIssues.length > 0 && errorId].filter(Boolean).join(" ") || undefined}
+    fieldState={fieldState} ownIssues={ownIssues} formatIssue={context.formatIssue} />
 }
 
 interface BoundProps {
@@ -82,13 +85,12 @@ interface BoundProps {
   container: React.RefObject<HTMLDivElement | null>; target: React.RefObject<HTMLElement | null>
   fieldState: FormFieldState
   ownIssues: readonly FormIssue[]
-  layout?: string
   formatIssue?: (message: string) => string
 }
 
 function BoundFormItem<I extends FormValues, O, P extends FormPath<I>>(props: { configuration: FormItemProps<I, O, P>; isDisabled: boolean } & BoundProps) {
-  const { id, labelId, describedBy, container, target, isDisabled: disabled, fieldState, ownIssues, layout, formatIssue } = props
-  const { form, name, label, description, required, noStyle, className, colSpan = 1 } = props.configuration
+  const { id, labelId, describedBy, container, target, isDisabled: disabled, fieldState, ownIssues, formatIssue } = props
+  const { form, name, label, description, required, noStyle, className, colSpan = 1, layout } = props.configuration
   const internal = getInternal(form)
   const { field } = useController({ control: internal.rhf.control, name, shouldUnregister: false })
   const accessibility = { id, name, "aria-invalid": ownIssues.length > 0, "aria-describedby": describedBy, "aria-required": required }
@@ -103,12 +105,11 @@ function BoundFormItem<I extends FormValues, O, P extends FormPath<I>>(props: { 
     controlProps={props.configuration.controlProps as Record<string, unknown> | undefined}
     binding={{ ...binding, onChange: (next: unknown) => binding.onChange(next as FormPathValue<I, P>), disabled: Boolean(disabled), accessibility, labelId }} />
   if (noStyle) return <>{control}</>
-  return <Field ref={container} className={cn("ex-form-item", className)} data-span={colSpan}
-    data-invalid={ownIssues.length > 0} data-disabled={disabled} data-form-layout={layout} orientation="vertical">
-    {label != null && <FieldLabel id={labelId} htmlFor={id} className="ex-form-label">{label}{required && <span aria-hidden="true">*</span>}</FieldLabel>}
-    <FieldContent className="ex-form-content">{control}
-      {description != null && <FieldDescription id={`${id}-description`}>{description}</FieldDescription>}
+  return <ExItem ref={container} className={cn("ex-form-item", className)} span={colSpan} layout={layout}
+    title={label != null ? <>{label}{required && <span aria-hidden="true">*</span>}</> : undefined}
+    desc={description} controlId={id} data-invalid={ownIssues.length > 0} data-disabled={disabled}>
+    <>{control}
       <FieldError id={`${id}-error`} errors={ownIssues.map((issue) => ({ message: formatIssue?.(issue.message) ?? issue.message }))} />
-    </FieldContent>
-  </Field>
+    </>
+  </ExItem>
 }

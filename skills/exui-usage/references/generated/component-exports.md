@@ -546,6 +546,10 @@ This inventory covers exports reachable from the public `@exre/exui` package roo
 - `ExFormFooterArguments` — type
 - `ExFormInstanceProps` — type
 - `ExFormSchemaProps` — type
+- `ExItem` — value
+- `ExItemLayout` — type
+- `ExItemProps` — type
+- `ExItemSpan` — type
 - `Form` — value
 - `FormArrayItem` — type
 - `FormCheckboxControlProps` — type

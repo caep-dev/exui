@@ -5,6 +5,7 @@ import type { Input } from "@/components/ui/input"
 import type { Textarea } from "@/components/ui/textarea"
 import type { Checkbox } from "@/components/ui/checkbox"
 import type { Switch } from "@/components/ui/switch"
+import type { ExItemLayout } from "@/components/patterns/ex-item"
 
 export type FormValues = Record<string, unknown>
 export type FormSchema = StandardSchemaV1<FormValues, unknown>
@@ -90,7 +91,7 @@ export interface FormRenderArguments<I extends FormValues, P extends FormPath<I>
 export interface FormFieldBase<I extends FormValues, P extends FormPath<I>> {
   name: P; label?: React.ReactNode; description?: React.ReactNode; required?: boolean; disabled?: boolean
   dependencies?: readonly FormPath<I>[]; visibleWhen?: (snapshot: FormSnapshot<I>) => boolean; disabledWhen?: (snapshot: FormSnapshot<I>) => boolean
-  preserve?: boolean; validationScope?: FormValidationScope<I>; colSpan?: FormColumnCount | "full"; className?: string; noStyle?: boolean
+  preserve?: boolean; validationScope?: FormValidationScope<I>; colSpan?: FormColumnCount | "full"; layout?: ExItemLayout; className?: string; noStyle?: boolean
 }
 type BindingProps = "name" | "value" | "defaultValue" | "checked" | "defaultChecked" | "onChange" | "onValueChange" | "onCheckedChange" | "onBlur" | "ref" | "id" | "disabled" | "aria-invalid" | "aria-describedby" | "required"
 export type FormInputControlProps = Omit<React.ComponentProps<typeof Input>, BindingProps | "type">

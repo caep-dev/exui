@@ -4,6 +4,7 @@ import * as React from "react"
 import { FormContext, getInternal } from "@/lib/forms/context"
 import type { FormColumns, FormErrors, FormInstance, FormProps, FormValues } from "@/lib/forms/types"
 import { cn } from "@/lib/utils"
+import { ExItemLayoutProvider } from "./ex-item"
 
 export const RetainStepFieldsContext = React.createContext(false)
 
@@ -57,11 +58,13 @@ export function FormShell<I extends FormValues, O>(props: FormProps<I, O> & { ro
     } catch (error) { onSubmitError?.(error) }
   }
   return <FormContext.Provider value={{ ...context, form: form as unknown as FormInstance<FormValues, unknown> }}>
+    <ExItemLayoutProvider layout={layout === "vertical" ? "vertical" : "horizontal"}>
     <form noValidate name={name} className={cn("ex-form", className)} style={style} onSubmit={onDomSubmit}
       onReset={(event) => { event.preventDefault(); form.reset() }} aria-busy={state.isSubmitting || state.isValidating}>
       <div className="ex-form-container">
         <div className="ex-form-grid" data-layout={layout} style={formColumnStyle(columns)}>{children}</div>
       </div>
     </form>
+    </ExItemLayoutProvider>
   </FormContext.Provider>
 }

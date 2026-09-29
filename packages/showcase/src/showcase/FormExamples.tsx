@@ -4,7 +4,7 @@ import { useShowcaseLanguage } from "./language"
 import { useIssueSeparator, useT } from "./translations"
 import {
   Button, Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
-  DialogTrigger, ExForm, Form, FormErrorSummary, FormItem, FormList, Input, useForm,
+  DialogTrigger, ExForm, ExItem, Form, FormErrorSummary, FormItem, FormList, Input, useForm,
 } from "@exre/exui"
 
 const profileSchema = z.object({
@@ -39,6 +39,8 @@ const attachmentSchema = z.object({
       "Use PNG, JPEG, or plain text files."),
 })
 
+const itemLayoutSchema = z.object({ handle: z.string() })
+
 const schemas = { profileSchema, preferencesSchema, teamSchema, contactSchema, confirmationSchema, applicationSchema, attachmentSchema }
 
 function Example({ title, description, children }: {
@@ -65,6 +67,22 @@ function ConfiguredProfile() {
       issueSeparator={issueSeparator}
       onSubmit={(values) => { setOutput(JSON.stringify(values, null, 2)) }} />
     {output && <pre className="form-example-output" aria-live="polite">{output}</pre>}
+  </Example>
+}
+
+function ItemLayoutPreview() {
+  const t = useT()
+  const form = useForm({ schema: itemLayoutSchema, defaultValues: { handle: "" } })
+  return <Example title={t("Item layouts")} description={t("A standalone input and a form field share the same title and control layout.")}>
+    <div style={{ display: "grid", gap: "1.5rem", maxWidth: "28rem" }}>
+      <ExItem title={t("Standalone input")} desc={t("This input is not registered with a form.")} layout="horizontal">
+        <Input placeholder={t("Try an independent input")} />
+      </ExItem>
+      <Form form={form} onSubmit={() => {}} layout="horizontal">
+        <FormItem form={form} name="handle" label={t("Form handle")} description={t("This field overrides the form layout.")}
+          control="text" layout="vertical" />
+      </Form>
+    </div>
   </Example>
 }
 
@@ -205,6 +223,6 @@ export function FormExamples() {
   return <section className="form-examples" aria-labelledby="form-examples-heading">
     <header><h2 id="form-examples-heading">{t("Complete forms")}</h2>
       <p>{t("Configured and composed forms share one schema and one draft.")}</p></header>
-    <ConfiguredProfile /><ComposedPreferences /><TeamList /><ApplicationDialog /><FilesAndAsync />
+    <ConfiguredProfile /><ItemLayoutPreview /><ComposedPreferences /><TeamList /><ApplicationDialog /><FilesAndAsync />
   </section>
 }
