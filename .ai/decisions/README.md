@@ -1,6 +1,6 @@
 # 决策索引
 
-最后更新：2026-09-28
+最后更新：2026-09-29
 
 本目录记录已被仓库证据（代码、配置、CI 或变更记录）印证为**已落地**的技术决策。每条记录说明背景、被否的备选方案、理由、代价与重新审视条件；产生的结构本身写在 `../architectures/` 下，这里不重复。
 
@@ -16,7 +16,7 @@
 
 ## components
 
-表单模块沿用本模块既有打包边界；已落地的结构与状态所有权见 [表单结构](../architectures/components/forms.md)，生命周期约束见 [表单任务](../knowledge/components/forms-lifecycle.md)。设计阶段的 ADR 保留在 `.notes/ex-form/rfcs/`。
+表单模块沿用本模块既有打包边界；已落地的结构与状态所有权见 [表单结构](../architectures/components/forms.md)，生命周期约束见 [表单任务](../knowledge/components/forms-lifecycle.md)。ExItem 的决策已实施；其详细 RFC 保留在 `.notes/ex-form/rfcs/`。
 
 | 编号 | 决策 | 状态 | 日期 |
 | --- | --- | --- | --- |
@@ -26,6 +26,7 @@
 | [[components/04-glass-capability-gating]] | 增强资格用运行时语法检查，不维护浏览器能力表 | 已接受 | 2026-09-21 |
 | [[components/05-glass-edge-from-inset-shadow]] | 材质边缘由 inset shadow 提供，不接管 `border-color` | 已接受 | 2026-09-21 |
 | [[components/06-single-ex-message-host]] | 全局消息复用单个 Sonner 宿主 | 已接受 | 2026-09-28 |
+| [[components/07-ex-item-presentation-boundary]] | ExItem 展示容器与表单字段状态分离 | 已接受，已实现 | 2026-09-29 |
 
 ## showcase
 

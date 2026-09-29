@@ -11,7 +11,7 @@ pnpm add zod
 ```
 
 ```tsx
-import { ExForm, Form, FormItem, FormList, FormErrorSummary, useForm, useFormContext, useWatch, useFieldArray } from "@exre/exui"
+import { ExForm, ExItem, Form, FormItem, FormList, FormErrorSummary, useForm, useFormContext, useWatch, useFieldArray } from "@exre/exui"
 import { z } from "zod"
 import "@exre/exui/style.css"
 ```
@@ -20,7 +20,7 @@ The public schema contract is Standard Schema V1. Zod 3.25.28 and 4.6.5 are the 
 
 ## Configuration and composition
 
-[Complete configured example](../../examples/form-configured.tsx) shows typed text, numeric-string and enum controls, with parsed output. [Complete composed example](../../examples/form-composed.tsx) shows a shared context, watched draft, object list and error summary.
+[Complete configured example](../../examples/form-configured.tsx) shows typed text, numeric-string and enum controls, with parsed output. [Complete composed example](../../examples/form-composed.tsx) shows a shared context, watched draft, object list and error summary. [Item layout example](../../examples/form-item-layout.tsx) shows a standalone `ExItem` and a field-level layout override.
 
 An `ExForm` receives either `schema` plus `defaultValues`, or an existing `form` from `useForm`. With an existing instance, do not also pass `schema`, `defaultValues`, `mode` or `reValidateMode`. A `Form` and all of its `FormItem`/`FormList` children must use the same instance; one instance can connect to one mounted form.
 
@@ -54,4 +54,10 @@ The `files` control keeps a memory-only `File[]`: choose, drop and paste append 
 
 Its `controlProps` can set `buttonLabel`, `formatFileSize(bytes)` and `removeFileLabel(file)` to localize the picker, rendered size, and accessible remove action. The callbacks affect presentation only; file validation and stored `File[]` values stay unchanged.
 
-Layout uses `vertical`, `horizontal` or `inline`, container-based columns (1–4) and field `colSpan`. Use application CSS for surrounding page layout. Consult the installed public types for all props and [Field](Field.md) for the lower-level presentation primitives.
+## Item presentation and layout
+
+`ExItem` presents `title`, `desc`, and `children` without a form instance or field registration. It accepts `layout="vertical" | "horizontal"`, `span={1 | 2 | 3 | 4 | "full"}`, ordinary `div` attributes, `className`, and `style`. A standalone item defaults to vertical. Inside `Form` or `ExForm`, it inherits the form layout: `vertical` stays vertical, while `horizontal` and `inline` make items horizontal by default. An explicit item `layout` wins. `inline` is only an outer form layout. Horizontal items wrap their title and control at the item's own width, including narrow grid columns and Dialogs. `span` uses the existing form grid or inline width rules; a standalone item declares a CSS Grid span but does not create its parent grid.
+
+A single direct ExUI `Input` receives a stable ID when it has none. `ExItem` links its title to that input and appends the description ID to any existing `aria-describedby` references. It preserves an existing input ID. If both `controlId` and the direct Input's `id` are present, they must match. For a wrapped Input, custom control, or multiple controls, pass `controlId`, put that ID on the actual focusable control, and include `${controlId}-description` in its `aria-describedby` when `desc` is present. Without an associated control ID, the title is visible text rather than an input label.
+
+`FormItem` and ordinary configured `ExForm.fields` retain `label`, `description`, and `colSpan`; each may add `layout="vertical" | "horizontal"` without changing its binding or validation. `noStyle` still skips the entire item shell. The outer form keeps `layout="vertical" | "horizontal" | "inline"`, container-based columns (1–4), and its field spans. `FormList.layout` continues to control list rows. Use application CSS for surrounding page layout. Consult the installed public types for all props and [Field](Field.md) for the lower-level presentation primitives.

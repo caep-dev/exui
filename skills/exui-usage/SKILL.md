@@ -15,7 +15,7 @@ Check the consuming project's installed ExUI version, React version, stylesheet 
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | Install or integrate React UI                                 | [React setup](references/react-setup.md)                                                                 | The component directory below                                                                            |
 | Build components or content that follow the root-font scale | [Standalone ExUI scaling rules](guides/EXUI_SCALING_RULES.md) | [React sizing guidance](references/react-setup.md#sizing) |
-| Build a validated form, object list or step flow | [Form](references/components/Form.md) | [Configured form](examples/form-configured.tsx) or [composed form](examples/form-composed.tsx) |
+| Build a validated form, object list or step flow | [Form](references/components/Form.md) | [Configured form](examples/form-configured.tsx), [composed form](examples/form-composed.tsx), or [item layout](examples/form-item-layout.tsx) |
 | Build standalone field presentation or selection controls | [Field](references/components/Field.md) | Input and selection components; the matching example below |
 | Build navigation or an application shell                      | [Sidebar](references/components/Sidebar.md) or [NavigationMenu](references/components/NavigationMenu.md) | Navigation and layout components                                                                         |
 | Add notifications                                             | [Sonner / Toaster / toast / ExMessage](references/components/Sonner.md)                                  | [Managed notifications](examples/ex-message.tsx) or [raw Sonner calls](examples/sonner-notifications.tsx) |
@@ -85,6 +85,7 @@ These are complete TSX examples, not a standalone application. Follow React setu
 | [field-usage.tsx](examples/field-usage.tsx)                       | Form labels, validation, errors                   | [Field](references/components/Field.md)                     |
 | [form-configured.tsx](examples/form-configured.tsx) | Typed configuration, parsed output and stable step schemas | [Form](references/components/Form.md) |
 | [form-composed.tsx](examples/form-composed.tsx) | Shared context, watched draft and dynamic object list | [Form](references/components/Form.md) |
+| [form-item-layout.tsx](examples/form-item-layout.tsx) | Standalone item and per-field layout | [Form](references/components/Form.md) |
 | [glass-surfaces.tsx](examples/glass-surfaces.tsx)                 | Seed plus glass prop and class surfaces           | [Glass material](references/glass.md)                       |
 | [message-scroller-usage.tsx](examples/message-scroller-usage.tsx) | Message list scrolling                            | [MessageScroller](references/components/MessageScroller.md) |
 | [select-usage.tsx](examples/select-usage.tsx)                     | Select composition                                | [Select](references/components/Select.md)                   |

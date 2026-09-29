@@ -55,7 +55,9 @@ Controls and form methods follow schema Input (`age` is a string); submission re
 
 `ExForm` takes either `schema`/`defaultValues` or an existing `form`. Steps require explicit stable scope schemas at the original input paths; final submission always checks the full schema. `reset` cancels pending work and establishes a new baseline; `cancelPending` preserves the draft. Close handlers for a Dialog that remains mounted should call one of those methods. Submission cancellation signals cooperative abort and cannot undo server operations already sent.
 
-See the [Form reference](../../skills/exui-usage/references/components/Form.md), [complete configured example](../../skills/exui-usage/examples/form-configured.tsx) and [complete composed example](../../skills/exui-usage/examples/form-composed.tsx). The consumer gates install Zod 3.25.28 and 4.6.5 independently, compile with `skipLibCheck` disabled, server-render without `document`/`File` access, and test parsed ExForm submission in Chromium.
+`ExItem` is a standalone presentation container for a title, description, and control. It also works directly inside `Form` or `ExForm` without registering a field. A single direct ExUI `Input` receives a stable ID and description association automatically; wrapped, custom, or multiple controls use `controlId` plus the same ID on the focusable control. `FormItem` and configured fields keep `label`, `description`, and `colSpan`, and can set `layout="vertical"` or `layout="horizontal"` to override the form default. Horizontal items wrap by their own available width.
+
+See the [Form reference](../../skills/exui-usage/references/components/Form.md), [item layout example](../../skills/exui-usage/examples/form-item-layout.tsx), [complete configured example](../../skills/exui-usage/examples/form-configured.tsx) and [complete composed example](../../skills/exui-usage/examples/form-composed.tsx). The consumer gates install Zod 3.25.28 and 4.6.5 independently, compile with `skipLibCheck` disabled, server-render without `document`/`File` access, and test parsed ExForm submission in Chromium.
 
 ### Themes
 
