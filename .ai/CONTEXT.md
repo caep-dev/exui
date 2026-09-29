@@ -35,7 +35,7 @@ _Avoid_: vendored widget、generated blob
 _Avoid_: 复杂组件、业务组件
 
 **控件组件（Control Component）**:
-位于 `packages/components/src/components/controls` 下的组合式输入控件，例如日期选择器、区间选择器、可搜索下拉、颜色选择器或文件上传。
+位于 `packages/components/src/components/patterns` 下的组合式输入控件，由 `form-controls.tsx` 及其 `form-controls/` 子目录组合，例如日期选择器（`form-controls/date.tsx`）或文件上传（`form-controls/files.tsx`）。该目录当前不叫 `controls`。
 _Avoid_: UI 组件、复杂组件
 
 **模式组件（Pattern Component）**:
@@ -43,7 +43,7 @@ _Avoid_: UI 组件、复杂组件
 _Avoid_: 页面组件、业务流程
 
 **布局组件（Layout Component）**:
-位于 `packages/components/src/components/layouts` 下的页面或应用结构组件，例如应用外壳、页面头部或分栏面板。
+页面或应用结构组件，例如应用外壳、页面头部或分栏面板。该目录当前尚未建立，`layouts` 只是约定中的名字。
 _Avoid_: UI 组件、模式组件
 
 **品牌主题（Brand Theme）**:

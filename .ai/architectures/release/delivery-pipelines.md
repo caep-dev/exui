@@ -90,6 +90,7 @@ checkout 标签（fetch-depth: 0）
 | tokens 样式消费者 | 独立 Vite 构建能解析字体资源、含配方变量、且不泄漏组件 Tailwind 样式 |
 | React 消费者 | `skipLibCheck: false` 类型检查、生产构建、服务端渲染冒烟（Button、字段、Chart），并断言包与消费者解析到**同一个** React 实例 |
 | 生产构建的浏览器断言 | `scripts/verify-react-browser.mjs` 在 Chromium 中验证图表两点数据、ExUI 图例与 hover 后变化的 tooltip 值、Dialog 经 portal 打开、表单提交、Escape 归还焦点，以及 16px / 32px 根字号下的 Button 几何与 portal Dialog 内边距 |
+| ExForm 隔离消费者 | `scripts/form-consumer-fixture.mjs` 按 Zod 3.25.28 与 4.6.5 各建一个临时消费者，依次做 `skipLibCheck: false` 类型检查、生产构建、`--ssr` 构建与 SSR 冒烟；再由 `scripts/verify-form-browser.mjs` 在 Chromium 中断言 schema 错误到达绑定控件（含 `aria-invalid`）、非法输出不调用 `onSubmit`、成功解析恰好调用一次、解析后的数值输出不覆盖字符串草稿、重新校验成功后清除错误，且无浏览器运行时错误 |
 
 fixture 一律建在 `os.tmpdir()` 下的临时目录并在 `finally` 中清理；控制器复用 Showcase 锁定的 Playwright 依赖，浏览器只服务隔离消费者的构建产物。门禁的失效模式与不可替代性见 [[release/03-packed-consumer-gates]]。
 

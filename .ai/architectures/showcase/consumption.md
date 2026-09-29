@@ -50,6 +50,14 @@ Feedback 分类包含 `ExMessage` 的可操作预览。`ShowcaseContent` 挂载�
 | `ShowcaseCatalog.vrt.test.tsx` | 目录分类与 hash、全量目录搜索、指标布局及 Feedback 的全局消息预览 | 否 |
 | `ShowcaseLocale.vrt.test.tsx` | 浏览器默认语言、手动持久化、中文搜索、表单草稿与错误、内置按钮文案 | 否 |
 | `ExMessage.vrt.test.tsx` | 全局消息的容量、时限、加载句柄与宿主生命周期 | 否 |
+| `Form.vrt.test.tsx` | 错误摘要仅在显式组合时渲染、Input 草稿与 Output 输出的类型边界、错误归属与生命周期、作用域投影与只读快照、稳定键与脏值比较 | 否 |
+| `FormAsync.vrt.test.tsx` | 异步校验的请求合并与批次合并、同步请求合并、本地成功不使整体转为有效、`reset` / `cancelPending` / `unmount` 的取消语义、提交锁期间的 touched 记录 | 否 |
+| `FormControls.vrt.test.tsx` | 各内置控件在真实可聚焦元素上的绑定：日历弹层的默认日期与可选边界、Today 的出现条件、月份与年份下拉、Select 的标签与失焦、布尔与数组取值、radio 与多选中搜索文本与字段值的隔离 | 否 |
+| `FormSteps.vrt.test.tsx` | 分步校验作用域、受控 `currentStep` 的确认与撤销、跨父级渲染保留草稿与待定导航、原生提前提交与业务提交的区别 | 否 |
+| `ExItem.vrt.test.tsx` | 独立条目的内容限宽与对齐、表单布局继承与逐项覆盖、直接 `Input` 的 id 与 `aria-describedby` 关联、服务端渲染后生成 id 的保留、按自身宽度换行、span 与根 `div` 属性 | 否 |
+| `FormContentSizing.vrt.test.tsx` | Showcase 中切换共享尺寸与对齐后草稿不丢失，窄行回退为填满可用宽度 | 否 |
+| `FormSurfaceOutline.vrt.test.tsx` | 三套主题下每个表单输入表面都保留 1px 实线边框，既不透明也不与自身背景同色，且各表面颜色一致 | 否 |
+| `FormSurfaces.vrt.test.tsx` | 文本、多选、日期与文件四类控件在空闲态使用同一个字段背景色 | 否 |
 
 ### 公共夹具模式
 
