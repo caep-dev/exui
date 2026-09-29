@@ -63,9 +63,11 @@ function ConfiguredProfile() {
         { name: "email", label: t("Email"), control: "email", required: true },
         { name: "age", label: t("Age"), control: "number", description: t("Whole years"), required: true },
       ]} columns={{ base: 1, md: 2 }} resetLabel={t("Reset")} submitLabel={t("Save profile")}
-      errorSummaryTitle={t("Please check the following issues")} formatIssue={t}
+      formatIssue={t}
       issueSeparator={issueSeparator}
-      onSubmit={(values) => { setOutput(JSON.stringify(values, null, 2)) }} />
+      onSubmit={(values) => { setOutput(JSON.stringify(values, null, 2)) }}>
+      <FormErrorSummary title={t("Please check the following issues")} />
+    </ExForm>
     {output && <pre className="form-example-output" aria-live="polite">{output}</pre>}
   </Example>
 }
@@ -170,9 +172,11 @@ function ApplicationDialog() {
           { id: "review", title: t("Review"), kind: "review", render: (values) =>
             <p>{t("Contact: ")}{values.email}{t(". Notice: ")}{t(values.accepted ? "confirmed" : "not confirmed")}{language === "zh-CN" ? "。" : "."}</p> },
         ]} submitLabel={t("Confirm preview")} backLabel={t("Back")} nextLabel={t("Next")}
-        stepsAriaLabel={t("Form steps")} errorSummaryTitle={t("Please check the following issues")}
+        stepsAriaLabel={t("Form steps")}
         formatIssue={t} issueSeparator={issueSeparator}
-        onSubmit={() => { setSaved(true); setOpen(false); form.reset() }} />
+        onSubmit={() => { setSaved(true); setOpen(false); form.reset() }}>
+          <FormErrorSummary title={t("Please check the following issues")} />
+        </ExForm>
       </DialogContent>
     </Dialog>
     {saved && <p role="status">{t("Application preview confirmed locally.")}</p>}
@@ -199,7 +203,7 @@ function FilesAndAsync() {
         removeFileLabel: (file: File) => `${t("Remove")} ${file.name}`,
       } },
     ]} resetLabel={t("Clear files")} submitLabel={t("Save local report")}
-    errorSummaryTitle={t("Please check the following issues")} formatIssue={t}
+    formatIssue={t}
     issueSeparator={issueSeparator}
     onSubmit={async (values, context) => {
       await new Promise<void>((resolve) => {
@@ -213,7 +217,9 @@ function FilesAndAsync() {
       } else {
         setSaved(`${values.title}: ${values.attachments.length} ${t("local file(s).")}`)
       }
-    }} />
+    }}>
+      <FormErrorSummary title={t("Please check the following issues")} />
+    </ExForm>
     {saved && <p role="status">{saved}</p>}
   </Example>
 }

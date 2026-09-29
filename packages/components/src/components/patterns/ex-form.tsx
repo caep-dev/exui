@@ -10,7 +10,6 @@ import type { ExFormSchemaProps, ExFormInstanceProps, ExFormCommonProps, ExFormF
 import { FormShell, RetainStepFieldsContext } from "./form"
 import { FormItem } from "./form-item"
 import { FormList } from "./form-list"
-import { FormErrorSummary } from "./form-error-summary"
 import { FormStepsController, stepStructure } from "./form-steps"
 
 export function ExForm<const S extends FormSchema>(props: ExFormSchemaProps<S>): React.ReactElement
@@ -28,7 +27,7 @@ function SchemaForm<S extends FormSchema>(props: ExFormSchemaProps<S>) {
 }
 
 function ConfiguredForm<I extends FormValues, O>(props: ExFormCommonProps<I, O> & { form: FormInstance<I, O> }) {
-  const { form, fields, steps = [], currentStep, onStepChange, footer, submitLabel = "提交", resetLabel, backLabel = "上一步", nextLabel = "下一步", stepsAriaLabel = "表单步骤", errorSummaryTitle, ...formProps } = props
+  const { form, children, fields, steps = [], currentStep, onStepChange, footer, submitLabel = "提交", resetLabel, backLabel = "上一步", nextLabel = "下一步", stepsAriaLabel = "表单步骤", ...formProps } = props
   const internal = getInternal(form)
   useRHFWatch({ control: internal.rhf.control })
   const state = React.useSyncExternalStore(internal.subscribe, internal.getSnapshot, internal.getServerSnapshot)
@@ -74,7 +73,7 @@ function ConfiguredForm<I extends FormValues, O>(props: ExFormCommonProps<I, O> 
       <button type="button" aria-current={entry.id === actualStep ? "step" : undefined} disabled={uiDisabled}
         onClick={() => { void controller.goTo(entry.id).catch(errorHandler) }}>{index + 1}. {entry.title}</button>
     </li>)}</ol>}
-    <FormErrorSummary form={form} title={errorSummaryTitle} />
+    {children}
     {step?.kind === "review" ? <div className="ex-form-review" data-span="full">{step.render(form.getValues())}</div> : visible.map((field) => <ConfiguredField key={field.name} form={form} configuration={field as unknown as RuntimeConfiguration} />)}
     <div className="ex-form-footer" data-span="full">
       {typeof footer === "function" ? footer(footerArgs) : footer !== undefined ? footer : <>

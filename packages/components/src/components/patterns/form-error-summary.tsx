@@ -2,11 +2,13 @@
 
 import * as React from "react"
 import { FormContext, getInternal } from "@/lib/forms/context"
-import type { FormErrorNode, FormErrorSummaryProps, FormPath, FormValues } from "@/lib/forms/types"
+import type { FormErrorNode, FormErrorSummaryProps, FormInstance, FormPath, FormValues } from "@/lib/forms/types"
 import { cn } from "@/lib/utils"
 
-export function FormErrorSummary<I extends FormValues, O>({ form, className, title = "请检查以下问题" }: FormErrorSummaryProps<I, O>) {
+export function FormErrorSummary<I extends FormValues, O>({ form: providedForm, className, title = "请检查以下问题" }: FormErrorSummaryProps<I, O>) {
   const context = React.useContext(FormContext)
+  const form = providedForm ?? context?.form as FormInstance<I, O> | undefined
+  if (!form) throw new Error("ExUI FormErrorSummary: render inside a Form.")
   if (!context || context.form !== form) throw new Error("ExUI FormErrorSummary: the nearest Form must use the same instance.")
   const internal = getInternal(form)
   const state = React.useSyncExternalStore(internal.subscribe, internal.getSnapshot, internal.getServerSnapshot)

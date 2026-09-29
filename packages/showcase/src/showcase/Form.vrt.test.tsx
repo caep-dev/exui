@@ -5,7 +5,7 @@ import { page } from "vitest/browser"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 import {
-  Form, FormItem, FormErrorSummary, FormList, useForm, useFieldArray, useWatch,
+  ExForm, Form, FormItem, FormErrorSummary, FormList, useForm, useFieldArray, useWatch,
   type FormInstance, type StandardSchemaV1,
 } from "@exre/exui"
 
@@ -49,6 +49,23 @@ beforeEach(() => { const host = document.createElement("div"); document.body.rep
 afterEach(() => { root.unmount(); vi.restoreAllMocks() })
 
 describe("Form public schema and error contract", () => {
+  it("renders the error summary in ExForm only when explicitly composed", async () => {
+    const schema = z.object({ age: z.string().min(1, "Enter your age") })
+    const fields = [{ name: "age", label: "Age", control: "number" }] as const
+    root.render(<ExForm schema={schema} defaultValues={{ age: "" }} fields={fields} onSubmit={() => {}} />)
+    await expect.element(page.getByRole("spinbutton", { name: "Age" })).toBeVisible()
+    await page.getByRole("button", { name: "提交" }).click()
+    await expect.element(page.getByText("请检查以下问题", { exact: true })).not.toBeInTheDocument()
+
+    root.render(<ExForm key="with-summary" schema={schema} defaultValues={{ age: "" }} fields={fields} onSubmit={() => {}}>
+      <FormErrorSummary />
+    </ExForm>)
+    await expect.element(page.getByRole("spinbutton", { name: "Age" })).toBeVisible()
+    await page.getByRole("button", { name: "提交" }).click()
+    await expect.element(page.getByText("请检查以下问题", { exact: true })).toBeVisible()
+    await expect.element(page.getByRole("button", { name: "Age: Enter your age" })).toBeVisible()
+  })
+
   it("submits transformed Output while watch and getValues retain the original Input", async () => {
     const schema = z.object({ age: z.string().regex(/^\d+$/).transform(Number) })
     let current!: FormInstance<z.input<typeof schema>, z.output<typeof schema>>
