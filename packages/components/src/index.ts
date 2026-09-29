@@ -95,7 +95,7 @@ export type {
   FormValidationScope, FormSubmitResult, FormSubmitContext, FormSubmitHandler,
   FormInstance, FormObjectArrayPath, FormArrayItem, FormFieldArray, FormLayout,
   FormColumnCount, FormColumns, FormLayoutOptions, FormRenderArguments,
-  FormFieldBase, FormInputControlProps, FormTextareaControlProps,
+  FormFieldBase, FormInputControlProps, FormDateControlProps, FormTextareaControlProps,
   FormCheckboxControlProps, FormSwitchControlProps, FormSelectOption,
   FormSelectControlProps, FormMultiSelectControlProps, FormSelectOrInputControlProps,
   FormFilesControlProps, FormFieldBinding, FormItemProps, FormOrdinaryFieldConfig,

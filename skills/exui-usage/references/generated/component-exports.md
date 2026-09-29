@@ -555,6 +555,7 @@ This inventory covers exports reachable from the public `@exre/exui` package roo
 - `FormCheckboxControlProps` — type
 - `FormColumnCount` — type
 - `FormColumns` — type
+- `FormDateControlProps` — type
 - `FormDefaults` — type
 - `FormErrorInput` — type
 - `FormErrorNode` — type

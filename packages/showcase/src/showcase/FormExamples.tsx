@@ -11,6 +11,14 @@ const profileSchema = z.object({
   name: z.string().trim().min(1, "Please enter your name."),
   email: z.string().email("Please enter a valid email."),
   age: z.string().regex(/^\d+$/, "Enter your age in years.").transform(Number),
+  birthDate: z.string(),
+})
+const controlGallerySchema = z.object({
+  text: z.string(), email: z.string(), password: z.string(), number: z.string(), date: z.string(),
+  notes: z.string(), select: z.enum(["first", "second"]), radio: z.enum(["first", "second"]),
+  checkbox: z.boolean(), switch: z.boolean(), checkboxes: z.array(z.string()),
+  multiSelect: z.array(z.string()), suggestion: z.string(),
+  files: z.array(z.custom<File>((value) => typeof File !== "undefined" && value instanceof File)),
 })
 const preferencesSchema = z.object({
   workspace: z.string().trim().min(1, "Name your workspace."),
@@ -41,7 +49,9 @@ const attachmentSchema = z.object({
 
 const itemLayoutSchema = z.object({ handle: z.string() })
 
-const schemas = { profileSchema, preferencesSchema, teamSchema, contactSchema, confirmationSchema, applicationSchema, attachmentSchema }
+const schemas = { profileSchema, controlGallerySchema, preferencesSchema, teamSchema, contactSchema, confirmationSchema, applicationSchema, attachmentSchema }
+const today = new Date()
+const latestBirthDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
 
 function Example({ title, description, children }: {
   title: string; description: string; children: React.ReactNode
@@ -57,11 +67,13 @@ function ConfiguredProfile() {
   const issueSeparator = useIssueSeparator()
   const [output, setOutput] = React.useState<string>("")
   return <Example title={t("Configured profile")} description={t("One schema binds the fields. Age stays text while editing and becomes a number on submit.")}>
-    <ExForm schema={schemas.profileSchema} defaultValues={{ name: "", email: "", age: "" }}
+    <ExForm schema={schemas.profileSchema} defaultValues={{ name: "", email: "", age: "", birthDate: "2000-01-15" }}
       fields={[
         { name: "name", label: t("Name"), control: "text", required: true },
         { name: "email", label: t("Email"), control: "email", required: true },
         { name: "age", label: t("Age"), control: "number", description: t("Whole years"), required: true },
+        { name: "birthDate", label: t("Birth date"), control: "date", description: t("From 1900 to today"),
+          controlProps: { min: "1900-01-01", max: latestBirthDate, placeholder: t("Select birth date"), todayLabel: t("Today") } },
       ]} columns={{ base: 1, md: 2 }} resetLabel={t("Reset")} submitLabel={t("Save profile")}
       formatIssue={t}
       issueSeparator={issueSeparator}
@@ -85,6 +97,44 @@ function ItemLayoutPreview() {
           control="text" layout="vertical" />
       </Form>
     </div>
+  </Example>
+}
+
+function ControlGallery() {
+  const t = useT()
+  const issueSeparator = useIssueSeparator()
+  const [output, setOutput] = React.useState("")
+  const choices = [
+    { value: "first", label: t("First option") },
+    { value: "second", label: t("Second option") },
+  ] as const
+  return <Example title={t("Every built-in input type")} description={t("Try each ExForm control, then submit to inspect its values locally.")}>
+    <ExForm schema={schemas.controlGallerySchema} defaultValues={{
+      text: "", email: "", password: "", number: "", date: "1995-02-10", notes: "",
+      select: "first", radio: "first", checkbox: false, switch: false,
+      checkboxes: [], multiSelect: [], suggestion: "", files: [],
+    }} fields={[
+      { name: "text", label: t("Text"), control: "text" },
+      { name: "email", label: t("Email input"), control: "email" },
+      { name: "password", label: t("Password"), control: "password" },
+      { name: "number", label: t("Number"), control: "number" },
+      { name: "date", label: t("Date"), control: "date", description: t("February 1995 only"),
+        controlProps: { min: "1995-02-01", max: "1995-02-28", placeholder: t("Select date"), todayLabel: t("Today") } },
+      { name: "notes", label: t("Textarea input"), control: "textarea" },
+      { name: "select", label: t("Select input"), control: "select", controlProps: { options: choices } },
+      { name: "radio", label: t("Radio group input"), control: "radio-group", controlProps: { options: choices } },
+      { name: "checkbox", label: t("Checkbox input"), control: "checkbox" },
+      { name: "switch", label: t("Switch input"), control: "switch" },
+      { name: "checkboxes", label: t("Checkbox group input"), control: "checkbox-group", controlProps: { options: choices } },
+      { name: "multiSelect", label: t("Multi-select input"), control: "multi-select", controlProps: { options: choices } },
+      { name: "suggestion", label: t("Select or input"), control: "select-or-input", controlProps: { options: choices, placeholder: t("Choose or type") } },
+      { name: "files", label: t("Files input"), control: "files", colSpan: "full", controlProps: { buttonLabel: t("Choose files") } },
+    ]} columns={{ base: 1, md: 2 }} resetLabel={t("Reset")} submitLabel={t("Show values")}
+    formatIssue={t} issueSeparator={issueSeparator}
+    onSubmit={(values) => setOutput(JSON.stringify({ ...values, files: values.files.map((file) => file.name) }, null, 2))}>
+      <FormErrorSummary title={t("Please check the following issues")} />
+    </ExForm>
+    {output && <pre className="form-example-output" aria-live="polite">{output}</pre>}
   </Example>
 }
 
@@ -229,6 +279,6 @@ export function FormExamples() {
   return <section className="form-examples" aria-labelledby="form-examples-heading">
     <header><h2 id="form-examples-heading">{t("Complete forms")}</h2>
       <p>{t("Configured and composed forms share one schema and one draft.")}</p></header>
-    <ConfiguredProfile /><ItemLayoutPreview /><ComposedPreferences /><TeamList /><ApplicationDialog /><FilesAndAsync />
+    <ConfiguredProfile /><ItemLayoutPreview /><ControlGallery /><ComposedPreferences /><TeamList /><ApplicationDialog /><FilesAndAsync />
   </section>
 }

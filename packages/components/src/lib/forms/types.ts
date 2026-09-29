@@ -95,6 +95,16 @@ export interface FormFieldBase<I extends FormValues, P extends FormPath<I>> {
 }
 type BindingProps = "name" | "value" | "defaultValue" | "checked" | "defaultChecked" | "onChange" | "onValueChange" | "onCheckedChange" | "onBlur" | "ref" | "id" | "disabled" | "aria-invalid" | "aria-describedby" | "required"
 export type FormInputControlProps = Omit<React.ComponentProps<typeof Input>, BindingProps | "type">
+export interface FormDateControlProps {
+  /** Inclusive YYYY-MM-DD boundary for the calendar picker. */
+  min?: string
+  /** Inclusive YYYY-MM-DD boundary for the calendar picker. */
+  max?: string
+  placeholder?: string
+  todayLabel?: React.ReactNode
+  className?: string
+  glass?: boolean
+}
 export type FormTextareaControlProps = Omit<React.ComponentProps<typeof Textarea>, BindingProps>
 export type FormCheckboxControlProps = Omit<React.ComponentProps<typeof Checkbox>, BindingProps>
 export type FormSwitchControlProps = Omit<React.ComponentProps<typeof Switch>, BindingProps>
@@ -104,7 +114,7 @@ export interface FormMultiSelectControlProps<V extends string> { options: readon
 export interface FormSelectOrInputControlProps { options: readonly { value: string; label?: string; disabled?: boolean }[]; placeholder?: string; className?: string; glass?: boolean }
 export interface FormFilesControlProps { accept?: string; buttonLabel?: React.ReactNode; description?: React.ReactNode; className?: string; formatFileSize?: (bytes: number) => string; removeFileLabel?: (file: File) => string }
 type Builtin<C extends string, Props> = { control: C; controlProps?: Props; render?: never }
-type TextControl<V> = [Exclude<V, undefined>] extends [string] ? string extends Exclude<V, undefined> ? Builtin<"text" | "email" | "password" | "number" | "date", FormInputControlProps> | Builtin<"textarea", FormTextareaControlProps> | Builtin<"select-or-input", FormSelectOrInputControlProps> : never : never
+type TextControl<V> = [Exclude<V, undefined>] extends [string] ? string extends Exclude<V, undefined> ? Builtin<"text" | "email" | "password" | "number", FormInputControlProps> | Builtin<"date", FormDateControlProps> | Builtin<"textarea", FormTextareaControlProps> | Builtin<"select-or-input", FormSelectOrInputControlProps> : never : never
 type BooleanControl<V> = [Exclude<V, undefined>] extends [boolean] ? boolean extends Exclude<V, undefined> ? Builtin<"checkbox", FormCheckboxControlProps> | Builtin<"switch", FormSwitchControlProps> : never : never
 type EnumControl<V> = [Exclude<V, undefined>] extends [string] ? Builtin<"select" | "radio-group", FormSelectControlProps<Exclude<V, undefined> & string>> : never
 type ArrayControl<V> = [MutableArray<V>] extends [never] ? never : [MutableArray<V>] extends [string] ? Builtin<"checkbox-group" | "multi-select", FormMultiSelectControlProps<MutableArray<V> & string>> : [Exclude<V, undefined>] extends [File[]] ? Builtin<"files", FormFilesControlProps> : never

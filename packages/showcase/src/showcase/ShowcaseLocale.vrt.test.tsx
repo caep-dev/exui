@@ -93,7 +93,9 @@ describe("Showcase language", () => {
       await page.getByRole("button", { name: "Browse categories" }).click()
     }
     await page.getByTestId("catalog-category-form-controls").click()
-    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!
+    const preview = [...container.querySelectorAll("article")].find((article) =>
+      article.querySelector("h3")?.textContent === "Local files and async submission")!
+    const input = preview.querySelector<HTMLInputElement>('input[type="file"]')!
     const selected = new DataTransfer()
     selected.items.add(new File(["hi"], "note.txt", { type: "text/plain" }))
     input.files = selected.files

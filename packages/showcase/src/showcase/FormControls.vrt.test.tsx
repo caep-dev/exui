@@ -65,6 +65,136 @@ beforeEach(() => {
 afterEach(async () => { root.unmount(); vi.restoreAllMocks(); await page.viewport(viewport.width, viewport.height) })
 
 describe("Form public control adapters", () => {
+  it("uses the ExUI calendar popup for a default date and inclusive date bounds", async () => {
+    type DateValues = { birthDate: string }
+    const dateSchema: StandardSchemaV1<DateValues, DateValues> = {
+      "~standard": { version: 1, vendor: "exui-date-test", validate: input => ({ value: input as DateValues }) },
+    }
+    const submitted = vi.fn()
+    let dateForm: FormInstance<DateValues, DateValues>
+    function DateFixture() {
+      dateForm = useForm({ schema: dateSchema, defaultValues: { birthDate: "2000-01-15" } })
+      return <Form form={dateForm} onSubmit={submitted}>
+        <FormItem form={dateForm} name="birthDate" label="Birth date" control="date"
+          controlProps={{ min: "2000-01-10", max: "2000-01-20", placeholder: "Select birth date" }} />
+        <button type="submit">Save date</button>
+        <button type="button" onClick={() => dateForm.reset()}>Reset date</button>
+      </Form>
+    }
+    root.render(<DateFixture />)
+    const trigger = page.getByRole("button", { name: "Birth date" })
+    await expect.element(trigger).toBeVisible()
+    expect(trigger.element().textContent).toContain("2000-01-15")
+    expect(document.querySelector('input[type="date"]')).toBeNull()
+    await trigger.click()
+    await expect.element(page.getByRole("grid", { name: /January 2000/ })).toBeVisible()
+    expect(document.querySelector('[data-slot="popover-content"]')?.textContent).not.toContain("Today")
+    expect(document.querySelector('[data-day="2000-01-15"]')?.getAttribute("aria-selected")).toBe("true")
+    const selectedRadius = (date: string) => {
+      const button = document.querySelector<HTMLButtonElement>(`[data-day="${date}"] button`)!
+      const style = getComputedStyle(button)
+      return { corners: [style.borderTopLeftRadius, style.borderTopRightRadius, style.borderBottomRightRadius, style.borderBottomLeftRadius].map(Number.parseFloat),
+        width: button.getBoundingClientRect().width, height: button.getBoundingClientRect().height,
+        dayBackground: getComputedStyle(button.parentElement!).backgroundColor }
+    }
+    const initialSelected = selectedRadius("2000-01-15")
+    expect(initialSelected.width).toBeCloseTo(initialSelected.height, 0)
+    initialSelected.corners.forEach(radius => expect(radius).toBeGreaterThanOrEqual(initialSelected.height / 2))
+    expect(initialSelected.dayBackground).toBe("rgba(0, 0, 0, 0)")
+    expect(document.querySelector<HTMLButtonElement>('[data-day="2000-01-09"] button')?.disabled).toBe(true)
+    expect(document.querySelector<HTMLButtonElement>('[data-day="2000-01-10"] button')?.disabled).toBe(false)
+    expect(document.querySelector<HTMLButtonElement>('[data-day="2000-01-20"] button')?.disabled).toBe(false)
+    expect(document.querySelector<HTMLButtonElement>('[data-day="2000-01-21"] button')?.disabled).toBe(true)
+    await page.getByRole("button", { name: /January 20th, 2000/ }).click()
+    expect(dateForm!.getValues("birthDate")).toBe("2000-01-20")
+    await expect.element(page.getByRole("grid", { name: /January 2000/ })).not.toBeInTheDocument()
+    await trigger.click()
+    await expect.element(page.getByRole("grid", { name: /January 2000/ })).toBeVisible()
+    const edgeSelected = selectedRadius("2000-01-20")
+    expect(edgeSelected.width).toBeCloseTo(edgeSelected.height, 0)
+    edgeSelected.corners.forEach(radius => expect(radius).toBeGreaterThanOrEqual(edgeSelected.height / 2))
+    expect(edgeSelected.dayBackground).toBe("rgba(0, 0, 0, 0)")
+    await trigger.click()
+    await page.getByRole("button", { name: "Save date" }).click()
+    expect(submitted).toHaveBeenCalledWith({ birthDate: "2000-01-20" }, expect.anything())
+    await page.getByRole("button", { name: "Reset date" }).click()
+    expect(dateForm!.getValues("birthDate")).toBe("2000-01-15")
+    expect(trigger.element().textContent).toContain("2000-01-15")
+  })
+
+  it("offers Today only when the current day is selectable", async () => {
+    type DateValues = { birthDate: string }
+    const dateSchema: StandardSchemaV1<DateValues, DateValues> = {
+      "~standard": { version: 1, vendor: "exui-date-test", validate: input => ({ value: input as DateValues }) },
+    }
+    const now = new Date()
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+    let dateForm: FormInstance<DateValues, DateValues>
+    function TodayFixture() {
+      dateForm = useForm({ schema: dateSchema, defaultValues: { birthDate: "" } })
+      return <Form form={dateForm} onSubmit={() => {}}>
+        <FormItem form={dateForm} name="birthDate" label="Birth date" control="date"
+          controlProps={{ min: today, max: today, todayLabel: "Today" }} />
+      </Form>
+    }
+    root.render(<TodayFixture />)
+    await page.getByRole("button", { name: "Birth date" }).click()
+    const todayButton = page.getByRole("button", { name: "Today", exact: true }).element()
+    expect(todayButton.closest('[data-slot="calendar"]')).not.toBeNull()
+    const popup = todayButton.closest<HTMLElement>('[data-slot="popover-content"]')!
+    const dropdowns = Array.from(popup.querySelectorAll<HTMLElement>('[data-slot="select-trigger"]'))
+    expect(dropdowns).toHaveLength(2)
+    const yearDropdown = dropdowns.find(dropdown => dropdown.getAttribute("aria-label")?.includes("Year"))!
+    const monthDropdown = dropdowns.find(dropdown => dropdown.getAttribute("aria-label")?.includes("Month"))!
+    expect(yearDropdown.getBoundingClientRect().right).toBeLessThan(monthDropdown.getBoundingClientRect().left)
+    expect(monthDropdown.getBoundingClientRect().right).toBeLessThan(todayButton.getBoundingClientRect().left)
+    expect(popup.querySelector('select')).toBeNull()
+    const centerY = (element: Element) => element.getBoundingClientRect().top + element.getBoundingClientRect().height / 2
+    for (const dropdown of dropdowns) {
+      expect(Math.abs(centerY(dropdown) - centerY(todayButton))).toBeLessThan(2)
+      expect(Math.abs(dropdown.getBoundingClientRect().height - todayButton.getBoundingClientRect().height)).toBeLessThanOrEqual(1)
+      expect(getComputedStyle(dropdown).fontSize).toBe(getComputedStyle(todayButton).fontSize)
+      expect(getComputedStyle(dropdown).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+      expect(getComputedStyle(dropdown).borderTopWidth).toBe("0px")
+    }
+    expect(popup.getBoundingClientRect().width).toBeGreaterThanOrEqual(275)
+    expect(popup.scrollWidth - popup.clientWidth).toBeLessThanOrEqual(1)
+    await page.getByRole("button", { name: "Today", exact: true }).click()
+    expect(dateForm!.getValues("birthDate")).toBe(today)
+    await expect.element(page.getByRole("button", { name: "Today", exact: true })).not.toBeInTheDocument()
+    await page.getByRole("button", { name: "Birth date" }).click()
+    const selectedDay = document.querySelector<HTMLElement>(`[data-day="${today}"]`)!
+    expect(selectedDay.getAttribute("aria-selected")).toBe("true")
+    expect(getComputedStyle(selectedDay).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    const selectedButton = selectedDay.querySelector("button")!
+    expect(Number.parseFloat(getComputedStyle(selectedButton).borderBottomLeftRadius)).toBeGreaterThanOrEqual(selectedButton.getBoundingClientRect().height / 2)
+  })
+
+  it("navigates months and years through the ExUI dropdown menus", async () => {
+    type DateValues = { date: string }
+    const schema: StandardSchemaV1<DateValues, DateValues> = {
+      "~standard": { version: 1, vendor: "exui-date-navigation-test", validate: input => ({ value: input as DateValues }) },
+    }
+    function NavigationFixture() {
+      const form = useForm({ schema, defaultValues: { date: "2000-01-15" } })
+      return <Form form={form} onSubmit={() => {}}>
+        <FormItem form={form} name="date" label="Date" control="date"
+          controlProps={{ min: "1999-01-01", max: "2002-12-31" }} />
+      </Form>
+    }
+    root.render(<NavigationFixture />)
+    await page.getByRole("button", { name: "Date", exact: true }).click()
+    const yearDropdown = page.getByRole("combobox", { name: /Year/ }).element()
+    const monthDropdown = page.getByRole("combobox", { name: /Month/ }).element()
+    expect(yearDropdown.getBoundingClientRect().right).toBeLessThan(monthDropdown.getBoundingClientRect().left)
+    await page.getByRole("combobox", { name: /Month/ }).click()
+    await page.getByRole("option", { name: "Mar", exact: true }).click()
+    await expect.element(page.getByRole("grid", { name: /March 2000/ })).toBeVisible()
+    await page.getByRole("combobox", { name: /Year/ }).click()
+    await page.getByRole("option", { name: "2001", exact: true }).click()
+    await expect.element(page.getByRole("grid", { name: /March 2001/ })).toBeVisible()
+  })
+
   it("places Select label, help, invalid state, blur and registered focus on its real trigger", async () => {
     await mount()
     const trigger = page.getByRole("combobox", { name: "Role", exact: true })

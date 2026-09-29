@@ -10,6 +10,7 @@ import { SelectField, SelectTrigger, SelectValue, SelectContent, SelectItem } fr
 import { Combobox, ComboboxChips, ComboboxChip, ComboboxChipsInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty, useComboboxAnchor } from "@/components/ui/combobox"
 import { cn } from "@/lib/utils"
 import { FormFilesControl } from "./form-controls/files"
+import { FormDateControl } from "./form-controls/date"
 
 // Values are erased only inside the adapter boundary. Public FormItem props
 // select the compatible adapter and retain each input path's exact value type.
@@ -69,7 +70,8 @@ function MultiSelectControl({ binding, options, placeholder, className }: Choice
 
 export function FormControl({ control, controlProps = {}, binding }: RuntimeControlProps) {
   const common = { ...binding.accessibility, disabled: binding.disabled, ref: binding.ref, onBlur: binding.onBlur }
-  if (["text", "email", "password", "number", "date"].includes(control)) {
+  if (control === "date") return <FormDateControl binding={binding} {...controlProps} />
+  if (["text", "email", "password", "number"].includes(control)) {
     return <Input {...controlProps as React.ComponentProps<typeof Input>} {...common} type={control}
       value={typeof binding.value === "string" ? binding.value : ""} onChange={(event) => binding.onChange(event.target.value)} />
   }

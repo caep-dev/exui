@@ -49,6 +49,25 @@ describe("Showcase catalog", () => {
     await expect.element(page.getByText("Input", { exact: true })).toBeVisible()
   })
 
+  it("shows every built-in form input and submits the date draft", async () => {
+    if (window.innerWidth < 640) {
+      await page.getByRole("button", { name: "Browse categories" }).click()
+    }
+    await page.getByTestId("catalog-category-form-controls").click()
+
+    const gallery = page.getByText("Every built-in input type").element().closest("article")!
+    expect(gallery.querySelectorAll(".ex-form-item")).toHaveLength(14)
+    expect(gallery.querySelector('input[type="date"]')).toBeNull()
+    expect(gallery.querySelector('input[type="password"]')).not.toBeNull()
+    expect(gallery.querySelector('input[type="file"]')).not.toBeNull()
+    await expect.element(page.getByRole("button", { name: "Birth date" })).toBeVisible()
+
+    await page.getByRole("button", { name: "Date", exact: true }).click()
+    await page.getByRole("button", { name: /February 12th, 1995/ }).click()
+    await page.getByRole("button", { name: "Show values" }).click()
+    await expect.element(page.getByText(/"date": "1995-02-12"/)).toBeVisible()
+  })
+
   it("filters the full public inventory by component name", async () => {
     const search = page.getByTestId(
       window.innerWidth < 640 ? "catalog-search-mobile" : "catalog-search-desktop"
