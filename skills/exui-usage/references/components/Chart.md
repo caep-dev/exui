@@ -41,4 +41,8 @@ copy with ExUI's Chart parts: tooltip and legend context will be disconnected.
 Consumers need no separate `recharts` dependency. The namespace exposes its public
 types as well, for example `Recharts.BarProps`.
 
+Chart colors support CSS color names, functions, `var()`, and `color-mix()`.
+Values that could break out of a CSS declaration or a server-rendered `<style>`
+element are ignored; chart ids and config keys are escaped in the stylesheet.
+
 For advanced props, use the TypeScript types exposed by the package-root import.
