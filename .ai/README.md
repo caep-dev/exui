@@ -1,6 +1,6 @@
 # ExUI 仓库知识库
 
-最后更新：2026-09-29
+最后更新：2026-10-05
 
 本目录记录 ExUI 仓库中**不能直接从源码读出来**的知识：系统边界与依赖方向、已被接受的技术决策及其理由、以及只有在真实运行或 CI 中才会暴露的约束。已落地行为以源码和运行证据为准；已批准但尚未实施的设计只放在标明“待实现”的决策记录中，不能当作当前行为。这些结论来自仓库证据或已批准设计，不包含未被接受的推测。
 
@@ -53,6 +53,8 @@
 表单模块：当前结构见 [`architectures/components/forms.md`](architectures/components/forms.md)，异步任务与消费约束见 [`knowledge/components/forms-lifecycle.md`](knowledge/components/forms-lifecycle.md)；ExItem 展示边界的决策见 [[components/07-ex-item-presentation-boundary]]。消费 API 用法继续由 `skills/exui-usage/references/components/Form.md` 维护；本目录不复制完整签名。
 
 全局消息模块：宿主和状态边界见 [`architectures/components/ex-message.md`](architectures/components/ex-message.md)，订阅时序与句柄约束见 [`knowledge/components/ex-message-lifecycle.md`](knowledge/components/ex-message-lifecycle.md)，共享宿主的取舍见 [[components/06-single-ex-message-host]]。
+
+图表外部配置的 SSR 与 CSS 边界见 [`knowledge/components/chart-style-inputs.md`](knowledge/components/chart-style-inputs.md)；源码监听中生成 CSS 的循环风险见 [`knowledge/release/watch-rebuilds.md`](knowledge/release/watch-rebuilds.md)。
 
 - 工作区与构建：`package.json`、`pnpm-workspace.yaml`、`tsconfig.json`、各包的 `package.json` 与 `vite.config.ts`
 - 生成与校验：`packages/tokens/scripts/`（`generate-css.mjs`、`verify-cjs.mjs`、`validate-tokens.mjs`、`token-length-policy.mjs`、`color-contrast-policy.mjs`、`foundation-reference-policy.mjs`、`glass-policy.mjs`）、`scripts/package-contract.mjs`、`scripts/verify-packages.mjs`、`scripts/verify-react-browser.mjs`、`scripts/verify-form-browser.mjs`、`scripts/form-consumer-fixture.mjs`
