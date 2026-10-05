@@ -1,5 +1,21 @@
 # @exre/exui
 
+## 0.7.0
+
+### Minor Changes
+
+- 43200a0: Add the standalone ExItem presentation component with per-item vertical or horizontal layout, responsive wrapping, span support, and accessible direct Input association. FormItem and configured ExForm fields now share its presentation and accept an item-level layout override.
+- 6b32cd9: Add an application-wide `ExMessageContext` host and managed `ExMessage` notifications with success, warning, error, info, loading completion, dismissal, duration, and capacity controls. Existing `Toaster` and `toast` exports remain available.
+- c0ebc58: Add contentMaxWidth and contentAlign to ExItem, FormItem, and configured fields, with shared defaults on Form and ExForm. Horizontal content can be capped and aligned left or right; vertical and narrow wrapped items keep filling the available width.
+- fdcc9a6: Add schema-driven ExForm and composed Form, FormItem, FormList and FormErrorSummary APIs with shared form hooks. Error summaries are added explicitly as children of ExForm or Form. FormItem places descriptions beneath labels and errors beneath controls, while keeping invalid labels at their normal text color. Form controls share the same default input background. Support typed input and parsed output, explicit step validation, async submission, server errors, file controls and responsive form layouts. Schema implementations such as Zod remain consumer-owned; React Hook Form is bundled internally.
+- 857c9cc: Render form date fields with the ExUI Calendar and Popover. Support a default date through form values, inclusive minimum and maximum selectable dates, and a localized Today action beside the year selector when today is in range.
+- ca46f13: Add optional presentation labels and issue formatting to forms, file controls, dialogs, and sheets so consuming applications can switch language without replacing form state.
+
+### Patch Changes
+
+- 3530a5c: Lighten input backgrounds across themes and retain visible 1px outlines, including hover, focus, and invalid form-control states. Align date, file, and multi-select form surfaces with the shared input border.
+- 067fb21: Use filled Lucide status icons and a prominent Lucide loading spinner in Toaster, with theme tokens: primary for info and loading, amber for warning, red for error, and green for success.
+
 ## 0.6.0
 
 ### Minor Changes
