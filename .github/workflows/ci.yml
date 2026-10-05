@@ -55,6 +55,9 @@ jobs:
       - name: Build workspaces
         run: pnpm build
 
+      - name: Test chart style and watch regressions
+        run: pnpm test:regressions
+
       - name: Self-test Skill updater
         run: node skills/exui-usage/scripts/update.mjs --self-test
 

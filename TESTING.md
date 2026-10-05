@@ -69,6 +69,24 @@ CI runs all three commands after the workspace build. The toast API surface in e
 
 The example self-test also proves Zod imports compile in the isolated fixture while Sonner, RHF, resolvers, private ExUI paths and Zod subpaths remain forbidden. Zod 4 compatibility belongs to the independent pack fixture rather than a workspace override.
 
+## Chart style and watch regressions
+
+After building the workspaces, run `pnpm test:regressions` on Node.js 24 with
+Chromium installed. `scripts/chart-style.test.mjs` renders the public
+`ChartContainer` through React SSR, then parses the result in Chromium. It
+checks that external configuration cannot create a script or unrelated CSS
+rule while valid theme colors, CSS variables, color mixing, and escaped chart
+ids and keys still work. `scripts/watch.test.mjs` runs the real watcher in an
+isolated temporary workspace with a fake pnpm build process. It checks that
+generated Token CSS causes no rebuild and that one source edit causes one
+Token build followed by one component build. Neither test writes to the source
+workspace.
+
+```bash
+pnpm build
+pnpm test:regressions
+```
+
 ## Visual tests
 
 The Showcase visual suite uses Vitest Browser Mode with Playwright Chromium. Baselines are platform-specific and CI runs them on Windows.
@@ -117,6 +135,7 @@ pnpm tokens:check
 pnpm typecheck
 pnpm lint
 pnpm build
+pnpm test:regressions
 node skills/exui-usage/scripts/update.mjs --self-test
 node skills/exui-usage/scripts/update.mjs --check
 node skills/exui-usage/scripts/verify-examples.mjs
