@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { watch } from "node:fs";
-import { relative, resolve } from "node:path";
+import { resolve } from "node:path";
 
 const root = process.cwd();
 const pnpmPath = process.env.npm_execpath;
@@ -80,7 +80,8 @@ function scheduleBuild(target) {
 function watchDirectory(directory, target, shouldIgnore = () => false) {
   const absoluteDirectory = resolve(root, directory);
   watch(absoluteDirectory, { recursive: true }, (_eventType, filename) => {
-    const changedPath = filename && relative(absoluteDirectory, filename);
+    // fs.watch reports a path relative to the watched directory on Windows.
+    const changedPath = filename?.toString();
     if (!shouldIgnore(changedPath)) {
       scheduleBuild(target);
     }
