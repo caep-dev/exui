@@ -1,14 +1,16 @@
 {
   "version": 1,
-  "reviewedCommit": "d0d843024ebca5af13a8f96afb038e670cc1f147",
-  "updatedAt": "2026-09-22",
+  "reviewedCommit": "b7a8d9583f7b321bfe735c7af251879d3a544a56",
+  "updatedAt": "2026-09-29",
   "surfaces": [
+    ".ai",
     "**/README*.md",
     "CONTRIBUTING.md",
     "TESTING.md",
     "skills"
   ],
   "additionalPaths": [
+    ".ai",
     "CONTRIBUTING.md",
     "TESTING.md",
     "skills/exui-usage"

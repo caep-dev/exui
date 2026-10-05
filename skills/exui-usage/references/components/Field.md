@@ -1,5 +1,7 @@
 # Field
 
+For schema-driven validation, shared state, dynamic lists and step navigation, use the [Form API](Form.md). `Field` remains the presentation primitive for labels, descriptions and errors.
+
 ## Import
 
 ```tsx

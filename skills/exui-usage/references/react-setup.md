@@ -75,6 +75,18 @@ export function App() {
 
 `toast` re-exports the same Sonner instance the `Toaster` renders, so `toast.success`, `toast.error`, `toast.dismiss`, and the other Sonner call signatures work as documented by Sonner. Theme behavior of the `Toaster` is covered in [Theme usage](theme-usage.md), and the runnable demo is [完整示例：通知调用链](../examples/sonner-notifications.tsx).
 
+## Schema-driven forms
+
+For `ExForm` or composed forms, install a Standard Schema V1 implementation yourself. The [Form reference](components/Form.md) and complete examples use Zod:
+
+```bash
+pnpm add zod
+```
+
+Zod is consumer-owned; ExUI exports neither `z` nor a resolver. Use ExUI's `useForm`, `useFormContext`, `useWatch` and `useFieldArray` together with its form components. The bundled RHF instance is private, and an independently installed RHF instance cannot be supplied as `form`.
+
+The skill example gate allows only the root `zod` import and installs exactly 3.25.28 outside the workspace. A separate packed-consumer gate verifies Zod 4.6.5. Implementation packages (`react-hook-form`, `@hookform/resolvers`, `sonner`) and private package paths remain forbidden in examples.
+
 ## Icons
 
 ExUI does not re-export `lucide-react`. When your own code renders icons, install it directly, as described in [Icon usage](icon-usage.md).

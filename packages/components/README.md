@@ -28,9 +28,71 @@ export function App() {
 
 The React root is ESM-only and supports React 19 (`>=19.0.0 <20`). General-purpose layout utilities are not part of the stylesheet contract; use your own CSS or utility setup for application layout.
 
+### Schema-driven forms
+
+Use `ExForm` for typed field configuration, or compose `Form`, `FormItem`, `FormList` and `FormErrorSummary`. Install a Standard Schema V1 implementation yourself; the examples use Zod:
+
+```bash
+npm add zod
+```
+
+```tsx
+import { z } from "zod"
+import { ExForm, FormErrorSummary } from "@exre/exui"
+
+const schema = z.object({
+  age: z.string().min(1).regex(/^\d+$/).transform(Number),
+})
+
+export function AgeForm() {
+  return <ExForm schema={schema} defaultValues={{ age: "" }}
+    fields={[{ name: "age", label: "Age", control: "number" }]}
+    onSubmit={(output) => { console.log(output.age) }}>
+    <FormErrorSummary />
+  </ExForm>
+}
+```
+
+Controls and form methods follow schema Input (`age` is a string); submission receives parsed Output (`age` is a number). Parsing does not replace the draft. Keep initialization and step schemas stable outside render or with `useMemo`. A form instance comes only from ExUI's `useForm`; its hooks and providers share the bundled RHF instance, so consumers need no RHF or resolver installation.
+
+`ExForm` takes either `schema`/`defaultValues` or an existing `form`. Steps require explicit stable scope schemas at the original input paths; final submission always checks the full schema. `reset` cancels pending work and establishes a new baseline; `cancelPending` preserves the draft. Close handlers for a Dialog that remains mounted should call one of those methods. Submission cancellation signals cooperative abort and cannot undo server operations already sent.
+
+`ExForm` does not add an error summary automatically. Place `FormErrorSummary` inside `ExForm` when you want one; it reads the nearest form instance and navigates to its fields. The summary also works inside a composed `Form`. Outside a form, it has no form state to display.
+
+`ExItem` is a standalone presentation container for a title, description, and control. It also works directly inside `Form` or `ExForm` without registering a field. A single direct ExUI `Input` receives a stable ID and description association automatically; wrapped, custom, or multiple controls use `controlId` plus the same ID on the focusable control. `FormItem` and configured fields keep `label`, `description`, and `colSpan`, and can set `layout="vertical"` or `layout="horizontal"` to override the form default. Horizontal items wrap by their own available width. `Form` and `ExForm` can set `contentMaxWidth` (CSS width or pixels as a number) and `contentAlign="left" | "right"` defaults; `ExItem`, `FormItem`, and configured fields can override each independently. The limit includes validation errors. Use `contentMaxWidth="none"` to remove an inherited limit. Vertical and narrow wrapped items fill the available width.
+
+See the [Form reference](../../skills/exui-usage/references/components/Form.md), [item layout example](../../skills/exui-usage/examples/form-item-layout.tsx), [complete configured example](../../skills/exui-usage/examples/form-configured.tsx) and [complete composed example](../../skills/exui-usage/examples/form-composed.tsx). The consumer gates install Zod 3.25.28 and 4.6.5 independently, compile with `skipLibCheck` disabled, server-render without `document`/`File` access, and test parsed ExForm submission in Chromium.
+
 ### Themes
 
 In a browser application, wrap the app with the root `ThemeProvider` and use `useTheme()` to switch between `"light"`, `"dark"`, and `"system"`. The default is `"system"`, and choices are stored under the `"theme"` localStorage key. Mount `Toaster` and call `toast` from the same `@exre/exui` root for notifications that follow the provider.
+
+For a single application-wide notification policy, mount `<ExMessageContext />` once inside `ThemeProvider` and call `ExMessage` from any module. The host renders ExUI's existing `Toaster`; do not mount another one for these messages. The default is three active messages at the top right, with ordinary messages and completed loading messages shown for 3000 ms. `duration`, `placement`, and `maxCount` configure the host; `{ duration }` overrides an individual call. `ExMessage` exposes `info`, `warn`, `error`, `success`, `loading`, and `dismiss(id)`.
+
+```tsx
+import { ExMessage, ExMessageContext, ThemeProvider } from "@exre/exui"
+
+function App() {
+  return <ThemeProvider><ExMessageContext /><SaveButton /></ThemeProvider>
+}
+
+function SaveButton() {
+  async function save() {
+    const pending = ExMessage.loading("Saving")
+    try {
+      await Promise.resolve()
+      pending.onSuccess("Saved")
+    } catch {
+      pending.onError("Save failed")
+    }
+  }
+  return <button onClick={save}>Save</button>
+}
+```
+
+Loading stays visible until completion or `dismiss()`; pass `{ duration }` to `loading` for an automatic deadline. A deadline closes the message without reporting an error. New managed messages evict the oldest managed message when `maxCount` is reached. Direct `toast` calls remain supported and share the host's visual limit, but do not participate in managed eviction. `ExMessage` requires a mounted host and throws if called before mount or after unmount. `<ExMessageContext />` is a self-contained host, not a provider wrapping children.
+
+The shared `Toaster` uses Lucide status icons for success, info, warning, error, and loading. Their colors follow the theme's feedback and primary CSS variables, so token overrides also change the icons. A direct `<Toaster />` accepts Sonner's `icons` prop when an application needs different icons.
 
 `ThemeProvider` reads localStorage during rendering and cannot render on a server. Mount it only in the browser after hydration when using an SSR framework; `"use client"` alone does not prevent prerendering. The `.pitch-black` token class is managed separately and is not a provider theme value.
 

@@ -58,7 +58,7 @@ import "@exre/exui/style.css"
 
 - Open state can stay uncontrolled via `DialogTrigger`, or be controlled with `open` and `onOpenChange` on `Dialog`.
 - `DialogTrigger` and `DialogClose` render buttons by default; pass `asChild` to use your own button or link.
-- `DialogContent` includes the portal, the overlay, and a close button in the top-right corner. Pass `showCloseButton={false}` to hide that button. There is no need to add `DialogPortal` or `DialogOverlay` yourself.
+- `DialogContent` includes the portal, the overlay, and a close button in the top-right corner. Pass `closeLabel` to localize that button's accessible name, or `showCloseButton={false}` to hide it. There is no need to add `DialogPortal` or `DialogOverlay` yourself.
 - `DialogTitle` and `DialogDescription` are required for accessibility; screen readers announce the dialog through them. For purely visual dialogs, render them with `sr-only` text rather than omitting them.
 - `DialogFooter` lays out actions and can render a standard close button with `showCloseButton`.
 - Escape closes the dialog and focus returns to the trigger, handled by the underlying primitive.

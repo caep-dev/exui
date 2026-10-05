@@ -22,7 +22,7 @@
   --exui-border-default: #e6e6e6;
   --exui-border-divider: #dae1e9;
   --exui-border-focused: #006dcc;
-  --exui-border-input: #e6e6e6;
+  --exui-border-input: #d8d8d8;
   --exui-border-strong: #a9a9a9;
   --exui-chart-series1: #74d4ff;
   --exui-chart-series2: #00a6f4;
@@ -260,17 +260,17 @@
   --exui-component-form-control-disabled-opacity: 0.5;
   --exui-component-form-control-disabled-shadow: none;
   --exui-component-form-control-focus-background: var(--exui-surface-input);
-  --exui-component-form-control-focus-border: transparent;
+  --exui-component-form-control-focus-border: var(--exui-border-focused);
   --exui-component-form-control-focus-foreground: var(--exui-text-primary);
   --exui-component-form-control-focus-opacity: 1;
   --exui-component-form-control-focus-shadow: var(--exui-shadow-focus);
   --exui-component-form-control-hover-background: var(--exui-surface-input);
-  --exui-component-form-control-hover-border: transparent;
+  --exui-component-form-control-hover-border: var(--exui-border-input);
   --exui-component-form-control-hover-foreground: var(--exui-text-primary);
   --exui-component-form-control-hover-opacity: 1;
   --exui-component-form-control-hover-shadow: none;
   --exui-component-form-control-invalid-background: var(--exui-surface-input);
-  --exui-component-form-control-invalid-border: transparent;
+  --exui-component-form-control-invalid-border: var(--exui-control-invalid);
   --exui-component-form-control-invalid-foreground: var(--exui-text-primary);
   --exui-component-form-control-invalid-opacity: 1;
   --exui-component-form-control-invalid-shadow: var(--exui-shadow-invalid);
@@ -563,7 +563,7 @@
   --exui-surface-background: #ffffff;
   --exui-surface-card: #ffffff;
   --exui-surface-card-foreground: #0b0b0b;
-  --exui-surface-input: #e6e6e6;
+  --exui-surface-input: #f5f5f5;
   --exui-surface-menu: #ffffff;
   --exui-surface-modal: #ffffff;
   --exui-surface-overlay: rgba(0, 0, 0, 0.3);
@@ -579,7 +579,7 @@
   --exui-text-secondary: #737373;
   --exui-text-tertiary: #66778f;
   --foreground: #0b0b0b;
-  --input: #e6e6e6;
+  --input: #d8d8d8;
   --muted: #f2f2f2;
   --muted-foreground: #737373;
   --popover: #ffffff;
@@ -612,7 +612,7 @@
   --exui-border-default: rgba(255, 255, 255, 0.1);
   --exui-border-divider: #2f3336;
   --exui-border-focused: #62b0ff;
-  --exui-border-input: rgba(255, 255, 255, 0.15);
+  --exui-border-input: rgba(255, 255, 255, 0.20);
   --exui-border-strong: #7e7e7e;
   --exui-control-danger: #ff6467;
   --exui-control-danger-foreground: #0b0b0b;
@@ -674,7 +674,7 @@
   --exui-surface-background: #0a0a0a;
   --exui-surface-card: #1d1d1d;
   --exui-surface-card-foreground: #fafafa;
-  --exui-surface-input: rgba(255, 255, 255, 0.15);
+  --exui-surface-input: rgba(255, 255, 255, 0.06);
   --exui-surface-menu: #1b1b1b;
   --exui-surface-modal: #1b1b1b;
   --exui-surface-overlay: rgba(0, 0, 0, 0.5);
@@ -689,7 +689,7 @@
   --exui-text-primary: #fafafa;
   --exui-text-secondary: #ababab;
   --foreground: #fafafa;
-  --input: rgba(255, 255, 255, 0.15);
+  --input: rgba(255, 255, 255, 0.20);
   --muted: #2e2e2e;
   --muted-foreground: #ababab;
   --popover: #1b1b1b;
@@ -717,7 +717,7 @@
   --exui-border-default: rgba(255, 255, 255, 0.1);
   --exui-border-divider: #2f3336;
   --exui-border-focused: #62b0ff;
-  --exui-border-input: rgba(255, 255, 255, 0.15);
+  --exui-border-input: rgba(255, 255, 255, 0.20);
   --exui-border-strong: #7e7e7e;
   --exui-control-danger: #ff6467;
   --exui-control-danger-foreground: #0b0b0b;
@@ -779,7 +779,7 @@
   --exui-surface-background: #000000;
   --exui-surface-card: #1d1d1d;
   --exui-surface-card-foreground: #fafafa;
-  --exui-surface-input: rgba(255, 255, 255, 0.15);
+  --exui-surface-input: rgba(255, 255, 255, 0.06);
   --exui-surface-menu: #1b1b1b;
   --exui-surface-modal: #1b1b1b;
   --exui-surface-overlay: rgba(0, 0, 0, 0.5);
@@ -794,7 +794,7 @@
   --exui-text-primary: #fafafa;
   --exui-text-secondary: #ababab;
   --foreground: #fafafa;
-  --input: rgba(255, 255, 255, 0.15);
+  --input: rgba(255, 255, 255, 0.20);
   --muted: #2e2e2e;
   --muted-foreground: #ababab;
   --popover: #1b1b1b;

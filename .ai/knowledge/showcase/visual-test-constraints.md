@@ -22,7 +22,7 @@ Showcase 只导入公开入口，解析到的是 `packages/components/dist/` 与
 ## 预期产物与失败产物
 
 - 失败时的附件写入 `.vitest-attachments/`，该目录已被忽略，不会污染工作区。
-- 测试文件间串行执行（`fileParallelism: false`），因为四个套件共用同一个浏览器实例。单个套件内部的用例也在共享一个挂载容器：`beforeEach` 会 `document.body.replaceChildren(container)` 并重建 root，所以用例之间不能依赖 DOM 残留。
+- 测试文件间串行执行（`fileParallelism: false`），因为十六个套件共用同一个浏览器实例。单个套件内部的用例也在共享一个挂载容器：`beforeEach` 会 `document.body.replaceChildren(container)` 并重建 root，所以用例之间不能依赖 DOM 残留。
 - 断言前必须 `await document.fonts.ready`。字体尚未替换时文本几何与最终值不同，直接读取会得到偶发失败。
 - 需要读浮层几何时不能只读一次：Radix 在 resize observer 里异步重排，根字号或布局变化后立刻读取可能拿到旧位置。`RemSizing.vrt.test.tsx` 用轮询到几何稳定（或达到尝试上限）的方式规避，跨根字号断言尤其依赖这一点。
 

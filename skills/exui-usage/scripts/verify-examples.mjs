@@ -126,6 +126,7 @@ const ALLOWED_IMPORT_SPECIFIERS = new Set([
   "@exre/exui/tokens/style.css",
   "@exre/exui/tokens/font.css",
   "lucide-react",
+  "zod",
 ])
 
 function isAllowedImportSpecifier(specifier) {
@@ -161,7 +162,7 @@ async function scanExampleImports(examplesRoot, exampleFiles) {
       if (!isAllowedImportSpecifier(specifier)) {
         violations.push(
           `${toPosix(relative(examplesRoot, file))}: import "${specifier}" is not allowed. ` +
-            `Examples may import only react, @exre/exui public entries, and lucide-react.`
+            `Examples may import only react, @exre/exui public entries, lucide-react, and zod.`
         )
       }
     }
@@ -249,6 +250,7 @@ async function checkExampleDocumentation(skillRoot, examplesRoot, exampleFiles) 
 // ---------------------------------------------------------------------------
 const fixtureReactVersion = "19.2.7"
 const fixtureLucideVersion = "1.23.0"
+const fixtureZodVersion = "3.25.28"
 const fixtureTypescriptVersion = "~6.0.2"
 
 async function packComponents(repositoryRoot, destination) {
@@ -271,6 +273,7 @@ async function compileExamples({ tarballPath, examplesRoot, exampleFiles, tempor
           react: fixtureReactVersion,
           "react-dom": fixtureReactVersion,
           "lucide-react": fixtureLucideVersion,
+          zod: fixtureZodVersion,
         },
         devDependencies: {
           "@types/node": "^24",
@@ -363,6 +366,13 @@ async function writeSelfTestSkill(root, { withDocs = true } = {}) {
   await mkdir(join(root, "examples"), { recursive: true })
   await mkdir(join(root, "references", "components"), { recursive: true })
   await writeFile(
+    join(root, "examples", "schema.tsx"),
+    `import { z } from "zod"
+const schema = z.object({ age: z.string().transform(Number) })
+export const parsedAge: number = schema.parse({ age: "23" }).age
+`
+  )
+  await writeFile(
     join(root, "examples", "button-basic.tsx"),
     `import "@exre/exui/style.css"
 import { Button } from "@exre/exui"
@@ -389,7 +399,7 @@ export default function SonnerNotifications() {
 `
   )
   if (withDocs) {
-    await writeFile(join(root, "SKILL.md"), `[button](examples/button-basic.tsx)\n`, "utf8")
+    await writeFile(join(root, "SKILL.md"), `[button](examples/button-basic.tsx)\n[schema](examples/schema.tsx)\n`, "utf8")
     await writeFile(
       join(root, "references", "components", "Button.md"),
       `[完整示例](../../examples/button-basic.tsx)\n`,
@@ -437,6 +447,16 @@ export default function BadImport() {
     )
     await import("node:fs/promises").then((fs) => fs.rm(join(root, "examples", "bad-import.tsx"), { force: true }))
 
+    // The Zod allowance must not open implementation or private imports.
+    for (const specifier of ["react-hook-form", "@hookform/resolvers/zod", "@exre/exui/src/hooks/use-form", "zod/v4"]) {
+      await writeFile(join(root, "examples", "bad-import.tsx"), `import "${specifier}"\nexport default function Forbidden() { return null }\n`)
+      await expectRejection(
+        () => scanExampleImports(examplesRoot, [...exampleFiles, join(root, "examples", "bad-import.tsx")]),
+        `import "${specifier}" is not allowed`
+      )
+    }
+    await import("node:fs/promises").then((fs) => fs.rm(join(root, "examples", "bad-import.tsx"), { force: true }))
+
     // Negative 2: an orphan example (no document links it) must be rejected.
     await writeFile(
       join(root, "examples", "orphan.tsx"),
@@ -468,7 +488,7 @@ export default function BadTypes() {
     )
     await writeFile(
       join(root, "SKILL.md"),
-      `[button](examples/button-basic.tsx)\n[broken](examples/bad-types.tsx)\n`,
+      `[button](examples/button-basic.tsx)\n[schema](examples/schema.tsx)\n[broken](examples/bad-types.tsx)\n`,
       "utf8"
     )
     const filesAfterBadTypes = await collectExampleFiles(examplesRoot)
@@ -486,7 +506,7 @@ export default function BadTypes() {
     )
     await import("node:fs/promises").then((fs) => fs.rm(join(root, "examples", "bad-types.tsx"), { force: true }))
     await import("node:fs/promises").then((fs) => fs.rm(join(fixtureRoot, "examples", "bad-types.tsx"), { force: true }))
-    await writeFile(join(root, "SKILL.md"), `[button](examples/button-basic.tsx)\n`, "utf8")
+    await writeFile(join(root, "SKILL.md"), `[button](examples/button-basic.tsx)\n[schema](examples/schema.tsx)\n`, "utf8")
 
     // Negative 4: a document link to a missing example must be rejected.
     await writeFile(

@@ -62,6 +62,6 @@ tokens: build:js + build:cjs → generate-css → copy-css → validate
 
 `release` 模块不拥有独立产物，它是对上面三层的门禁集合：
 
-- **CI**（`.github/workflows/ci.yml`）在 Windows 上按固定顺序跑 tokens 校验 → 类型 → lint → 构建 → 技能示例 → 视觉测试 → 打包消费者 → 发布配置校验 → 发布自动化测试，最后由 `ci-gate` 聚合。
+- **CI**（`.github/workflows/ci.yml`）在 Windows 上按固定顺序跑 tokens 校验 → 类型 → lint → 构建 → 技能自测 → 技能生成物一致性 → 技能示例 → 视觉测试 → 打包消费者 → 发布配置校验 → 发布自动化测试，最后由 `ci-gate` 聚合。
 - **打包消费者门禁**在 workspace 之外安装真实 tarball，是唯一能证明"消费者真的装得上"的环节；workspace 内的 `pnpm` 解析会掩盖缺失依赖。理由见 [[release/03-packed-consumer-gates]]。
 - **发布流水线**由成功的主分支 CI 触发，串行完成版本提交、注解标签与 npm OIDC 发布；标签推送只发布被标记的那个包。理由见 [[release/02-tag-driven-oidc-release]]。

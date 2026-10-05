@@ -4,6 +4,7 @@
 @import "@exre/exui-tokens/font.css";
 @import "@exre/exui-tokens/style.css";
 @import "./glass.css";
+@import "./form.css";
 
 @custom-variant dark (&:is(.dark *));
 

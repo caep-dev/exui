@@ -21,7 +21,7 @@ CI 运行在 `windows-latest` 上，Windows 上的 Git 默认会把文本文件�
 /packages/tokens/src/style.css text eol=lf
 ```
 
-同一份清单还钉住了 `scripts/release-bootstrap/*.mjs`、两个发布工作流、`.release-bootstrap.yaml` 与 `skills/exui-usage/references/generated/*.md`——都是会被逐字节或结构化比对的文本。
+同一份清单还钉住了 `scripts/release-bootstrap/*.mjs`、两个发布工作流、`.release-bootstrap.yaml`、`/packages/components/src/docs/theme.css` 与 `skills/exui-usage/references/generated/*.md`——都是会被逐字节或结构化比对的文本。
 
 ## 操作约束
 

@@ -1,6 +1,6 @@
 # 公共包的入口与构建边界
 
-最后更新：2026-09-18
+最后更新：2026-09-28
 
 ## 源码布局
 
@@ -19,7 +19,7 @@ packages/components/
     └── lib/utils.ts
 ```
 
-当前所有可复用组件都位于 `src/components/ui`，包括组合度较高的那些。术语表中 `控件组件`、`模式组件`、`布局组件` 描述的是分类意图，对应的目录尚未建立；新增组件时以其所属分类决定落点。
+基础可复用组件位于 `src/components/ui`。表单模式组件位于 `src/components/patterns`，同源 hooks 位于 `src/hooks`，状态与校验边界位于 `src/lib/forms`；详见 [表单结构](forms.md)。`controls`、`layouts` 目录尚未建立。
 
 ## 公开入口
 
@@ -36,7 +36,7 @@ packages/components/
 
 React 与 React DOM 是**可选 peer**，范围 `>=19.0.0 <20`，`peerDependenciesMeta.optional` 为 `true`。包不会代装它们；tokens-only 消费者不需要它们。`@exre/exui/docs/theme.css` 面向消费者自己的 Fumadocs 安装，manifest 中不出现 `fumadocs-ui`，理由与边界见 [[components/03-docs-theme-subpath]]。入口形状与依赖排除由 `scripts/package-contract.mjs` 的 `requireExportsEntry` / `assertPublishableManifest` 逐项锁死，任何尝试改动都会在 `pnpm verify:pack` 阶段失败。
 
-包内还随 tarball 附带 `src/`（`files` 字段包含 `src/components`、`src/hooks`、`src/lib`、`src/index.css`、`src/index.ts`）供参考与既有工具复制源码使用，但支持的消费边界只有 `exports`；复制源码的消费者自行承担第三方源码依赖。
+包内还随 tarball 附带 `src/`（`files` 字段包含 `src/components`、`src/docs`、`src/hooks`、`src/lib`、`src/index.css`、`src/index.ts`）供参考与既有工具复制源码使用，但支持的消费边界只有 `exports`；复制源码的消费者自行承担第三方源码依赖。
 
 ## 导出汇总
 
@@ -44,12 +44,14 @@ React 与 React DOM 是**可选 peer**，范围 `>=19.0.0 <20`，`peerDependenci
 
 - `src/components/theme-provider.tsx` 以**显式命名导出**给出 `ThemeProvider` 与 `useTheme`，不使用 `export *`。
 - `src/components/ui/*` 与 `src/hooks/use-mobile`、`src/lib/utils` 以 `export *` 逐文件转发。
+- 表单组件、同源 hooks 和公开类型采用显式命名导出；私有 Context、协调器、绑定适配器与导航入口不从根公开。
+- 全局消息宿主、静态调用入口和公开类型采用显式命名导出；状态归属见 [`ex-message`](ex-message.md)。
 
 新增 shadcn/ui 组件时必须同时在这里补一行转发，否则组件不会被发布，而 Oxlint 的 `react/only-export-components` 规则会提示同时导出组件与非组件的文件。
 
 ## 样式表源
 
-`src/index.css` 按顺序 `@import` 四层内容：`tailwindcss`、`tw-animate-css`、`shadcn/tailwind.css`、以及内部工作区的 `font.css` 与 `style.css`（后两者在构建期被解析并内联）。随后用 `@custom-variant dark (&:is(.dark *))` 定义暗色变体，用 `@theme inline` 把 shadcn/ui 的短变量名（`--primary`、`--border`、`--chart-*`、`--sidebar-*`、`--radius` 等）映射为 Tailwind 的 `--color-*`，使工具类能读到 Token。
+`src/index.css` 按顺序 `@import` 七条内容：`tailwindcss`、`tw-animate-css`、`shadcn/tailwind.css`、内部工作区的 `font.css` 与 `style.css`（后两者在构建期被解析并内联），以及 `./glass.css` 与 `./form.css`。随后用 `@custom-variant dark (&:is(.dark *))` 定义暗色变体，用 `@theme inline` 把 shadcn/ui 的短变量名（`--primary`、`--border`、`--chart-*`、`--sidebar-*`、`--radius` 等）映射为 Tailwind 的 `--color-*`，使工具类能读到 Token。
 
 `package.json` 的 `sideEffects` 把 `*.css` 与 `src/index.css` 标为有副作用，避免打包器在树摇时丢掉样式导入。
 
@@ -76,7 +78,7 @@ React 与 React DOM 是**可选 peer**，范围 `>=19.0.0 <20`，`peerDependenci
 
 ## 声明产物
 
-`build:types` 依次执行：`clean-types` → `tsc -p tsconfig.lib.json`（`emitDeclarationOnly` 到 `types/`）→ `tsc-alias`（把 `@/*` 别名改写成相对路径）→ `fix-css-dts` → `bundle-types`。最终 `types/index.d.ts` 与 `types/index.css.d.ts` 是入口，`types/vendor/` 承载内部化后的第三方类型。
+`build:types` 依次执行：`clean-types` → `tsc -p tsconfig.lib.json`（`emitDeclarationOnly` 到 `types/`）→ `tsc-alias`（把 `@/*` 别名改写成相对路径）→ `fix-css-dts` → `build-docs-theme` → `bundle-types`。最终 `types/index.d.ts` 与 `types/index.css.d.ts` 是入口，`types/vendor/` 承载内部化后的第三方类型。
 
 目标是根声明只依赖包内声明、标准 TypeScript 类型与 React / React DOM 类型：不残留 `radix-ui`、`recharts` 等裸模块引用，也不借助 `any`、削减 props 或 ambient 空壳绕过检查。打包消费者门禁以 `skipLibCheck: false` 编译 React 消费者来验证这一点。
 

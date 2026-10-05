@@ -57,6 +57,11 @@ async function verifyReactBrowser(consumerRoot) {
     await dialog.waitFor({ state: "hidden" })
     await page.waitForFunction(() => document.activeElement?.textContent === "Open")
 
+    // A notification from the packed public API must reach its bundled host.
+    await page.getByRole("button", { name: "Notify", exact: true }).click()
+    await page.locator("[data-sonner-toast]").getByText("Packed message ready", { exact: true })
+      .waitFor({ state: "visible" })
+
     // The packed tarball has to ship the material itself: the seed's filter, the
     // class entry point on an element that is not an ExUI component, the prop
     // entry point, and the danger material. Only computed styles are read here;
@@ -185,7 +190,7 @@ async function verifyReactBrowser(consumerRoot) {
     closeEnough(restored.value, 36, "the default Button height after restoring the root font size")
 
     assert.deepEqual(pageErrors, [], "packed consumer must not raise browser runtime errors")
-    console.log("Packed browser consumer passed: chart hover/legend, dialog portal, form submission, focus return, glass material, rem scaling")
+    console.log("Packed browser consumer passed: chart hover/legend, dialog portal, form submission, focus return, managed notification, glass material, rem scaling")
   } finally {
     try {
       await browser?.close()

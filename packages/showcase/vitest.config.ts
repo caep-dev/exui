@@ -4,6 +4,8 @@ import { defineConfig } from "vitest/config"
 
 export default defineConfig({
   plugins: [react()],
+  resolve: { dedupe: ["react", "react-dom"] },
+  optimizeDeps: { include: ["react-dom/server"] },
   test: {
     name: "visual",
     include: ["src/**/*.vrt.test.tsx"],

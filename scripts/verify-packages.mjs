@@ -4,6 +4,7 @@ import { basename, dirname, join, resolve } from "node:path"
 import { spawnSync } from "node:child_process"
 import { fileURLToPath } from "node:url"
 import { assertPublishableManifest, COMPONENT_PACKAGE_NAME } from "./package-contract.mjs"
+import { createFormConsumerFiles } from "./form-consumer-fixture.mjs"
 
 const repositoryRoot = fileURLToPath(new URL("..", import.meta.url))
 const temporaryRoot = await mkdtemp(join(tmpdir(), "exui-pack-check-"))
@@ -87,6 +88,10 @@ const FORBIDDEN_TOKENS_TREE_PACKAGES = new Set([
   "react",
   "react-dom",
   "react-is",
+  "react-hook-form",
+  "@hookform/resolvers",
+  "zod",
+  "@standard-schema/spec",
   "@types/react",
   "@types/react-dom",
   "scheduler",
@@ -141,6 +146,8 @@ function isForbiddenTokensTreePackage(name) {
     FORBIDDEN_TOKENS_TREE_PACKAGES.has(name) ||
     name.startsWith("@radix-ui/") ||
     name.startsWith("@base-ui/") ||
+    name.startsWith("@hookform/") ||
+    name.startsWith("@standard-schema/") ||
     name.startsWith("d3-") ||
     name === "@types/react" ||
     name === "@types/react-dom"
@@ -594,7 +601,7 @@ async function verifyReactConsumer(tarballPath) {
   const application = `
 import "@exre/exui/style.css"
 import { useState } from "react"
-import { Button, Card, CardContent, GlassSeed, ThemeProvider, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, Field, Input, Label, Recharts, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartConfig, useIsMobile } from "@exre/exui"
+import { Button, Card, CardContent, ExMessage, ExMessageContext, GlassSeed, ThemeProvider, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, Field, Input, Label, Recharts, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartConfig, useIsMobile } from "@exre/exui"
 
 const { BarChart, Bar, XAxis } = Recharts
 const chartData = [
@@ -610,6 +617,8 @@ export function App() {
   const [submittedEmail, setSubmittedEmail] = useState("")
   return (
     <ThemeProvider>
+      <ExMessageContext />
+      <Button onClick={() => ExMessage.success("Packed message ready")}>Notify</Button>
       <GlassSeed />
       <Dialog>
         <DialogTrigger asChild>
@@ -649,6 +658,8 @@ export function App() {
     </ThemeProvider>
   )
 }
+
+
 `
   // The glass prop is a boolean on a fixed set of surfaces; these cases fail the
   // type-check when the prop is widened, when it leaks onto a DOM element, or
@@ -775,6 +786,49 @@ console.log("react consumer SSR smoke ok:", html.length, "chars, single React in
   console.log(run(process.execPath, [join(repositoryRoot, "scripts", "verify-react-browser.mjs"), consumerRoot], consumerRoot))
 }
 
+// Each version is installed outside the workspace, so workspace overrides
+// cannot silently replace the consumer's schema implementation.
+async function verifyFormConsumer(tarballPath, zodVersion) {
+  const consumerRoot = join(temporaryRoot, `form-zod-${zodVersion}`)
+  await mkdir(consumerRoot, { recursive: true })
+  await writeFile(join(consumerRoot, "package.json"), `${JSON.stringify({
+    name: `exui-form-zod-${zodVersion.replaceAll(".", "-")}`,
+    private: true,
+    type: "module",
+    dependencies: {
+      "@exre/exui": `file:${toDependencyPath(tarballPath)}`,
+      react: reactVersion,
+      "react-dom": reactVersion,
+      zod: zodVersion,
+    },
+    devDependencies: {
+      "@types/node": "^24",
+      "@types/react": "^19",
+      "@types/react-dom": "^19",
+      typescript: typescriptVersion,
+      vite: viteVersion,
+    },
+  }, null, 2)}\n`)
+  for (const [filename, source] of Object.entries(createFormConsumerFiles())) {
+    await writeFile(join(consumerRoot, filename), source)
+  }
+  run(npmCommand, ["install", "--no-fund", "--no-audit"], consumerRoot)
+  requireCondition(
+    JSON.parse(await readFile(join(consumerRoot, "node_modules", "zod", "package.json"), "utf8")).version === zodVersion,
+    `form consumer must install exactly Zod ${zodVersion}`
+  )
+  const installed = await collectInstalledPackageNames(join(consumerRoot, "node_modules"))
+  for (const name of ["react-hook-form", "@hookform/resolvers", "@standard-schema/spec"]) {
+    requireCondition(!installed.has(name), `form consumer must not install ${name}`)
+  }
+  run("node", [join(consumerRoot, "node_modules", "typescript", "bin", "tsc"), "-p", "tsconfig.json"], consumerRoot)
+  run("node", [join(consumerRoot, "node_modules", "vite", "bin", "vite.js"), "build"], consumerRoot)
+  run("node", [join(consumerRoot, "node_modules", "vite", "bin", "vite.js"), "build", "--ssr", "server.tsx", "--outDir", "ssr"], consumerRoot)
+  run("node", ["smoke.mjs"], consumerRoot)
+  console.log(run(process.execPath, [join(repositoryRoot, "scripts", "verify-form-browser.mjs"), consumerRoot], consumerRoot))
+  logStage(`Zod ${zodVersion}: strict types, SSR, production build and ExForm browser passed`)
+}
+
 function logStage(message) {
   console.log(`[verify-packages] ${message}`)
 }
@@ -886,6 +940,8 @@ try {
   await verifyDocsThemeConsumer(componentPackage.filename)
   await verifyTokensOnlyConsumer(componentPackage.filename, { packageManager: "pnpm" })
   await verifyReactConsumer(componentPackage.filename)
+  await verifyFormConsumer(componentPackage.filename, "3.25.28")
+  await verifyFormConsumer(componentPackage.filename, "4.6.5")
 
   logStage(`all stages finished in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`)
   console.log(`Packed tokens CSS contains ${componentVariableCount} component recipe variables`)
