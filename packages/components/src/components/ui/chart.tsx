@@ -8,6 +8,40 @@ import { cn } from "@/lib/utils"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
+const UNSAFE_COLOR_CHARACTERS = new Set([";", "{", "}", "<", ">", "\\", "[", "]", '"', "'"])
+
+// Escape config keys as CSS identifiers and chart ids inside a quoted CSS
+// attribute selector. Neither may open another declaration or rule.
+function escapeCssIdentifier(value: string) {
+  return Array.from(value, (character) =>
+    /[a-zA-Z0-9_-]/.test(character)
+      ? character
+      : `\\${character.codePointAt(0)!.toString(16)} `
+  ).join("")
+}
+
+function safeChartColor(value: unknown): string | undefined {
+  if (typeof value !== "string" || !value.trim()) return undefined
+
+  // A chart color may be a named color, function, or var()/color-mix() chain.
+  // None needs CSS/HTML rule delimiters, comments, escapes, or quoted strings.
+  if (
+    Array.from(value).some((character) => {
+      const codePoint = character.codePointAt(0)!
+      return codePoint < 32 || codePoint === 127 || UNSAFE_COLOR_CHARACTERS.has(character)
+    }) ||
+    /\/\*|\*\//.test(value)
+  ) {
+    return undefined
+  }
+
+  let depth = 0
+  for (const character of value) {
+    if (character === "(") depth += 1
+    if (character === ")" && --depth < 0) return undefined
+  }
+  return depth === 0 ? value.trim() : undefined
+}
 
 const INITIAL_DIMENSION = { width: 320, height: 200 } as const
 type TooltipNameType = number | string
@@ -96,13 +130,14 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+${prefix} [data-chart="${escapeCssIdentifier(id)}"] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    const safeColor = safeChartColor(color)
+    return safeColor ? `  --color-${escapeCssIdentifier(key)}: ${safeColor};` : null
   })
   .join("\n")}
 }
