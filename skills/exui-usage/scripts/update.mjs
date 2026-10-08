@@ -341,6 +341,14 @@ const publicFormDeclarations = new Set([
   "types/lib/forms/standard-schema.d.ts",
 ])
 
+// Public layout patterns are an explicit set as well. `form-controls` and
+// `form-steps` stay unapproved on purpose: they are form plumbing rather than
+// a family of their own, and approving them would let internal helpers become
+// documented export families.
+const publicPatternDeclarations = new Set([
+  "types/components/patterns/modal.d.ts",
+])
+
 function classifyDeclaration(componentDirectory, declarationFile, referenceNames) {
   requireWithin(componentDirectory, declarationFile, "component declaration")
   const relative = path.relative(componentDirectory, declarationFile).split(path.sep).join("/")
@@ -354,6 +362,15 @@ function classifyDeclaration(componentDirectory, declarationFile, referenceNames
     return {
       category: "Forms",
       family: "Form",
+      reference: referenceName ? `../components/${referenceName}.md` : null,
+    }
+  }
+  if (publicPatternDeclarations.has(relative)) {
+    const patternName = path.basename(relative, ".d.ts")
+    const referenceName = referenceNames.get(normalizedReferenceKey(patternName))
+    return {
+      category: "Components",
+      family: referenceName ?? pascalCaseFileName(patternName),
       reference: referenceName ? `../components/${referenceName}.md` : null,
     }
   }

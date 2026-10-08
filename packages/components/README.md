@@ -269,6 +269,11 @@ share the chart context: mixing its charts with ExUI's tooltip or legend can
 silently omit their content. Chart primitive props and types are available
 through `Recharts`; no separate `recharts` installation is needed.
 
+Chart colors may use CSS color names, functions, `var()`, and `color-mix()`.
+Values containing CSS rule delimiters, comments, escapes, or HTML tag
+delimiters are ignored. Chart ids and config keys are escaped when they are
+written into the chart stylesheet.
+
 The namespace exposes the bundled Recharts public API and increases the shipped
 component bundle size. Tokens remain isolated behind `@exre/exui/tokens`.
 

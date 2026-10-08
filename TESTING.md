@@ -24,6 +24,7 @@ Run `pnpm release:verify` to check the release declaration, Changesets configura
 - the tokens stylesheets build standalone with resolvable font assets and no component Tailwind styles;
 - a React consumer type-checks public component imports with `skipLibCheck` disabled, produces a production build, renders `GlassSeed`, the form, and Chart components on the server, and shares exactly one React instance with the package. Its `glass-types.tsx` fixture pins the glass prop's shape with `@ts-expect-error` cases — a non-boolean `glass`, `glass` on a DOM element, and children on `GlassSeed` — so widening the prop, leaking it onto an intrinsic element, or making the seed accept content turns the gate red instead of passing silently;
 - the production build runs in Chromium: chart primitives imported through the root `Recharts` namespace render both data points, ExUI legend content, and tooltip values that change on hover; Dialog opens through its portal, the form submits, and Escape restores focus to the trigger; and the packed stylesheet ships the glass material, checked through computed styles only — the seed declares exactly one filter under the documented id and publishes its reference on the document root, the `ex-glass` class paints a blurring backdrop on an element that is not an ExUI component, the danger surface keeps the danger material, the edge adds no border width, and the `glass` prop leaves no DOM attribute. These read computed styles; they do not judge how the refraction renders.
+- `Modal` is gated from the packed tarball as well. Its `modal-types.tsx` fixture pins the public surface with `@ts-expect-error` cases — a missing `title`, `open` together with `defaultOpen`, a controlled modal without a change handler, and a size outside the four presets — while the accepted shapes keep compiling; the server smoke renders it and asserts the portal emits no body markup and no `aria-describedby` before a document exists; and Chromium drives portal mount, the single full-screen media rule in the packed stylesheet, a draft and file control surviving a breakpoint change, an outside click that returns focus to the trigger, and reduced motion. A motion-enabled context also compares the modal's opacity-only `ex-modal-*` keyframes with the existing Dialog's `enter` animation, so the inherited zoom stays confined to Dialog.
 
 The packed Chromium consumer also mounts `ExMessageContext`, triggers `ExMessage.success` through the public root export, and requires the notification to render. The focused `packages/showcase/src/showcase/ExMessage.vrt.test.tsx` browser suite covers capacity, durations, loading lifecycle, dismissal, and host cleanup at desktop and mobile sizes.
 
@@ -68,6 +69,24 @@ node skills/exui-usage/scripts/verify-examples.mjs
 CI runs all three commands after the workspace build. The toast API surface in examples is the nine-method list (`success`, `error`, `warning`, `info`, `message`, `loading`, `promise`, `custom`, `dismiss`); `toast.custom` accepts an `(id) => ReactElement` render function.
 
 The example self-test also proves Zod imports compile in the isolated fixture while Sonner, RHF, resolvers, private ExUI paths and Zod subpaths remain forbidden. Zod 4 compatibility belongs to the independent pack fixture rather than a workspace override.
+
+## Chart style and watch regressions
+
+After building the workspaces, run `pnpm test:regressions` on Node.js 24 with
+Chromium installed. `scripts/chart-style.test.mjs` renders the public
+`ChartContainer` through React SSR, then parses the result in Chromium. It
+checks that external configuration cannot create a script or unrelated CSS
+rule while valid theme colors, CSS variables, color mixing, and escaped chart
+ids and keys still work. `scripts/watch.test.mjs` runs the real watcher in an
+isolated temporary workspace with a fake pnpm build process. It checks that
+generated Token CSS causes no rebuild and that one source edit causes one
+Token build followed by one component build. Neither test writes to the source
+workspace.
+
+```bash
+pnpm build
+pnpm test:regressions
+```
 
 ## Visual tests
 
@@ -117,6 +136,7 @@ pnpm tokens:check
 pnpm typecheck
 pnpm lint
 pnpm build
+pnpm test:regressions
 node skills/exui-usage/scripts/update.mjs --self-test
 node skills/exui-usage/scripts/update.mjs --check
 node skills/exui-usage/scripts/verify-examples.mjs

@@ -57,6 +57,61 @@ async function verifyReactBrowser(consumerRoot) {
     await dialog.waitFor({ state: "hidden" })
     await page.waitForFunction(() => document.activeElement?.textContent === "Open")
 
+    // The modal arrives through the same public root export. Its responsive
+    // rules must be in the stylesheet on first paint, not decided by script.
+    const responsiveRule = await page.evaluate(() =>
+      [...document.styleSheets].flatMap((sheet) => {
+        try {
+          return [...sheet.cssRules]
+        } catch {
+          return []
+        }
+      })
+        .filter((rule) => rule instanceof CSSMediaRule)
+        .map((rule) => rule.cssText)
+        // The full-screen layout rule, not the static-viewport fallback beside it.
+        .filter((text) => text.includes("data-mobile-fullscreen") && /inset:\s*0/.test(text))
+    )
+    assert.equal(responsiveRule.length, 1,
+      "the packed stylesheet must carry exactly one modal full-screen media rule")
+    assert.match(responsiveRule[0], /max-width:\s*100%/, "the full-screen rule must lift the width cap")
+
+    const modalTrigger = page.getByRole("button", { name: "Open modal", exact: true })
+    await modalTrigger.click()
+    const modal = page.getByRole("dialog", { name: "Project profile" })
+    await modal.waitFor({ state: "visible" })
+    assert.equal(await modal.evaluate((element) => element.closest("#app") === null), true,
+      "Modal must mount through its portal outside the application root")
+    assert.equal(await modal.evaluate((element) => element.getAttribute("aria-describedby")),
+      await page.locator("[data-slot='dialog-description']").getAttribute("id"),
+      "the description must be wired to the element that carries it")
+
+    // The reduce path is the context default here: no motion, but fully usable.
+    const reduced = await modal.evaluate((element) => {
+      const style = getComputedStyle(element)
+      return { name: style.animationName, duration: style.animationDuration }
+    })
+    assert.equal(reduced.name, "none", "the packed modal must drop its motion under reduce")
+    assert.equal(reduced.duration, "0s", "and must not wait out a duration")
+
+    // Crossing the breakpoint keeps one tree: the draft, the file control, and
+    // the footer stay where the consumer put them.
+    await modal.getByLabel("Draft", { exact: true }).fill("kept draft")
+    await page.setViewportSize({ width: 390, height: 844 })
+    assert.equal(await modal.evaluate((element) => Math.round(element.getBoundingClientRect().width)), 390,
+      "a narrow viewport must fill the screen")
+    await page.setViewportSize({ width: 1280, height: 900 })
+    assert.equal(await modal.getByLabel("Draft", { exact: true }).inputValue(), "kept draft",
+      "the draft must survive a breakpoint change")
+    assert.equal(await page.locator("#modal-file").count(), 1, "the file control must be the same one")
+
+    // A real outside click is a trusted pointer sequence closing the modal, and
+    // focus must come back to the trigger that opened it.
+    const box = await modal.boundingBox()
+    await page.mouse.click(Math.max(4, Math.round(box.x) - 12), 4)
+    await modal.waitFor({ state: "hidden" })
+    await page.waitForFunction(() => document.activeElement?.textContent === "Open modal")
+
     // A notification from the packed public API must reach its bundled host.
     await page.getByRole("button", { name: "Notify", exact: true }).click()
     await page.locator("[data-sonner-toast]").getByText("Packed message ready", { exact: true })
@@ -189,8 +244,46 @@ async function verifyReactBrowser(consumerRoot) {
     const restored = await measure(trigger, "height")
     closeEnough(restored.value, 36, "the default Button height after restoring the root font size")
 
+    // Motion preference is a browser setting, so the normal path needs its own
+    // context: the modal must run its own opacity-only keyframes, and the old
+    // Dialog on the same page must keep the zoom it has always had.
+    const motionPage = await browser.newPage({ viewport: { width: 1280, height: 900 }, reducedMotion: "no-preference" })
+    const motionErrors = []
+    motionPage.on("pageerror", (error) => motionErrors.push(error.message))
+    try {
+      await motionPage.goto(server.resolvedUrls.local[0])
+      await motionPage.getByRole("button", { name: "Open modal", exact: true }).click()
+      const motionModal = motionPage.getByRole("dialog", { name: "Project profile" })
+      await motionModal.waitFor({ state: "visible" })
+      const motion = await motionModal.evaluate((element) => {
+        const overlay = document.querySelector(".ex-modal-overlay")
+        return {
+          name: getComputedStyle(element).animationName,
+          duration: getComputedStyle(element).animationDuration,
+          overlayName: overlay ? getComputedStyle(overlay).animationName : null,
+        }
+      })
+      assert.equal(motion.name, "ex-modal-in", "the packed modal must fade in with its own keyframes")
+      assert.equal(motion.overlayName, "ex-modal-in", "the overlay must share them")
+      assert.equal(motion.duration, "0.1s", "and use the dialog recipe duration")
+      await motionPage.keyboard.press("Escape")
+      await motionModal.waitFor({ state: "hidden" })
+
+      await motionPage.getByRole("button", { name: "Open", exact: true }).click()
+      const legacyDialog = motionPage.getByRole("dialog", { name: "Subscribe" })
+      await legacyDialog.waitFor({ state: "visible" })
+      assert.equal(await legacyDialog.evaluate((element) => getComputedStyle(element).animationName), "enter",
+        "the existing Dialog must keep its own enter animation")
+      await motionPage.keyboard.press("Escape")
+      await legacyDialog.waitFor({ state: "hidden" })
+
+      assert.deepEqual(motionErrors, [], "packed consumer must not raise browser runtime errors with motion enabled")
+    } finally {
+      await motionPage.close()
+    }
+
     assert.deepEqual(pageErrors, [], "packed consumer must not raise browser runtime errors")
-    console.log("Packed browser consumer passed: chart hover/legend, dialog portal, form submission, focus return, managed notification, glass material, rem scaling")
+    console.log("Packed browser consumer passed: chart hover/legend, dialog portal, form submission, focus return, managed notification, glass material, rem scaling, modal portal/fullscreen/motion")
   } finally {
     try {
       await browser?.close()

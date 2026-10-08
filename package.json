@@ -10,6 +10,7 @@
     "typecheck": "pnpm --filter @exre/exui-tokens typecheck && pnpm --filter @exre/exui typecheck && pnpm --filter @exre/exui build:types && pnpm --filter @exre/exui-showcase typecheck",
     "lint": "oxlint scripts && pnpm --filter @exre/exui-tokens lint && pnpm --filter @exre/exui lint && pnpm --filter @exre/exui-showcase lint",
     "test:visual": "pnpm --filter @exre/exui-showcase test:visual",
+    "test:regressions": "node --test scripts/chart-style.test.mjs scripts/watch.test.mjs",
     "tokens:check": "pnpm --filter @exre/exui-tokens tokens:check",
     "verify:pack": "node scripts/verify-packages.mjs",
     "changeset": "changeset",
