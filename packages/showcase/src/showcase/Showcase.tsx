@@ -133,6 +133,7 @@ import {
 
 import { GlassSample } from "./GlassSample"
 import { FormExamples } from "./FormExamples"
+import { ModalSamples } from "./ModalSamples"
 import { ShowcaseLanguageProvider } from "./ShowcaseLanguageProvider"
 import { useShowcaseLanguage } from "./language"
 import { translate, useT } from "./translations"
@@ -256,6 +257,7 @@ const catalogItems: CatalogItem[] = [
   { category: "overlays", name: "Dialog", description: "Focuses attention on a modal task." },
   { category: "overlays", name: "Drawer", description: "Opens contextual content from the viewport edge." },
   { category: "overlays", name: "Hover Card", description: "Reveals rich context on hover or focus." },
+  { category: "overlays", name: "Modal", description: "A titled dialog that sizes itself and fills a phone screen." },
   { category: "overlays", name: "Popover", description: "Anchors contextual content to a trigger." },
   { category: "overlays", name: "Sheet", description: "Presents a modal panel from an edge." },
   { category: "overlays", name: "Tooltip", description: "Explains an unfamiliar control on hover or focus." },
@@ -1086,6 +1088,10 @@ function OverlaysSection() {
             </SheetContent>
           </Sheet>
         </div>
+      </PreviewPanel>
+
+      <PreviewPanel title={t("Responsive modal")}>
+        <ModalSamples />
       </PreviewPanel>
 
       <PreviewPanel title={t("Inline overlays")}>

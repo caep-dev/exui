@@ -1,0 +1,243 @@
+/*
+ * Responsive modal layout.
+ *
+ * Every rule in this file is deliberately unlayered. The Dialog surface ships
+ * Tailwind utilities for the geometry a modal has to own: its width (`w-full`,
+ * `sm:max-w-md`), its centering translate, its surface padding and its gap.
+ * Those live in the utilities layer, and an unlayered declaration outranks
+ * every layer, so the modal can own its frame without asking callers to win a
+ * class-string fight. `twMerge` cannot drop `sm:max-w-md` for a `w-*` utility,
+ * so this cannot be expressed with utilities alone.
+ *
+ * The frame geometry enters through private `--_exui-modal-*` variables rather
+ * than inline `width`/`height`/`max-width`, because the narrow-viewport rule
+ * below has to be able to override all three, and an inline declaration would
+ * outrank it. `translate` is read from a variable for the same reason: a
+ * literal value here is rewritten into a `transform` by the CSS pipeline, and
+ * the fullscreen rule could then no longer remove it.
+ *
+ * Only the modal's own `ex-modal` class is targeted, so an existing Dialog on
+ * the same page keeps its own layout, motion, and footer direction.
+ */
+
+.ex-modal[data-slot="dialog-content"] {
+  /* Recipe inputs, read from Tokens rather than restated here. */
+  --P: var(--exui-component-dialog-surface-padding);
+  --R: var(--exui-component-dialog-close-button-placement-right);
+  --T: var(--exui-component-dialog-close-button-placement-top);
+  --B: var(--exui-component-button-small-height);
+  --D: var(--exui-component-button-default-height);
+  --G: var(--exui-component-dialog-footer-gap);
+  --L: var(--exui-component-dialog-title-line-height);
+
+  /* Safe areas start at zero so the desktop math stays readable. */
+  --safe-top: 0px;
+  --safe-right: 0px;
+  --safe-bottom: 0px;
+  --safe-left: 0px;
+
+  --_exui-modal-translate: -50% -50%;
+  --_exui-modal-available-height: calc(100dvh - 2rem);
+  --_exui-modal-request-limit: calc(100dvh - 2rem);
+  --_exui-modal-effective-limit: var(--_exui-modal-request-limit);
+  --_exui-modal-min-chrome: calc(2 * var(--P) + var(--L));
+  --_exui-modal-chrome-cap: calc(min(max(var(--_exui-modal-effective-limit), var(--_exui-modal-min-chrome)), var(--_exui-modal-available-height)) / 3);
+
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  translate: var(--_exui-modal-translate);
+  transform: none;
+  scale: 1;
+  transition: none;
+
+  display: flex;
+  flex-direction: column;
+  width: var(--_exui-modal-width, 32rem);
+  max-width: calc(100vw - 2rem);
+  height: var(--_exui-modal-height, auto);
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  min-width: 0;
+  min-height: min(var(--_exui-modal-min-chrome), var(--_exui-modal-available-height));
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.ex-modal-header[data-slot="dialog-header"] {
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: calc(max(2 * var(--P) + var(--L), var(--T) + var(--B) + var(--G)) + var(--safe-top));
+  max-height: var(--_exui-modal-chrome-cap);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: calc(var(--P) + var(--safe-top)) calc(max(var(--P), var(--R) + var(--B) + var(--G)) + var(--safe-right)) var(--P) calc(var(--P) + var(--safe-left));
+}
+
+/* The header is a keyboard-reachable region so a long title can be read by
+   scrolling it; the ring has to be visible inside the clipped frame. */
+.ex-modal-header:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -3px;
+}
+
+/* The whole title stays readable: it wraps and breaks instead of truncating. */
+.ex-modal-header [data-slot="dialog-title"] {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.ex-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* With no footer, the body is the last region and carries the bottom inset. */
+.ex-modal:not(:has(.ex-modal-footer-scroll)) .ex-modal-body {
+  padding-bottom: var(--safe-bottom);
+}
+
+/* The scroll container is outside the footer and keeps the normal block
+   direction, so every action can be reached from both ends. The footer inside
+   it only arranges its children. */
+.ex-modal-footer-scroll {
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: var(--_exui-modal-chrome-cap);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.ex-modal-footer[data-slot="dialog-footer"] {
+  flex: 0 0 auto;
+  flex-direction: row;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  overscroll-behavior: contain;
+  padding: var(--P) calc(var(--P) + var(--safe-right)) calc(var(--P) + var(--safe-bottom)) calc(var(--P) + var(--safe-left));
+  border-top: 1px solid var(--border);
+}
+
+/* A footer needs room for two rows of actions, not just the title line. */
+.ex-modal[data-slot="dialog-content"]:has(.ex-modal-footer-scroll) {
+  --_exui-modal-min-chrome: calc(4 * var(--P) + var(--L) + 2 * var(--D) + var(--G));
+}
+
+/* The corner button stays outside the header's scroll area. */
+.ex-modal > [data-slot="dialog-close"] {
+  top: calc(var(--T) + var(--safe-top));
+  right: calc(var(--R) + var(--safe-right));
+}
+
+/* Opacity-only motion. The inherited zoom is an `enter`/`exit` keyframe with a
+   `.95` scale, and replacing the shorthand is what removes it — clearing a
+   transform or adding `animate-none` would leave the keyframe reachable. */
+@keyframes ex-modal-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ex-modal-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.ex-modal[data-state="open"],
+.ex-modal-overlay[data-state="open"] {
+  animation: ex-modal-in var(--exui-component-dialog-overlay-duration) ease-out both;
+}
+
+.ex-modal[data-state="closed"],
+.ex-modal-overlay[data-state="closed"] {
+  animation: ex-modal-out var(--exui-component-dialog-overlay-duration) ease-in both;
+}
+
+/* Below the breakpoint the footer stacks with the primary action nearest the
+   thumb, and a modal that asked for it fills the viewport. */
+@media (width < 768px) {
+  .ex-modal-footer[data-slot="dialog-footer"] {
+    flex-direction: column-reverse;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+
+  .ex-modal[data-slot="dialog-content"][data-mobile-fullscreen="true"] {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+
+    /* The glass host shadow is a separate variable from the surface shadow, so
+       both have to go or a floating frame reappears over the full screen. */
+    --_exui-glass-host-shadow: 0 0 transparent;
+    --_exui-modal-translate: none;
+    --_exui-modal-available-height: 100dvh;
+    --_exui-modal-effective-limit: 100dvh;
+
+    inset: 0;
+    translate: var(--_exui-modal-translate);
+    transform: none;
+    scale: 1;
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* Unlayered and after the rules above, so it covers both states and the
+   duration utility cannot bring a transition back. */
+@media (prefers-reduced-motion: reduce) {
+  .ex-modal[data-slot="dialog-content"][data-state],
+  .ex-modal-overlay[data-slot="dialog-overlay"][data-state] {
+    animation: none;
+    animation-duration: 0s;
+    animation-delay: 0s;
+    transition-property: none;
+    transition-duration: 0s;
+    transition-delay: 0s;
+  }
+}
+
+/*
+ * Static-viewport fallback. The rules above are written with `dvh` alone
+ * because a custom property accepts any token sequence, so a second
+ * `100vh` declaration could never win over it — the fallback has to be a
+ * conditional block instead. A browser without dynamic viewport units keeps
+ * the whole viewport rather than falling back to an invalid length.
+ */
+@supports not (height: 100dvh) {
+  .ex-modal[data-slot="dialog-content"] {
+    --_exui-modal-available-height: calc(100vh - 2rem);
+    --_exui-modal-request-limit: calc(100vh - 2rem);
+    max-height: calc(100vh - 2rem);
+  }
+}
+
+@media (width < 768px) {
+  @supports not (height: 100dvh) {
+    .ex-modal[data-slot="dialog-content"][data-mobile-fullscreen="true"] {
+      --_exui-modal-available-height: 100vh;
+      --_exui-modal-effective-limit: 100vh;
+      height: 100vh;
+      max-height: 100vh;
+    }
+  }
+}

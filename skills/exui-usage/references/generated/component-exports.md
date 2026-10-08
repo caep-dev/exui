@@ -356,6 +356,13 @@ This inventory covers exports reachable from the public `@exre/exui` package roo
 - `useMessageScrollerScrollable` — value
 - `useMessageScrollerVisibility` — value
 
+### [Modal](../components/Modal.md)
+
+- `Modal` — value
+- `ModalProps` — type
+- `ModalSize` — type
+- `ModalStateProps` — type
+
 ### [NativeSelect](../components/NativeSelect.md)
 
 - `NativeSelect` — value

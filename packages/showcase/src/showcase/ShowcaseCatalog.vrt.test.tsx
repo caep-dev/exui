@@ -27,7 +27,7 @@ afterEach(() => {
 describe("Showcase catalog", () => {
   it("reports the full catalogue entry count from the rendered inventory", async () => {
     await expect.element(page.getByTestId("catalog-result-count")).toHaveTextContent(
-      "71 catalogue entries"
+      "72 catalogue entries"
     )
   })
 

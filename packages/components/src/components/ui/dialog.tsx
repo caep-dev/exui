@@ -53,15 +53,25 @@ function DialogContent({
   children,
   showCloseButton = true,
   closeLabel = "Close",
+  closeButtonDisabled = false,
+  overlayClassName,
   glass,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
   closeLabel?: string
+  /**
+   * Disables the corner button only. Escape, an outside pointer, a footer
+   * close, and the parent's own state change are all unaffected, so this is
+   * never a way to keep a dialog open by itself.
+   */
+  closeButtonDisabled?: boolean
+  /** Class list for the overlay this content renders. */
+  overlayClassName?: string
 } & GlassSurfaceProps) {
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
@@ -79,6 +89,7 @@ function DialogContent({
               variant="ghost"
               className="absolute top-[var(--exui-component-dialog-close-button-placement-top)] right-[var(--exui-component-dialog-close-button-placement-right)] bg-secondary"
               size="icon-sm"
+              disabled={closeButtonDisabled}
             >
               <XIcon
               />
