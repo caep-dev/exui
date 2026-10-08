@@ -601,7 +601,7 @@ async function verifyReactConsumer(tarballPath) {
   const application = `
 import "@exre/exui/style.css"
 import { useState } from "react"
-import { Button, Card, CardContent, ExMessage, ExMessageContext, GlassSeed, ThemeProvider, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, Field, Input, Label, Recharts, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartConfig, useIsMobile } from "@exre/exui"
+import { Button, Card, CardContent, ExMessage, ExMessageContext, GlassSeed, ThemeProvider, Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription, Field, Input, Label, Modal, Recharts, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartConfig, useIsMobile } from "@exre/exui"
 
 const { BarChart, Bar, XAxis } = Recharts
 const chartData = [
@@ -615,6 +615,7 @@ const chartConfig = {
 
 export function App() {
   const [submittedEmail, setSubmittedEmail] = useState("")
+  const [modalDraft, setModalDraft] = useState("")
   return (
     <ThemeProvider>
       <ExMessageContext />
@@ -640,6 +641,24 @@ export function App() {
           </form>
         </DialogContent>
       </Dialog>
+      <Modal
+        title="Project profile"
+        description="A modal from the packed public entry."
+        trigger={<Button variant="secondary">Open modal</Button>}
+        footer={<Button type="submit" form="packed-modal-form">Save modal</Button>}
+      >
+        <form id="packed-modal-form" onSubmit={(event) => {
+          event.preventDefault()
+          setModalDraft(String(new FormData(event.currentTarget).get("draft")))
+        }}>
+          <Field>
+            <Label htmlFor="modal-draft">Draft</Label>
+            <Input id="modal-draft" name="draft" defaultValue="" />
+          </Field>
+          <input id="modal-file" type="file" />
+          <output data-testid="modal-draft-output" role="status">{modalDraft}</output>
+        </form>
+      </Modal>
       <Card glass>
         <CardContent>
           <Button glass variant="danger">Delete</Button>
@@ -676,6 +695,28 @@ export const onDomElement = <div glass>Nope</div>
 // @ts-expect-error GlassSeed takes no children and renders no content of its own.
 export const withChildren = <GlassSeed>Nope</GlassSeed>
 `
+  // The modal is a configured pattern, not a primitive: the title is required,
+  // the two switch modes are mutually exclusive, and the size is a closed set.
+  // A failing case here becomes a compiler error, so the surface cannot widen.
+  const modalTypes = `
+import { Modal } from "@exre/exui"
+
+// @ts-expect-error a modal always needs a visible title.
+export const withoutTitle = <Modal>body</Modal>
+
+// @ts-expect-error open and defaultOpen cannot both be passed.
+export const bothModes = <Modal title="T" open defaultOpen>body</Modal>
+
+// @ts-expect-error a controlled modal needs its change handler.
+export const controlledWithoutHandler = <Modal title="T" open>body</Modal>
+
+// @ts-expect-error "huge" is not one of the four size presets.
+export const unknownSize = <Modal title="T" size="huge">body</Modal>
+
+export const uncontrolled = <Modal title="T" defaultOpen onOpenChange={() => {}}>body</Modal>
+export const controlled = <Modal title="T" open onOpenChange={() => {}}>body</Modal>
+export const everyOption = <Modal title="T" description="d" size="lg" width={480} height="30rem" padding={0} mobileFullscreen={false} dismissible={false} closeOnEscape={false} closeOnOutsideClick={false} closeLabel="Close" glass footer={<span>f</span>} bodyClassName="custom" onOpenAutoFocus={(event) => event.preventDefault()} onCloseAutoFocus={(event) => event.preventDefault()}>body</Modal>
+`
   const entry = `
 import { createRoot } from "react-dom/client"
 import { App } from "./app"
@@ -687,6 +728,7 @@ if (container) {
 `
   await writeFile(join(consumerRoot, "app.tsx"), application)
   await writeFile(join(consumerRoot, "glass-types.tsx"), glassTypes)
+  await writeFile(join(consumerRoot, "modal-types.tsx"), modalTypes)
   await writeFile(join(consumerRoot, "main.tsx"), entry)
   await writeFile(
     join(consumerRoot, "index.html"),
@@ -707,7 +749,7 @@ if (container) {
           lib: ["ES2023", "DOM", "DOM.Iterable"],
           types: ["node", "vite/client"],
         },
-        include: ["app.tsx", "main.tsx", "glass-types.tsx"],
+        include: ["app.tsx", "main.tsx", "glass-types.tsx", "modal-types.tsx"],
       },
       null,
       2
@@ -727,7 +769,7 @@ export default defineConfig({
   const serverSmoke = `
 import { renderToString } from "react-dom/server"
 import { createElement } from "react"
-import { Button, Card, GlassSeed, Field, Input, Label, ChartContainer, ChartTooltip } from "@exre/exui"
+import { Button, Card, GlassSeed, Field, Input, Label, Modal, ChartContainer, ChartTooltip } from "@exre/exui"
 import { createRequire } from "node:module"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
@@ -750,7 +792,11 @@ const html = renderToString(
     createElement(Card, { glass: true }, createElement("span", null, "Glass card")),
     createElement(Field, null, createElement(Label, { htmlFor: "email" }, "Email"), createElement(Input, { id: "email", type: "email" })),
     createElement(ChartContainer, { config }, createElement("span", null, "chart")),
-    createElement(ChartTooltip, null)
+    createElement(ChartTooltip, null),
+    // The modal must server-render without a document: the portal stays empty
+    // on the server, so only the trigger reaches the markup.
+    createElement(Modal, { title: "Server modal", description: "Packed.", trigger: createElement("button", null, "Open modal") }, createElement("p", null, "body")),
+    createElement(Modal, { title: "Server modal without a description", defaultOpen: true }, createElement("p", null, "body"))
   )
 )
 
@@ -760,6 +806,9 @@ assert.match(html, /exui-glass-distortion-v1/, "SSR output must contain the stat
 assert.match(html, /aria-hidden="true"/, "the seed must stay out of the accessibility tree on the server")
 assert.match(html, /ex-glass/, "SSR output must contain the material marker")
 assert.doesNotMatch(html, /glass="/, "the glass prop must never reach the server markup as an attribute")
+assert.match(html, /Open modal/, "SSR output must contain the modal trigger")
+assert.doesNotMatch(html, /ex-modal-body/, "the portal must not emit content that needs a document")
+assert.doesNotMatch(html, /aria-describedby/, "no description target may be promised on the server")
 
 const require = createRequire(import.meta.url)
 const rootReact = require.resolve("react")
