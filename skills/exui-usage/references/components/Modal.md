@@ -62,7 +62,7 @@ Use `Modal` when you want one titled dialog that adapts to the viewport: it owns
 - `width` overrides `size`. Both are preferred widths only: the frame is still clipped by the viewport, and neither applies while the modal fills a phone screen.
 - `width` and `height` take a CSS length string or a number of pixels. A number must be finite and positive, and `padding` must be finite and non-negative; a value that fails the check throws during render. A string is passed through to CSS unchanged, so `"70rem"` and `"min(90vw, 40rem)"` both work and neither is validated.
 - An unknown `size` throws during render, including a name inherited from `Object.prototype` such as `"toString"`, which would otherwise resolve to a function instead of a width. Validate any `size` that arrives from untyped JavaScript or from a URL parameter.
-- `height` is a preferred height, not a fixed one. When the request is too small, the header and footer keep their minimum chrome and the close button stays inside the frame. `height` also caps them: each is limited to one third of the effective height, so a long footer scrolls instead of squeezing the body out.
+- `height` is a preferred height, not a fixed one. When the request is too small, the header and footer keep their minimum chrome and the close button stays inside the frame. `height` also caps the two chrome regions: each one's maximum height is one third of `min(max(<requested height>, <minimum chrome>), <viewport height>)`, so the cap never collapses below the minimum chrome — with a footer, a `height="2rem"` request still leaves roughly 65px of chrome rather than 11px, and a long footer scrolls instead of squeezing the body out.
 
 ### Body, padding, and footer
 
@@ -102,7 +102,7 @@ Use `Modal` when you want one titled dialog that adapts to the viewport: it owns
 ### Scrolling and long content
 
 - The body scrolls on its own when the content is taller than the frame; the header and footer do not scroll with it.
-- The header and footer are each capped at one third of the effective height. The footer scrolls in the normal block direction, so both the first and the last action stay reachable from either end.
+- The header and footer carry the same cap described above, and it applies even when you pass no `height`: the requested height then defaults to the viewport, so each region is capped at one third of it. The footer scrolls in the normal block direction, so both the first and the last action stay reachable from either end.
 
 ### Surfaces and rendering
 
@@ -115,7 +115,8 @@ The responsive layout uses `dvh` dynamic viewport units, `env(safe-area-inset-*)
 
 ## Verification status
 
-- **Covered by the library's own gates:** the geometry, breakpoint, focus, scroll, motion, and close-policy behaviour above, checked in Chromium at desktop and emulated narrow viewports, plus a server render and the public types in an isolated packed consumer.
+- **Covered by the library's own gates:** the geometry, the 768px breakpoint, the header focus, body and footer scrolling, reduced motion, and the `dismissible` close policy, checked in Chromium at desktop and emulated narrow viewports, plus a server render and the public types in an isolated packed consumer.
+- **Not separately gated:** `closeOnEscape` and `closeOnOutsideClick` narrowed on their own rather than through `dismissible`, the focus staying put across a breakpoint change, and a footer button submitting a body form through the native `form` attribute. The first two compile in the packed type fixture and the third is rendered by the packed consumer, but no behaviour assertion covers any of them — verify these on your own target if you rely on them.
 - **Not covered:** real iOS and Android devices. The software keyboard, safe-area values, and mobile browser toolbars are unverified, so check the full-screen layout on your own target devices before shipping it.
 
 For advanced props, use the TypeScript types exposed by the package-root import.
