@@ -60,7 +60,7 @@ These components accept `glass`. Any other element can still use `className="ex-
 | Actions and markers | `Button`, `ActionButton`, `InputGroupButton`, `Toggle`, `ToggleGroupItem`, `Badge` |
 | Content surfaces | `Card`, `Alert`, `Item`, `Attachment`, `Bubble`, `BubbleContent`, `BubbleReactions` |
 | Input surfaces | `Input`, `Textarea`, `InputGroup`, `NativeSelect`, `Select`, `SelectTrigger`, `ComboboxInput`, `ComboboxChips`, `ComboboxChip` |
-| Dialogs and popups | `DialogContent`, `AlertDialogContent`, `SheetContent`, `DrawerContent`, `PopoverContent`, `HoverCardContent`, `TooltipContent` |
+| Dialogs and popups | `Modal`, `DialogContent`, `AlertDialogContent`, `SheetContent`, `DrawerContent`, `PopoverContent`, `HoverCardContent`, `TooltipContent` |
 | Selection and menu panels | `SelectContent`, `ComboboxContent`, `DropdownMenuContent`, `DropdownMenuSubContent`, `ContextMenuContent`, `ContextMenuSubContent`, `MenubarContent`, `MenubarSubContent` |
 | Command palette | `Command`, `CommandDialog` |
 | Navigation surfaces | `Sidebar`, `SidebarInset`, `TabsList`, `TabsTrigger`, `Menubar` |

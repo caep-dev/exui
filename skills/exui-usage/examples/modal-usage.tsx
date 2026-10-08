@@ -80,3 +80,33 @@ export default function ModalUsage() {
     </>
   )
 }
+
+/**
+ * Uncontrolled form: `trigger` opens the modal and `Modal` owns the open state.
+ * `mobileFullscreen={false}` keeps the centred dialog at every width, which
+ * suits a short confirmation more than a form that needs the whole screen.
+ */
+export function ModalWithTrigger() {
+  return (
+    <Modal
+      title="Archive this project"
+      description="Archiving keeps the history and hides the project from the dashboard."
+      trigger={<Button variant="outline">Archive…</Button>}
+      size="sm"
+      mobileFullscreen={false}
+      closeLabel="Close archive dialog"
+      footer={
+        <>
+          <DialogClose asChild>
+            <Button variant="outline">Keep</Button>
+          </DialogClose>
+          <Button variant="danger">Archive</Button>
+        </>
+      }
+    >
+      <p className="text-sm text-muted-foreground">
+        Archived projects stay searchable. Nothing is deleted.
+      </p>
+    </Modal>
+  )
+}

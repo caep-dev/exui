@@ -19,6 +19,7 @@ Check the consuming project's installed ExUI version, React version, and stylesh
 | Present a control with a title and description, without a form | [Item presentation and layout](references/components/Form.md#item-presentation-and-layout) | [Item layout](examples/form-item-layout.tsx) |
 | Build standalone field presentation or selection controls | [Field](references/components/Field.md) | Input and selection components; the matching example below |
 | Build navigation or an application shell                      | [Sidebar](references/components/Sidebar.md) or [NavigationMenu](references/components/NavigationMenu.md) | Navigation and layout components                                                                         |
+| Add a dialog, modal, or other overlay                          | [Modal](references/components/Modal.md)                                                                  | [Dialog](references/components/Dialog.md) for hand-composed parts, then [modal example](examples/modal-usage.tsx) |
 | Add notifications                                             | [Sonner / Toaster / toast / ExMessage](references/components/Sonner.md)                                  | [Managed notifications](examples/ex-message.tsx) or [raw Sonner calls](examples/sonner-notifications.tsx) |
 | Switch themes or integrate SSR                                | [Theme usage](references/theme-usage.md)                                                                 | [Theme example](examples/theme-provider-usage.tsx); read the SSR limitation before mounting the provider |
 | Customize colors, fonts, radii, or recipe variables | [Token customization](references/token-customization.md) | [Exact Token paths and CSS properties](references/generated/token-paths.md) |
@@ -77,7 +78,7 @@ These are complete TSX examples, not a standalone application. Follow React setu
 | [form-item-layout.tsx](examples/form-item-layout.tsx) | Standalone item and per-field layout | [Form](references/components/Form.md) |
 | [glass-surfaces.tsx](examples/glass-surfaces.tsx)                 | Seed plus glass prop and class surfaces           | [Glass material](references/glass.md)                       |
 | [message-scroller-usage.tsx](examples/message-scroller-usage.tsx) | Message list scrolling                            | [MessageScroller](references/components/MessageScroller.md) |
-| [modal-usage.tsx](examples/modal-usage.tsx)                       | Responsive modal, sizes, padding, busy state       | [Modal](references/components/Modal.md)                     |
+| [modal-usage.tsx](examples/modal-usage.tsx)                       | Responsive modal, sizes, padding, busy state, trigger variant | [Modal](references/components/Modal.md)                     |
 | [select-usage.tsx](examples/select-usage.tsx)                     | Select composition                                | [Select](references/components/Select.md)                   |
 | [sidebar-layout.tsx](examples/sidebar-layout.tsx)                 | Sidebar application layout                        | [Sidebar](references/components/Sidebar.md)                 |
 | [sonner-notifications.tsx](examples/sonner-notifications.tsx)     | Trigger, update, dismiss, and theme notifications | [Sonner](references/components/Sonner.md)                   |
@@ -94,6 +95,7 @@ These are complete TSX examples, not a standalone application. Follow React setu
 ## ExUI integration pitfalls
 
 - **Composition APIs:** read the selected component reference before using upstream shadcn, Radix, or Base UI patterns. For example, ExUI's Combobox uses Base UI; do not assume Radix composition or callback signatures.
+- **Overlays:** use `Modal` for a titled dialog that sizes itself and fills a phone screen, and compose `Dialog` only when you need the portal, overlay, and body laid out yourself. `dismissible={false}` blocks every user-initiated close and disables the corner button; `closeButtonDisabled` on `DialogContent` disables that button only, so it never keeps a dialog open by itself.
 - **Notifications:** import both `toast` and `Toaster` from `@exre/exui`. A separately installed Sonner instance does not share the ExUI notification state.
 - **Forms:** install your own schema implementation (the examples use `zod`), and import form hooks and components from `@exre/exui`. Keep initialization and step schemas stable across renders, and do not pass external RHF instances.
 - **Themes and SSR:** consult Theme usage before mounting ThemeProvider. It reads browser APIs during rendering; `"use client"` alone does not make it SSR-safe. Pitch Black is a Token CSS class, not a `setTheme` value.
